@@ -42,6 +42,8 @@ Per applicable checklist item:
 | insufficient evidence | 0.5 (tool failed or file unreadable). Not a critical Fail. Do not apply a critical floor. |
 | not assessed | excluded — human-interview only, never a Fail |
 
+Publish a mark census per category before the ratio: N/A listed separately; `Pass + Partial + Fail + insufficient evidence` **must equal** the applicable count. If they do not sum, recount. Do not divide by a number you did not list.
+
 `category_ratio = sum(marks of applicable items) / count(applicable items)`
 
 If count is 0, the category is N/A: omit it from the overall numerator and subtract its weight from the denominator. Never substitute 0.
@@ -110,7 +112,7 @@ Fictional `saas-multi-tenant` Next.js + Supabase app. Details: `references/examp
 
 **Security (23 applicable, 1 N/A):** 12 Pass + 4 Partial + 6 Fail + 1 `insufficient evidence`, including critical AuthZ Fail.
 
-N/A: LLM prompt-injection (no LLM). `insufficient evidence`: secret rotation (leak history unknown). Fail: secret scan in CI, **[C]** object-level AuthZ, frontend as AuthZ boundary, roles on server, RLS, public storage bucket. Partial: auth rate-limit, brute-force, XSS, security headers. Pass: **[C]** no hardcoded secrets, env/gitignore/example, **[C]** AuthN server-side, mature provider, session cookies, **[C]** input validation, parameterized queries, least-privilege DB, CSRF, HTTPS, no public admin/debug, security logs without tokens.
+N/A: LLM prompt-injection (no LLM). `insufficient evidence`: secret rotation (leak history unknown). Fail: secret scan in CI, **[C]** object-level AuthZ, frontend as AuthZ boundary, roles on server, RLS, public storage bucket. Partial: auth rate-limit, brute-force, XSS, security headers. Pass: **[C]** no hardcoded secrets, env/gitignore/example, **[C]** AuthN server-side, mature provider, **[C]** session cookies, **[C]** input validation, parameterized queries, least-privilege DB, CSRF, HTTPS, no public admin/debug, security logs without tokens.
 
 `category_ratio = (12×1 + 4×0.5 + 6×0 + 1×0.5) / 23 = 14.5 / 23 = 0.6304` → `round(6.304) = 6` → critical floor caps at **4**.
 

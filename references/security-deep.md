@@ -38,7 +38,12 @@ rg -n "jwt|access_token|id_token|refresh_token" --glob '*.{ts,tsx,js,jsx}'
 rg -n "Authorization.*localStorage|Bearer.*localStorage"
 ```
 
-Red flags: `localStorage.setItem('token')` plus client-only route guards; JWTs decoded (not verified) in the browser to assign roles.
+Red flags: `localStorage.setItem('token')` plus client-only route guards; JWTs decoded (not verified) in the browser to assign roles; `httpOnly: false` / missing HttpOnly on session cookies (map to checklist **[C]** session cookies — Fail, not Partial).
+
+```bash
+rg -n "httpOnly:\\s*false|httpOnly:\\s*!1" --glob '*.{ts,js}'
+rg -n "maxAge:\\s*[0-9]{6,}" --glob '*.{ts,js}'
+```
 
 ---
 

@@ -69,7 +69,7 @@ Fail: no secret-scan job in CI; **[C]** object-level AuthZ; frontend is the Auth
 
 Partial: auth rate-limit (Supabase defaults only); brute-force (same); XSS (`dangerouslySetInnerHTML` in `CommentBody.tsx`); security headers (no CSP).
 
-Pass: **[C]** no hardcoded secrets; env/gitignore/`.env.example`; **[C]** AuthN server-side (`supabase.auth.getUser()`); mature provider; session cookies; **[C]** Zod on task routes; parameterized Supabase client; least-privilege anon key (no `service_role` in client); CSRF/SameSite; HTTPS on Vercel; no public admin/debug routes; security logs without tokens.
+Pass: **[C]** no hardcoded secrets; env/gitignore/`.env.example`; **[C]** AuthN server-side (`supabase.auth.getUser()`); mature provider; **[C]** session cookies (HttpOnly); **[C]** Zod on task routes; parameterized Supabase client; least-privilege anon key (no `service_role` in client); CSRF/SameSite; HTTPS on Vercel; no public admin/debug routes; security logs without tokens.
 
 Evidence:
 

@@ -27,7 +27,7 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 - [ ] Mature provider when the product **has users** (Clerk, Auth0, Supabase Auth, Better Auth, NextAuth). N/A if no users. Do not invent auth for CLIs, libraries, or static sites.
 - [ ] Rate limiting on login, register, and auth endpoints.
 - [ ] Brute-force / credential-stuffing protections (lockout, backoff, or provider equivalent).
-- [ ] Session or JWT cookies: HttpOnly, Secure, SameSite, short expiry (or provider equivalent).
+- [ ] **[C]** Session or JWT cookies: HttpOnly, Secure, SameSite, short expiry (or provider equivalent). N/A if no cookie/session auth. **Fail** if the session is JS-readable (`localStorage` JWT, or cookies with HttpOnly off). **Partial** if HttpOnly is on but Secure/SameSite is missing or max-age is months/years.
 
 ### Authorization (N/A if no users and resources)
 

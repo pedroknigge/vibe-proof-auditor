@@ -9,7 +9,7 @@ metadata:
 
 # Vibe-Proof Auditor
 
-Evidence-based production audit. Numbers, gates, and verdict words live only in `references/` — never invent them.
+Numbers, gates, and verdict words live only in `references/` — never invent them.
 
 ## When to Use
 
@@ -19,32 +19,35 @@ A production-readiness or anti-vibe audit of a project path.
 
 - Architecture-principle ranking → `arquitectura-software-analyzer`
 - Over-engineering deletion pass → `ponytail-audit`
-- This package or docs-only trees: allowed as product type `skill/docs`
+- Docs-only trees: product type `skill/docs`
 
 ## Workflow
 
 1. **Path.** Missing project root → ask once. Else infer stack, prototype/MVP/production, and product type from the tree. Do not block on questions.
 
-2. **Snapshot (real only).** Inspect tree, languages, test ratio, secret patterns, dependencies, largest files, CI, Docker, `.env.example`, README, docs. Never simulate or invent it. Tool failure → say so, mark affected scored items `insufficient evidence`. Unasked human-interview → `not assessed`.
+2. **Snapshot (real only).** Tree, languages, tests, secrets, deps, largest files, CI, Docker, `.env.example`, README, docs. Never simulate. Tool failure → `insufficient evidence` on affected scored items. Unasked interview → `not assessed`.
 
-3. **Audit.** Deep: load `references/checklist.md` first. Load `references/scoring.md` before any number. Per category: repo evidence, score, 1–3 evidences, 1 fix. Load `references/security-deep.md` with Security (Deep). Unassessed human-interview items → `not assessed`, never Fail, never a gate.
+3. **Audit.** Deep: load `references/checklist.md` first, `references/scoring.md` before any number. Per category: evidence, score, 1–3 proofs, 1 fix. Load `references/security-deep.md` with Security. Fan-out if the host can spawn agents.
 
 4. **Gates.** `references/gates.md` only.
 
 5. **Report.** Format below. Verdict strings only from `references/gates.md`.
 
-6. **Optional artifacts** (if asked): cover `assets/checklist-template.md` + marked `references/checklist.md`, AGENTS.md rules, remediation prompt, tools (gitleaks, trivy, codeql).
+6. **Optional artifacts** (if asked): cover + marked checklist, AGENTS.md rules, remediation prompt.
 
 ## Modes
 
 - **Deep** (default): key files, full checklist, concrete evidence.
-- **Quick**: "quick"/"rápido" or ≤40 source files (`git ls-files`; skip vendor/build/lock). Snapshot + scores + top 5 gaps + gates. ≤15 key-file reads. Skip `security-deep.md`. Report Audit mode Quick and that skip.
+- **Quick**: "quick"/"rápido" or ≤40 source files (`git ls-files`; skip vendor/build/lock). Snapshot + scores + top 5 gaps + gates. ≤15 reads. Skip `security-deep.md`. Declare that skip.
 - **Remediation**: after an audit, only if asked. Default: copyable prompt. Edit the target repo only when asked to apply fixes.
+
+## Parallelism
+
+Deep **and** this host can spawn parallel agents (subagents, worktrees, equivalent) → fan-out. Coordinator: steps 1–2, product type, N/A, merge, 4–6. Children: independent categories; load `checklist.md` + `scoring.md`; return marks, evidence, one fix. No verdicts or gates. Security child also loads `security-deep.md`. Apply `gates.md` once after merge. Quick or no spawn: serial. Never fan-out the verdict.
 
 ## Principles
 
 - Evidence > opinion. Demo-works is not Pass. Do not hallucinate snapshots.
-- Think like an attacker and a future maintainer.
 - Mature auth only when the product has users — never invent auth for CLIs, libraries, or static sites.
 - Prefer stdlib and small audited deps.
 - Human-only claims are not gates and not automatic Fail.
@@ -79,7 +82,7 @@ A production-readiness or anti-vibe audit of a project path.
 | (from gates.md) | Pass/Fail/N/A | ... |
 
 ## Category Detail
-(for each scored category: score, evidence paths, gaps, priority actions)
+(score, evidence, gaps, actions)
 
 ## Extras (not in overall)
 ...
@@ -95,10 +98,10 @@ A production-readiness or anti-vibe audit of a project path.
 
 ## Resources
 
-- `references/checklist.md` — Deep: load first
+- `references/checklist.md` — Deep first
 - `references/scoring.md` — before numbers
 - `references/gates.md` — before verdict
 - `references/security-deep.md` — Security, Deep
 - `references/prompt-maestro.md` — export
 - `references/example-report.md` — worked report
-- `assets/checklist-template.md` — cover only
+- `assets/checklist-template.md` — cover

@@ -17,6 +17,7 @@ Rules:
 5. Infer stack, prototype/MVP/production, and product type from the tree. Ask only if the project path is missing.
 6. If a tool fails, say so and mark `insufficient evidence` on affected items.
 7. Quick vs Deep vs Remediation: only as defined in SKILL.md. Do not invent modes. Default Deep. Do not edit the target repo unless the user explicitly asks to apply fixes.
+8. Deep + host can spawn parallel agents: fan-out per SKILL.md Parallelism. Coordinator owns merge and gates. Never fan-out the verdict.
 ```
 
 ## Cursor / AGENTS.md variant

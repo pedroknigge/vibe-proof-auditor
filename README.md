@@ -2,7 +2,17 @@
 
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 
-Evidence-based production audit skill for coding agents. Install once; it lands in every agent the [Skills CLI](https://github.com/vercel-labs/skills) detects (Grok, Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and 70+ more).
+The internet is very brave about other people's pull requests.
+
+Every week the timeline invents a new reason vibe coding is going to sink production. Auth that only lives in `localStorage`. Tests that cover the demo and nothing else. A 900-line `utils.ts` that "the model wrote." A senior quote-tweets a screenshot, the dunks pile up, and someone who actually shipped gets told they aren't a real engineer.
+
+Here's the bit they skip: **every one of those dunks is a checklist item.** Secrets in git. IDOR because the UI "hides" the button. No user-A / user-B tests. "It worked on my machine." That's not a personality. That's an audit.
+
+This skill is the roast, bottled. We scooped up what people actually mock when someone codes with AI, and we pointed an agent at it. The model already trained on those threads. It already knows the lecture. It just needed a north star instead of vibes.
+
+If you're shipping with AI anyway — good. Run the roast on yourself before someone does it for clout.
+
+Install once. It lands in every coding agent the [Skills CLI](https://github.com/vercel-labs/skills) finds (Grok, Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and 70+ more).
 
 ## Install (all your agents, all projects)
 

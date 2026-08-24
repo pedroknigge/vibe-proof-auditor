@@ -61,6 +61,11 @@ In any supported agent:
 
 Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
 
+Every pass writes two artifacts at the project root and opens the HTML:
+
+- `vibe-proof-audit-report.md` — the evidence report (source of truth)
+- `vibe-proof-audit-report.html` — styled twin (`scripts/render-report.py`)
+
 ## One-off without installing
 
 ```bash
@@ -81,7 +86,12 @@ Symlink or copy that folder into the skills directory of each agent you use (`~/
 vibe-proof-auditor/
 ├── SKILL.md                      # Agent prompt
 ├── README.md
+├── CHANGELOG.md
 ├── LICENSE
+├── scripts/
+│   └── render-report.py          # Markdown report → styled HTML
+├── tests/
+│   └── test_render_report.py     # Renderer contract (stdlib unittest)
 ├── references/
 │   ├── checklist.md              # Scored items (only home)
 │   ├── gates.md                  # Verdicts and production gates
@@ -89,9 +99,20 @@ vibe-proof-auditor/
 │   ├── security-deep.md          # Security grep playbook
 │   ├── prompt-maestro.md         # Short export for other agents
 │   └── example-report.md         # Worked report
+├── docs/adr/
+│   └── 0001-html-render-does-not-score.md
 └── assets/
     └── checklist-template.md     # Cover sheet (not a second item list)
 ```
+
+Python **3.9+**. The renderer is stdlib only.
+
+```bash
+python3 -m py_compile scripts/render-report.py
+python3 -m unittest discover -s tests -v
+```
+
+`main` is protected: CI jobs `renderer` + `gitleaks`, one review on PRs (repo admins can still push so the first workflow can land). Secret scanning and push protection are on.
 
 ## Contract (do not restate numbers here)
 
@@ -102,6 +123,8 @@ vibe-proof-auditor/
 | Scored items and human-interview (unscored) items | `references/checklist.md` (only home; the template is a cover) |
 | Security grep playbook | `references/security-deep.md` |
 | Report format | `SKILL.md` |
+| HTML render | `scripts/render-report.py` |
+| HTML render does not score | `docs/adr/0001-html-render-does-not-score.md` |
 | One worked report | `references/example-report.md` |
 
 ## Related skills

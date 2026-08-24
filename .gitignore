@@ -2,3 +2,10 @@
 *.swp
 .idea/
 .vscode/
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+vibe-proof-audit-report.md
+vibe-proof-audit-report.html

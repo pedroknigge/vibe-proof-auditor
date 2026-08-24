@@ -1,5 +1,16 @@
 # Vibe-Proof Auditor
 
+```
+ __     _____ ____  _____
+ \ \   / /_ _| __ )| ____|
+  \ \ / / | ||  _ \|  _|
+   \ V /  | || |_) | |___
+    \_/  |___|____/|_____|
+            p r o o f
+         ── auditor ──
+    run the roast on yourself
+```
+
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 
 The internet is very brave about other people's pull requests.

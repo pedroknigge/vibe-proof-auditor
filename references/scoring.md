@@ -1,6 +1,6 @@
 # Scoring
 
-Single home for **weights**, **formula**, **critical floors**, **scale**, **product-type N/A matrix**, and **mark values**. Gates and verdict strings live in `references/gates.md`. Checklist items live in `references/checklist.md`.
+Single home for **weights**, **formula**, **critical floors**, **scale**, **product-type N/A matrix**, and **mark values**. Gates, verdict strings, and stage notes live in `references/gates.md`. Checklist items live in `references/checklist.md`. Mode (Prototype / MVP / Production) does not change weights, floors, or N/A.
 
 ## Ten scored categories (weights)
 
@@ -66,7 +66,7 @@ Floors cap; they never raise a score.
 
 Do not include extras in `D` or the numerator.
 
-Feed `overall` and category scores into `references/gates.md` for the verdict. Do not apply verdict logic here.
+Feed `overall` and category scores into `references/gates.md` for the verdict and stage note. Do not apply verdict or stage-note logic here.
 
 ## Category status (report table)
 
@@ -144,4 +144,4 @@ Other category scores: Comprehension 7, Architecture 7, Maintainability 6, Error
 
 Extras (excluded): Data model 5 (schema Pass, destructive Partial, restorable backup Fail — Vercel rollback is not a DB backup), Docs 6, Mobile 5, Accessibility 4, Observability 5.
 
-Verdict: apply `references/gates.md` (absolute Security and Testing fail) → `BLOCKED FOR PRODUCTION`.
+Verdict and stage note: apply `references/gates.md` (absolute Security and Testing fail).

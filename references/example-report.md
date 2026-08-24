@@ -6,9 +6,10 @@
 **Audit mode:** Deep  
 **Product type:** `saas-multi-tenant`  
 **Overall Score:** 5.4 / 10  
-**Status:** BLOCKED FOR PRODUCTION
+**Status:** BLOCKED FOR PRODUCTION  
+**Stage note:** Not expected. Do not ship.
 
-Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict applied from `references/gates.md` only.
+Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict and stage note from `references/gates.md` only.
 
 ## Snapshot (real)
 

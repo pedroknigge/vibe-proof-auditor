@@ -1,12 +1,12 @@
 # Production gates
 
-Single home for **verdict words**, **absolute/recommended gates**, and the **verdict rule**. Do not copy thresholds or these strings into other files; point here.
+Single home for **verdict words**, **absolute/recommended gates**, the **verdict rule**, and **stage notes**. Do not copy thresholds or these strings into other files; point here.
 
 ## Verdict words (exact)
 
 `READY` | `NEEDS HARDENING` | `BLOCKED FOR PRODUCTION`
 
-Do not invent aliases.
+Do not invent aliases. Do not suffix them with the stage note.
 
 ## Absolute gates (must-pass when applicable)
 
@@ -83,6 +83,32 @@ Apply only **applicable** absolute gates (skipped/N/A gates ignored):
 
 Overall and category scores come from `references/scoring.md`. Do not average gates. Do not Fail because a recommended gate failed.
 
+## Stage (Prototype / MVP / Production)
+
+Infer from the tree. Do not ask. Mode does **not** change absolute gates, recommended gates, floors, N/A, or verdict words.
+
+Signals (more serious wins when mixed):
+
+- **Production** — production URL, release changelog, public/paying users in-tree, on-call/status, or README claims production.
+- **MVP** — README/changelog names MVP, one core flow, preview/staging deploy, unused billing sketch.
+- **Prototype** — demo / poc / hackathon language, no deploy, no user evidence.
+
+No signal → **MVP**. Do not default Production.
+
+After Status, copy **one** stage note from this table. Do not paraphrase.
+
+| Mode | Status | Stage note |
+|------|--------|------------|
+| Prototype | `BLOCKED FOR PRODUCTION` | Expected for Prototype. Ship the demo. Do not put users on it. |
+| Prototype | `NEEDS HARDENING` | Ahead of a typical Prototype, still not production. |
+| Prototype | `READY` | Unusual for Prototype — re-check mode. Production gates already pass. |
+| MVP | `BLOCKED FOR PRODUCTION` | Expected for MVP when absolute gates fail. Closed beta only if you accept the failed gates. Do not open public signups. |
+| MVP | `NEEDS HARDENING` | Typical for MVP. Harden before public users. |
+| MVP | `READY` | Rare for MVP: production gates already pass. |
+| Production | `BLOCKED FOR PRODUCTION` | Not expected. Do not ship. |
+| Production | `NEEDS HARDENING` | Do not ship as-is. Harden first. |
+| Production | `READY` | Ship. |
+
 ## Report table
 
-Use the report format in `SKILL.md`. Rows: the four absolute gates, then the four recommended gates. Status per row: Pass / Fail / N/A plus evidence paths.
+Use the report format in `SKILL.md`. Header includes `Stage note` (exact string from the table above). Rows: the four absolute gates, then the four recommended gates. Status per row: Pass / Fail / N/A plus evidence paths.

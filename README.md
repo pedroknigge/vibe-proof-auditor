@@ -59,7 +59,7 @@ In any supported agent:
 - “listo para prod”
 - “production checklist”
 
-Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
+Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
 
 Every pass writes two artifacts at the project root and opens the HTML:
 
@@ -118,7 +118,7 @@ python3 -m unittest discover -s tests -v
 
 | Fact | Home |
 |------|------|
-| Verdict words, absolute/recommended gates, verdict rule | `references/gates.md` |
+| Verdict words, absolute/recommended gates, verdict rule, stage notes | `references/gates.md` |
 | Weights, formula, floors, scale, product-type N/A matrix | `references/scoring.md` |
 | Scored items and human-interview (unscored) items | `references/checklist.md` (only home; the template is a cover) |
 | Security grep playbook | `references/security-deep.md` |

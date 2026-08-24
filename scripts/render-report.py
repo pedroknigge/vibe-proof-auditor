@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Render a vibe-proof audit markdown report into a self-contained HTML file.
 
-Stdlib only. Does not invent scores, gates, or verdict words — it styles
-whatever the markdown already contains.
+Stdlib only. Does not invent scores, gates, verdict words, or stage notes —
+it styles whatever the markdown already contains.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ META_LABELS = (
     "Product type",
     "Overall Score",
     "Status",
+    "Stage note",
 )
 
 SKIP_BODY_HEADINGS = {
@@ -469,6 +470,13 @@ body::before {
 .stamp-blocked { color: var(--blocked); }
 .stamp-harden { color: var(--harden); }
 .stamp-ready { color: var(--ready); }
+.stage-note {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 42ch;
+  color: var(--ink);
+}
 .hero-kicker {
   color: var(--muted);
   font-size: 15px;
@@ -659,6 +667,10 @@ def render_html(md: str) -> str:
     m = re.search(r"(?im)^[-*]\s*verdict:\s*(.+)$", md)
     if m:
         kicker = f'<p class="hero-kicker">{inline(m.group(1))}</p>'
+    stage_note = meta.get("Stage note", "")
+    stage_html = (
+        f'<p class="stage-note">{inline(stage_note)}</p>' if stage_note else ""
+    )
 
     chips = []
     for key in ("Mode", "Audit mode", "Product type", "Date"):
@@ -694,6 +706,7 @@ def render_html(md: str) -> str:
       </div>
       <div class="status-block {sclass}">
         <div class="stamp stamp-{sclass}">{status_display(status)}</div>
+        {stage_html}
         {kicker}
         <div class="chips">{"".join(chips)}</div>
       </div>

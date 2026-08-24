@@ -13,7 +13,7 @@ Marks: Pass | Partial | Fail | N/A | insufficient evidence
 Human-interview rows: not assessed | Pass | Fail — **not scored, not a gate**
 
 Scoring: `references/scoring.md`  
-Gates / verdict words: `references/gates.md`
+Gates / verdict words / stage notes: `references/gates.md`
 
 ## How to fill
 
@@ -62,6 +62,7 @@ Fill from `references/gates.md` only. Do not invent rows or verdict words.
 | Basic observability (recommended) | | |
 
 **Overall score:** __._ / 10  _(formula: `references/scoring.md`)_  
-**Status:** _(exact strings: `references/gates.md`)_
+**Status:** _(exact strings: `references/gates.md`)_  
+**Stage note:** _(exact strings: `references/gates.md`)_
 
 **Notes / actions:**

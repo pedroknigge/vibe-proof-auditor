@@ -42,6 +42,60 @@ class RenderReportTests(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stderr)
             html = dest.read_text(encoding="utf-8")
             self.assertIn("BLOCKED FOR PRODUCTION", html)
+            self.assertIn('class="stage-note"', html)
+            self.assertIn("Not expected. Do not ship.", html)
+
+    def test_stage_note_is_styled_not_invented(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "in.md"
+            dest = Path(tmp) / "out.html"
+            src.write_text(
+                "# Vibe-Proof Audit Report\n\n"
+                "**Project:** /tmp/x\n"
+                "**Date:** 2026-08-24\n"
+                "**Mode:** MVP\n"
+                "**Audit mode:** Quick\n"
+                "**Product type:** `cli`\n"
+                "**Overall Score:** 4.0 / 10\n"
+                "**Status:** BLOCKED FOR PRODUCTION\n"
+                "**Stage note:** Expected for MVP when absolute gates fail. "
+                "Closed beta only if you accept the failed gates. "
+                "Do not open public signups.\n\n"
+                "## Executive Summary\n\n"
+                "- Verdict: absolute gates fail.\n",
+                encoding="utf-8",
+            )
+            proc = run([str(src), str(dest)])
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            html = dest.read_text(encoding="utf-8")
+            self.assertIn('class="stage-note"', html)
+            self.assertIn("Do not open public signups.", html)
+            self.assertNotIn("Not expected. Do not ship.", html)
+
+    def test_missing_stage_note_is_not_invented(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "in.md"
+            dest = Path(tmp) / "out.html"
+            src.write_text(
+                "# Vibe-Proof Audit Report\n\n"
+                "**Project:** /tmp/x\n"
+                "**Date:** 2026-08-24\n"
+                "**Mode:** Production\n"
+                "**Audit mode:** Quick\n"
+                "**Product type:** `cli`\n"
+                "**Overall Score:** 1.0 / 10\n"
+                "**Status:** READY\n\n"
+                "## Why this dunks (plain language)\n\n"
+                "**P0 — xss.** hello\n",
+                encoding="utf-8",
+            )
+            proc = run([str(src), str(dest)])
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            html = dest.read_text(encoding="utf-8")
+            self.assertNotIn('class="stage-note"', html)
+            self.assertNotIn("Not expected. Do not ship.", html)
+            self.assertNotIn("Expected for Prototype", html)
+            self.assertNotIn("Expected for MVP", html)
 
     def test_script_tag_is_escaped(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

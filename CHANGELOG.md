@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5
+
+- Stage notes: Prototype / MVP / Production frame the verdict. They do not change gates, floors, or N/A. Strings and mode inference live in `references/gates.md`.
+- Report header includes `Stage note`. Renderer styles it; does not invent it.
+
 ## 2.4
 
 - HTML twin of the audit report (`scripts/render-report.py`). Stdlib only. Styles markdown; does not compute scores, gates, or verdict words.

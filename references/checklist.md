@@ -33,7 +33,7 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 
 ### Authorization (N/A if no users and resources)
 
-- [ ] **[C]** Object-level authorization (IDOR / BOLA) on every sensitive resource.
+- [ ] **[C]** Object-level authorization (IDOR / BOLA) on every sensitive resource. **Pass** requires a server ownership/tenant check on the resource path **and** an isolation test or equivalent request-level proof (user A cannot access user B). Grep / “the UI hides the button” only is **Partial**, never Pass.
 - [ ] Frontend is not the authorization boundary.
 - [ ] Roles and permissions evaluated on the server.
 - [ ] Datastore rules (Postgres RLS, Firebase Security Rules, or equivalent) when the product has users **and** a client-reachable datastore (anon/authenticated client key, mobile SDK, etc.). Applies to `saas-single-user` when a client key can read rows — not only `saas-multi-tenant`. N/A if there is no client-reachable datastore. **Fail** if rules are off, missing, or open (`USING (true)`, allow-all Firebase rules, or equivalent).

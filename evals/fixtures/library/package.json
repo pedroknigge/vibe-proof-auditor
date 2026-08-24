@@ -1,0 +1,7 @@
+{
+  "name": "leftpad-lite",
+  "version": "0.0.1",
+  "dependencies": {
+    "react-sate-managment": "1.0.0"
+  }
+}

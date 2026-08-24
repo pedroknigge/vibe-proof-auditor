@@ -1,0 +1,7 @@
+{
+  "name": "acme-tasks",
+  "private": true,
+  "scripts": {
+    "test": "echo 'no tests'"
+  }
+}

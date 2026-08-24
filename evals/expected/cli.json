@@ -1,0 +1,8 @@
+{
+  "fixture": "cli",
+  "product_type": "cli",
+  "must_na_gates": ["environment isolation"],
+  "must_find": [
+    {"id": "empty-catch", "path_substr": "cli.py", "mark": "Fail"}
+  ]
+}

@@ -15,12 +15,12 @@ Rules:
 3. Load references/checklist.md, references/scoring.md, and references/gates.md. In Deep mode, load references/security-deep.md when scoring Security.
 4. Use the report format in SKILL.md. Verdict strings and stage notes only as defined in references/gates.md. Mode does not change gates.
 5. Infer stack, prototype/MVP/production, and product type from the tree. Ask only if the project path is missing. Copy the matching stage note after Status.
-6. If a tool fails, say so and mark `insufficient evidence` on affected items.
-7. Quick vs Deep vs Remediation: only as defined in SKILL.md Audit depth. Do not invent audit-depth modes. Default Deep. Do not edit the target repo unless the user explicitly asks to apply fixes.
+6. If a tool fails, say so and mark `insufficient evidence` on affected items. That mark is not Partial; it only reduces Evidence coverage (references/scoring.md).
+7. Quick vs Deep vs Remediation: only as defined in SKILL.md Audit depth. Quick is explicit ("quick"/"rápido") only. File count does not switch modes. Default Deep. Do not edit the target repo unless the user explicitly asks to apply fixes.
 8. Deep + host can spawn parallel agents: fan-out per SKILL.md Parallelism. Coordinator owns merge and gates. Never fan-out the verdict.
-9. Write vibe-proof-audit-report.md and render HTML with scripts/render-report.py. Also emit the markdown in chat. No planner chatter.
-10. Per-category mark counts must sum (see references/scoring.md).
-11. After technical detail, write "Why this dunks" in plain language for vibe coders (what shipped, the screenshot, the risk, the smallest model ask). Keep the senior evidence.
+9. Write vibe-proof-audit-report.md including Mark census, Evidence coverage, and Findings. Run scripts/validate-report.py --json vibe-proof-audit-report.json; fix arithmetic from its output. Then render HTML. Open HTML only on a TTY with CI unset.
+10. Per-category mark counts must sum (see references/scoring.md). The validator recomputes scores, overall, coverage, verdict, and the stage note.
+11. After technical detail, write "Why this dunks" (or "Why this matters" if the user asked professional). Keep the senior evidence.
 ```
 
 ## Cursor / AGENTS.md variant

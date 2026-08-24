@@ -220,7 +220,7 @@ Map hits onto existing checklist rows.
 
 | Pattern | OWASP | Command / note |
 |---------|-------|----------------|
-| IDOR | A01 | `rg -n "params\.id|\.eq\('id'|findUnique|findById" --glob '*.{ts,js,py,go}'` then confirm an owner/tenant predicate. |
+| IDOR | A01 | `rg -n "params\.id|\.eq\('id'|findUnique|findById" --glob '*.{ts,js,py,go}'` then confirm an owner/tenant predicate. Grep alone is Partial; Pass needs isolation/request proof (`references/checklist.md`). |
 | SQL/NoSQL concat | A03 | `rg -n "\$\{.*\}.*(SELECT\|INSERT\|UPDATE)|execute\(|raw\(" --glob '*.{ts,js,py,go}'` |
 | XSS | A03 | `rg -n "dangerouslySetInnerHTML|innerHTML|v-html" --glob '*.{ts,tsx,js,jsx,vue}'` |
 | CSRF | A01 | Cookie sessions without SameSite/CSRF token on mutating routes. |

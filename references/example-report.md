@@ -5,7 +5,8 @@
 **Mode:** Production  
 **Audit mode:** Deep  
 **Product type:** `saas-multi-tenant`  
-**Overall Score:** 5.4 / 10  
+**Overall Score:** 5.9 / 10  
+**Evidence coverage:** 99%  
 **Status:** BLOCKED FOR PRODUCTION  
 **Stage note:** Not expected. Do not ship.
 
@@ -27,6 +28,23 @@ Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict 
 - Strengths: no secrets in the tree; lockfile and few dependencies; CI runs the unit suite; generic API errors hide stack traces.
 - Weaknesses: task APIs load by id with no tenant check; RLS never enabled; no isolation tests; N+1 comments on the list endpoint.
 - Verdict: applicable Security and Testing absolute gates fail. Do not ship.
+
+## Mark census
+
+| Category | Pass | Partial | Fail | insufficient evidence | N/A | Critical Fail | Score |
+|----------|------|---------|------|----------------------|-----|---------------|-------|
+| 1. Security | 14 | 4 | 6 | 1 | 3 | yes | 4 |
+| 2. Comprehension | 4 | 0 | 2 | 0 | 0 | no | 7 |
+| 3. Testing | 3 | 2 | 3 | 0 | 0 | yes | 5 |
+| 4. Architecture | 5 | 3 | 1 | 0 | 0 | no | 7 |
+| 5. Maintainability | 3 | 4 | 1 | 0 | 0 | no | 6 |
+| 6. Error handling | 4 | 3 | 1 | 0 | 0 | no | 7 |
+| 7. Performance | 3 | 3 | 1 | 0 | 0 | no | 6 |
+| 8. Dependencies | 5 | 1 | 1 | 0 | 0 | no | 8 |
+| 9. Process / environments | 3 | 3 | 1 | 0 | 0 | no | 6 |
+| 10. Product / scope | 1 | 3 | 1 | 0 | 0 | no | 5 |
+
+Known marks 89 + 1 insufficient → coverage 99%. Score column is after floors.
 
 ## Category Scores
 
@@ -56,11 +74,19 @@ Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict 
 | Minimal docs | Pass | README runbook exists; env vars listed |
 | Basic observability | Fail | `console.log` only; no request ids, metrics, or alerts |
 
+## Findings
+
+| ID | Mark | Path | Note |
+|----|------|------|------|
+| idor | Fail | `app/api/tasks/[id]/route.ts` | GET/PATCH/DELETE by id, no org_id |
+| rls-open | Fail | `supabase/migrations/0001_init.sql` | no ENABLE ROW LEVEL SECURITY |
+| isolation-tests | Fail | `__tests__/` | no user A vs user B |
+
 ## Category Detail
 
 ### 1. Security — 4/10 (Fail)
 
-Marks: 28 checklist rows → 3 N/A + 25 applicable: 14 Pass, 4 Partial, 6 Fail, 1 `insufficient evidence` (includes **[C]** object-level AuthZ Fail). Ratio 16.5/25 → 7, then critical floor → **4**. See `references/scoring.md` worked example.
+Marks: 28 checklist rows → 3 N/A + 25 applicable: 14 Pass, 4 Partial, 6 Fail, 1 `insufficient evidence` (includes **[C]** object-level AuthZ Fail). `known = 24`; ratio 16/24 → 7, then critical floor → **4**. See `references/scoring.md` worked example.
 
 N/A: LLM prompt-injection (no LLM in the tree); production CORS (same-origin App Router, no cross-origin API); webhook signatures (billing is an unused Stripe sketch — no receiver).
 

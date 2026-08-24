@@ -1,0 +1,7 @@
+{
+  "fixture": "library",
+  "product_type": "library",
+  "must_find": [
+    {"id": "slopsquat", "path_substr": "react-sate-managment", "mark": "Fail"}
+  ]
+}

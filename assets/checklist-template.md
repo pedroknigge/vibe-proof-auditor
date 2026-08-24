@@ -8,8 +8,9 @@ Cover sheet only. **Items live solely in `references/checklist.md`.** Do not pas
 **Mode:** Prototype / MVP / Production  
 **Product type:** _(from `references/scoring.md`)_  
 **Audit mode:** Deep / Quick  
+**Evidence coverage:** _% (from `references/scoring.md`)_
 
-Marks: Pass | Partial | Fail | N/A | insufficient evidence  
+Marks: Pass | Partial | Fail | N/A | insufficient evidence (coverage only, not Partial)  
 Human-interview rows: not assessed | Pass | Fail — **not scored, not a gate**
 
 Scoring: `references/scoring.md`  

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>forgeboard — BLOCKED FOR PRODUCTION</title>
+  <style>
+:root {
+  --bg: #0c0c0a;
+  --paper: #14140f;
+  --ink: #efe8d6;
+  --muted: #b7ad96;
+  --faint: #8a8373;
+  --line: #2a281f;
+  --line-strong: #3d3a2e;
+  --blocked: #ff3b30;
+  --harden: #e8a317;
+  --ready: #c6f135;
+  --pass: #c6f135;
+  --partial: #e8a317;
+  --fail: #ff3b30;
+  --na: #8a8373;
+  --font-display: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.sheet {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 22px 80px;
+}
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 14px;
+  margin-bottom: 28px;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.wordmark b { display: block; font-size: 22px; letter-spacing: -0.02em; }
+.wordmark span { color: var(--muted); font-family: var(--font-mono); font-weight: 400; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+.mast-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.45;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  align-items: stretch;
+  margin-bottom: 36px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.score-block {
+  padding: 22px 28px 24px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+}
+.score-block .label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3.4rem, 7vw, 5.2rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 12px 0;
+}
+.denom {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.status-block {
+  padding: 22px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+}
+.status-block.blocked { box-shadow: inset 6px 0 0 var(--blocked); }
+.status-block.harden { box-shadow: inset 6px 0 0 var(--harden); }
+.status-block.ready { box-shadow: inset 6px 0 0 var(--ready); }
+.stamp {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.6vw, 2.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+.stamp span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68em;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin-top: 0.12em;
+}
+.stamp-blocked { color: var(--blocked); }
+.stamp-harden { color: var(--harden); }
+.stamp-ready { color: var(--ready); }
+.stage-note {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  max-width: 48ch;
+  color: var(--ink);
+}
+.hero-kicker {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 48ch;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-strong);
+  padding: 5px 8px;
+  color: var(--ink);
+}
+h2 {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+.scorecard, .gates { margin-bottom: 36px; }
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.cat {
+  background: var(--paper);
+  padding: 14px 16px 12px;
+}
+.cat header { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.cat-name { font-weight: 600; font-size: 15px; }
+.cat-score { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.cat-score b {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  min-width: 1.4ch;
+}
+.ticks { display: flex; gap: 3px; flex: 1; }
+.ticks i { display: block; height: 8px; flex: 1; background: var(--line-strong); }
+.ticks i.on { background: var(--ink); }
+.cat.fail .ticks i.on { background: var(--fail); }
+.cat.partial .ticks i.on { background: var(--partial); }
+.cat.pass .ticks i.on { background: var(--pass); }
+.cat.na .cat-score b, .cat.na .cat-name { color: var(--faint); }
+.notes { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.pill.pass, .pill.ready { color: var(--pass); }
+.pill.partial, .pill.harden { color: var(--partial); }
+.pill.fail, .pill.blocked { color: var(--fail); }
+.pill.na { color: var(--na); }
+.gate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.gate {
+  background: var(--paper);
+  padding: 16px 16px 14px;
+  min-height: 120px;
+}
+.gate h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 10px 0 8px;
+  line-height: 1.25;
+}
+.gate p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.article {
+  border-top: 1px solid var(--line-strong);
+  padding-top: 28px;
+}
+.article h2 {
+  font-size: 13px;
+  margin: 32px 0 12px;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+}
+.article h3 {
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 28px 0 10px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.article h4 { font-size: 16px; margin: 20px 0 8px; line-height: 1.35; }
+.article p { margin: 0 0 12px; max-width: 68ch; }
+.article ul, .article ol { margin: 0 0 16px; padding-left: 1.2em; max-width: 68ch; }
+.article li { margin: 0 0 8px; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: #1c1c16;
+  border: 1px solid var(--line);
+  padding: 0.05em 0.35em;
+}
+pre {
+  background: #0a0a08;
+  border: 1px solid var(--line-strong);
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 0 0 20px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 13.5px; line-height: 1.55; }
+.table-wrap { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; }
+th, td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--paper);
+}
+.dunk {
+  border-left: 3px solid var(--line-strong);
+  padding: 4px 0 4px 14px;
+  margin: 0 0 16px;
+  max-width: 68ch;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.dunk p { margin: 0; }
+.dunk-p0 { border-left-color: var(--fail); }
+.dunk-p1 { border-left-color: var(--partial); }
+.dunk-p2 { border-left-color: var(--na); }
+.foot {
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .hero, .cat-grid, .gate-grid { grid-template-columns: 1fr; }
+  .score-block { border-right: 0; border-bottom: 1px solid var(--line); min-height: 0; }
+  .masthead { flex-direction: column; align-items: flex-start; }
+  .mast-meta { text-align: left; }
+}
+@media print {
+  body { background: #fff; color: #111; }
+  body::before { display: none; }
+  .sheet { padding: 0; }
+  .hero, .cat, .gate, pre, code { background: #fff; }
+  .cat-grid, .gate-grid, .hero { border-color: #111; background: #111; }
+  a { color: inherit; }
+}
+</style>
+</head>
+<body>
+  <main class="sheet">
+    <header class="masthead">
+      <div class="wordmark"><b>Vibe-Proof</b><span>auditor</span></div>
+      <div class="mast-meta">/Users/demo/forgeboard<br>2026-08-24</div>
+    </header>
+    <section class="hero">
+      <div class="score-block">
+        <div class="label">Overall score</div>
+        <div class="score">5.9</div>
+        <div class="denom">/ 10</div>
+      </div>
+      <div class="status-block blocked">
+        <div class="stamp stamp-blocked">BLOCKED<span>FOR PRODUCTION</span></div>
+        <p class="stage-note">Not expected. Do not ship.</p>
+        <p class="hero-kicker">applicable Security and Testing absolute gates fail. Do not ship.</p>
+        <div class="chips"><span class="chip">Production</span><span class="chip">Deep</span><span class="chip">saas-multi-tenant</span><span class="chip">2026-08-24</span><span class="chip">coverage 99%</span></div>
+      </div>
+    </section>
+    <section class="scorecard"><h2>Category scores</h2><div class="cat-grid"><article class="cat fail">
+  <header>
+    <span class="cat-name">1. Security</span>
+    <span class="pill fail">Fail</span>
+  </header>
+  <div class="cat-score">
+    <b>4</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">Critical AuthZ Fail; floor applied (<code>references/scoring.md</code>)</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">2. Comprehension</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>7</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">README flow; 912-line `sync.ts</p>
+</article><article class="cat fail">
+  <header>
+    <span class="cat-name">3. Testing</span>
+    <span class="pill fail">Fail</span>
+  </header>
+  <div class="cat-score">
+    <b>5</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">Critical isolation-test and edge/error-path Fail</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">4. Architecture</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>7</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">Clear folders; tenant column unused</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">5. Maintainability</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>6</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">God file; untracked TODOs</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">6. Error handling</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>7</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">No user-facing stacks; reconnect logs, no retry</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">7. Performance</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>6</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">N+1 on task comments</p>
+</article><article class="cat pass">
+  <header>
+    <span class="cat-name">8. Dependencies</span>
+    <span class="pill pass">Pass</span>
+  </header>
+  <div class="cat-score">
+    <b>8</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">Lockfile, no hallucinated packages</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">9. Process / environments</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>6</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">Preview + prod; rollback via Vercel</p>
+</article><article class="cat partial">
+  <header>
+    <span class="cat-name">10. Product / scope</span>
+    <span class="pill partial">Partial</span>
+  </header>
+  <div class="cat-score">
+    <b>5</b>
+    <span class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>
+  </div>
+  <p class="notes">MVP named; no user evidence in-tree</p>
+</article></div></section>
+    <section class="gates"><h2>Production gates</h2><div class="gate-grid"><article class="gate fail">
+  <span class="pill fail">Fail</span>
+  <h3>Critical security</h3>
+  <p>app/api/tasks/[id]/route.ts<code> GET/PATCH/DELETE by </code>id<code> only; </code>supabase/migrations/0001_init.sql<code> has no </code>ENABLE ROW LEVEL SECURITY`; Security score 4</p>
+</article><article class="gate fail">
+  <span class="pill fail">Fail</span>
+  <h3>Testing</h3>
+  <p>No test that user A is denied user B’s task; Testing score 5</p>
+</article><article class="gate pass">
+  <span class="pill pass">Pass</span>
+  <h3>Error handling</h3>
+  <p>API <code>error.ts</code> returns <code>{ error: &quot;internal&quot; }</code>; no stacks in responses; score 7</p>
+</article><article class="gate pass">
+  <span class="pill pass">Pass</span>
+  <h3>Environment isolation</h3>
+  <p>.env.example<code> local; Vercel Preview vs Production; </code>vercel rollback` documented in README</p>
+</article><article class="gate fail">
+  <span class="pill fail">Fail</span>
+  <h3>Basic performance</h3>
+  <p>listTasks<code> queries comments per row in </code>src/lib/tasks.ts</p>
+</article><article class="gate pass">
+  <span class="pill pass">Pass</span>
+  <h3>Dependency audit</h3>
+  <p>package-lock.json<code>; </code>npm audit` in CI; 11 runtime deps</p>
+</article><article class="gate pass">
+  <span class="pill pass">Pass</span>
+  <h3>Minimal docs</h3>
+  <p>README runbook exists; env vars listed</p>
+</article><article class="gate fail">
+  <span class="pill fail">Fail</span>
+  <h3>Basic observability</h3>
+  <p>console.log` only; no request ids, metrics, or alerts</p>
+</article></div></section>
+    <div class="article">
+      <p>Worked example for the formula in <code>references/scoring.md</code> (ForgeBoard). Verdict and stage note from <code>references/gates.md</code> only.</p>
+<h2 id="snapshot">Snapshot (real)</h2>
+<ul><li>Next.js 14 App Router + TypeScript + Supabase (Postgres + Auth + Storage)</li><li><code>app/</code>, <code>src/lib/</code>, <code>supabase/migrations/</code>, <code>__tests__/</code></li><li>Test ratio: 4 test files / 62 TS source files</li><li>No <code>gitleaks</code> job; <code>.env</code> not tracked; <code>.env.example</code> present</li><li>Largest file: <code>src/lib/sync.ts</code> (912 lines)</li><li>CI: <code>.github/workflows/ci.yml</code> (lint + unit tests)</li><li>Vercel project linked; Docker absent</li><li>README architecture section present; no <code>docs/adr/</code></li></ul>
+<h2 id="executive-summary">Executive Summary</h2>
+<ul><li>Strengths: no secrets in the tree; lockfile and few dependencies; CI runs the unit suite; generic API errors hide stack traces.</li><li>Weaknesses: task APIs load by id with no tenant check; RLS never enabled; no isolation tests; N+1 comments on the list endpoint.</li><li>Verdict: applicable Security and Testing absolute gates fail. Do not ship.</li></ul>
+<h2 id="mark-census">Mark census</h2>
+<div class='table-wrap'><table><thead><tr><th>Category</th><th>Pass</th><th>Partial</th><th>Fail</th><th>insufficient evidence</th><th>N/A</th><th>Critical Fail</th><th>Score</th></tr></thead><tbody><tr><td>1. Security</td><td>14</td><td>4</td><td>6</td><td>1</td><td>3</td><td>yes</td><td>4</td></tr><tr><td>2. Comprehension</td><td>4</td><td>0</td><td>2</td><td>0</td><td>0</td><td>no</td><td>7</td></tr><tr><td>3. Testing</td><td>3</td><td>2</td><td>3</td><td>0</td><td>0</td><td>yes</td><td>5</td></tr><tr><td>4. Architecture</td><td>5</td><td>3</td><td>1</td><td>0</td><td>0</td><td>no</td><td>7</td></tr><tr><td>5. Maintainability</td><td>3</td><td>4</td><td>1</td><td>0</td><td>0</td><td>no</td><td>6</td></tr><tr><td>6. Error handling</td><td>4</td><td>3</td><td>1</td><td>0</td><td>0</td><td>no</td><td>7</td></tr><tr><td>7. Performance</td><td>3</td><td>3</td><td>1</td><td>0</td><td>0</td><td>no</td><td>6</td></tr><tr><td>8. Dependencies</td><td>5</td><td>1</td><td>1</td><td>0</td><td>0</td><td>no</td><td>8</td></tr><tr><td>9. Process / environments</td><td>3</td><td>3</td><td>1</td><td>0</td><td>0</td><td>no</td><td>6</td></tr><tr><td>10. Product / scope</td><td>1</td><td>3</td><td>1</td><td>0</td><td>0</td><td>no</td><td>5</td></tr></tbody></table></div>
+<p>Known marks 89 + 1 insufficient → coverage 99%. Score column is after floors.</p>
+<h2 id="findings">Findings</h2>
+<div class='table-wrap'><table><thead><tr><th>ID</th><th>Mark</th><th>Path</th><th>Note</th></tr></thead><tbody><tr><td>idor</td><td>Fail</td><td><code>app/api/tasks/[id]/route.ts</code></td><td>GET/PATCH/DELETE by id, no org_id</td></tr><tr><td>rls-open</td><td>Fail</td><td><code>supabase/migrations/0001_init.sql</code></td><td>no ENABLE ROW LEVEL SECURITY</td></tr><tr><td>isolation-tests</td><td>Fail</td><td><code>__tests__/</code></td><td>no user A vs user B</td></tr></tbody></table></div>
+<h2 id="category-detail">Category Detail</h2>
+<h3 id="1-security-4-10">1. Security — 4/10 (Fail)</h3>
+<p>Marks: 28 checklist rows → 3 N/A + 25 applicable: 14 Pass, 4 Partial, 6 Fail, 1 <code>insufficient evidence</code> (includes <strong>[C]</strong> object-level AuthZ Fail). <code>known = 24</code>; ratio 16/24 → 7, then critical floor → <strong>4</strong>. See <code>references/scoring.md</code> worked example.</p>
+<p>N/A: LLM prompt-injection (no LLM in the tree); production CORS (same-origin App Router, no cross-origin API); webhook signatures (billing is an unused Stripe sketch — no receiver).</p>
+<p><code>insufficient evidence</code>: secret rotation (no in-tree leak history; git log not proof of a past leak).</p>
+<p>Fail: no secret-scan job in CI; <strong>[C]</strong> object-level AuthZ; frontend is the AuthZ boundary; roles not evaluated per resource; datastore rules (RLS off; would also apply if this were <code>saas-single-user</code> with an anon key); <code>task-attachments</code> public.</p>
+<p>Partial: auth rate-limit (Supabase defaults only; no LLM/paid endpoint in tree); brute-force (same); XSS (<code>dangerouslySetInnerHTML</code> in <code>CommentBody.tsx</code>); security headers (no CSP).</p>
+<p>Pass: <strong>[C]</strong> no hardcoded secrets; <strong>[C]</strong> no client-bundle secrets (<code>service_role</code> / <code>sk_live</code> absent from client; no <code>NEXT_PUBLIC_</code> server secret; <code>productionBrowserSourceMaps</code> not set); env/gitignore/<code>.env.example</code>; <strong>[C]</strong> AuthN server-side (<code>supabase.auth.getUser()</code>); mature provider; <strong>[C]</strong> session cookies (HttpOnly); session invalidation (Supabase Auth <code>signOut</code>); <strong>[C]</strong> Zod on task routes (no hardcoded <code>true</code> skip); parameterized Supabase client; least-privilege anon key; CSRF/SameSite; HTTPS on Vercel; no public admin/debug routes; security logs without tokens.</p>
+<p>Evidence:</p>
+<ul><li><code>app/api/tasks/[id]/route.ts</code> — <code>supabase.from(&#x27;tasks&#x27;).select(&#x27;*&#x27;).eq(&#x27;id&#x27;, id).single()</code> with no <code>org_id</code> / <code>user_id</code> predicate.</li><li><code>middleware.ts</code> — redirects when <code>sb-access-token</code> cookie is missing; does not bind a tenant (AuthZ boundary is still the client).</li><li><code>supabase/migrations/0001_init.sql</code> — <code>tasks</code>, <code>comments</code>, <code>orgs</code> created; no RLS; <code>task-attachments</code> bucket <code>public: true</code>.</li><li><code>.github/workflows/ci.yml</code> — lint + <code>npm test</code>; no gitleaks/TruffleHog/secret-scanning job.</li></ul>
+<p>Gaps: IDOR on every task/comment route; RLS off; public attachments; no secret scan.</p>
+<p>Fix: enable RLS (<code>org_id = auth.jwt()-&gt;&gt;&#x27;org_id&#x27;</code>), enforce the same predicate in every route/action, make the bucket private + signed URLs, add CSP, add a secret-scan CI job.</p>
+<h3 id="2-comprehension-7-10">2. Comprehension — 7/10 (Partial)</h3>
+<p>Evidence: <code>README.md</code> “Architecture” traces App Router → route handlers → Supabase. No <code>docs/adr/</code>. <code>src/lib/sync.ts</code> (912 lines) mixes realtime, cache, and billing.</p>
+<p>Fix: split <code>sync.ts</code>; add a one-page ADR for tenant isolation.</p>
+<p>Human interview: <strong>not assessed</strong> (author not asked). Not a gate.</p>
+<h3 id="3-testing-5-10">3. Testing — 5/10 (Fail)</h3>
+<p>Marks: 8 applicable, 0 N/A → 3 Pass, 2 Partial, 3 Fail (includes <strong>[C]</strong> isolation tests and <strong>[C]</strong> edge/error paths). Ratio 0.5 → <strong>5</strong>.</p>
+<p>Pass: <strong>[C]</strong> tests for critical flows (create/list); suite in CI; happy path. Partial: coverage undocumented; AuthZ still demo-shaped. Fail: <strong>[C]</strong> isolation tests; <strong>[C]</strong> principal edge cases and error paths (no 401/403/timeout); regression suite.</p>
+<p>Evidence:</p>
+<ul><li><code>__tests__/tasks.test.ts</code> — create/list happy path only.</li><li>No file matches <code>authz|idor|isolation|tenant</code>.</li><li><code>.github/workflows/ci.yml</code> runs <code>npm test</code>.</li></ul>
+<p>Gaps: no 401/403/timeout tests; no user-A/user-B case.</p>
+<p>Fix: two seeded orgs; assert 404/403 on cross-org GET/PATCH/DELETE; add webhook timeout test.</p>
+<h3 id="4-architecture-7-10">4. Architecture — 7/10 (Partial)</h3>
+<p>Evidence: <code>app/api/</code> vs <code>src/lib/</code> separation. <code>tasks.org_id</code> exists but is not consulted in handlers. Server Actions and REST handlers duplicate writes.</p>
+<p>Fix: one repository module that always filters by <code>org_id</code>; delete the duplicate Server Action path.</p>
+<h3 id="5-maintainability-6-10">5. Maintainability — 6/10 (Partial)</h3>
+<p>Evidence: consistent Prettier/TS. <code>src/lib/sync.ts</code> god file. <code>TODO: fix later</code> in <code>src/lib/billing.ts</code> with no ticket.</p>
+<p>Fix: split sync; file the billing TODO or delete the dead path.</p>
+<h3 id="6-error-handling-7-10">6. Error handling — 7/10 (Partial)</h3>
+<p><strong>[C]</strong> not swallowed: Pass (reconnect errors are logged). <strong>[C]</strong> no user-facing stacks: Pass.</p>
+<p>Evidence: <code>app/api/error.ts</code> maps unknown errors to <code>{ error: &quot;internal&quot; }</code>. <code>src/lib/sync.ts</code> logs reconnect failures but has no retry budget or user-visible dead-sync state (Partial on retries/degradation).</p>
+<p>Fix: retry with backoff; surface a dead-sync banner.</p>
+<h3 id="7-performance-6-10">7. Performance — 6/10 (Partial)</h3>
+<p>Evidence: <code>src/lib/tasks.ts</code> <code>listTasks</code> loops <code>comments</code> per task (N+1). <code>tasks_org_id_idx</code> exists. No pagination on <code>/api/tasks</code>.</p>
+<p>Fix: join/select comments in one query; <code>limit</code>/<code>cursor</code>.</p>
+<h3 id="8-dependencies-8-10">8. Dependencies — 8/10 (Pass)</h3>
+<p>Evidence: <code>package-lock.json</code>; 11 runtime deps; no unpublished or slopsquatted names; <code>npm audit</code> in CI with <code>high</code> fail.</p>
+<p>Fix: pin <code>supabase-js</code> to the minor already in the lockfile in <code>package.json</code>.</p>
+<h3 id="9-process-environments-6-10">9. Process / environments — 6/10 (Partial)</h3>
+<p>Evidence: conventional commits; <code>.gitignore</code> includes <code>.env</code>; Preview vs Production on Vercel; no required CODEOWNERS.</p>
+<p>Human interview (“agent never touches prod”): <strong>not assessed</strong>. Not a gate.</p>
+<p>Fix: protect <code>main</code>; require CI + one review.</p>
+<h3 id="10-product-scope-5-10">10. Product / scope — 5/10 (Partial)</h3>
+<p>Evidence: README claims “MVP: shared task board”. No interviews, metrics, or cut-list in-tree. <code>src/lib/billing.ts</code> is an unused Stripe sketch.</p>
+<p>Fix: delete or hide billing until a written MVP check passes.</p>
+<h2 id="extras">Extras (not in overall)</h2>
+<div class='table-wrap'><table><thead><tr><th>Extra</th><th>Score</th><th>Notes</th></tr></thead><tbody><tr><td>Data model / migrations</td><td>5</td><td>Schema versioned (Pass); no down migrations (Partial); restorable backup Fail (<code>vercel rollback</code> is not a DB backup)</td></tr><tr><td>Docs</td><td>6</td><td>README run/env; no ownership diagram</td></tr><tr><td>Mobile / responsive</td><td>5</td><td>Tailwind; no tested breakpoint below <code>md</code></td></tr><tr><td>Accessibility</td><td>4</td><td>Icon buttons without names in <code>TaskRow.tsx</code></td></tr><tr><td>Observability</td><td>5</td><td><code>console.log</code> only</td></tr></tbody></table></div>
+<h2 id="why-this-dunks">Why this dunks (plain language)</h2>
+<div class="dunk dunk-p0"><p><strong>P0 — anyone can open someone else&#x27;s task.</strong> The API loads a task by <code>id</code> and never checks org. A logged-in user who guesses (or lists) another org&#x27;s id can read and edit it. That screenshot is the classic IDOR dunk. Ignore it and you leak customer data the day you have two tenants. Tell the model: <em>filter every task/comment query by <code>org_id</code> from the verified session, enable RLS with the same rule, private bucket + signed URLs.</em></p></div>
+<div class="dunk dunk-p0"><p><strong>P0 — you never proved user A can&#x27;t see user B.</strong> Happy-path tests exist. There is no test with two orgs. Seniors will say you only tested the demo. Without that test, the IDOR fix can regress next week. Tell the model: <em>two seeded orgs; A gets 403/404 on B&#x27;s GET/PATCH/DELETE; fail CI if that fails.</em></p></div>
+<div class="dunk dunk-p1"><p><strong>P1 — the list endpoint queries comments once per row.</strong> Works with 10 tasks. Falls over with 500. Tell the model: <em>one query for comments; paginate <code>/api/tasks</code>.</em></p></div>
+<h2 id="prioritized-remediation">Prioritized Remediation</h2>
+<ol><li><strong>P0</strong> — Object-level AuthZ + RLS + private storage on tasks, comments, attachments.</li><li><strong>P0</strong> — Isolation tests (two orgs) on GET/PATCH/DELETE; fail CI if they fail.</li><li><strong>P1</strong> — Kill N+1 list query; add sync retry/backoff; add CSP.</li><li><strong>P1</strong> — Split <code>sync.ts</code>; require review on <code>main</code>.</li><li><strong>P2</strong> — ADR for tenancy; a11y names; request-id logs; delete unused billing.</li></ol>
+<h2 id="remediation-prompt">Remediation Prompt (copy-paste)</h2>
+<pre><code>You are remediating ForgeBoard after a vibe-proof-auditor pass (BLOCKED FOR PRODUCTION).
+
+Do not argue with the findings. Implement P0 first, then P1. Keep diffs small.
+
+P0:
+1. Enable RLS on `tasks`, `comments`, `orgs`, `task-attachments`. Policies: a row is visible only when `org_id` equals the JWT org claim. Revoke public bucket access; use signed URLs.
+2. In every route and Server Action that loads a task or comment by id (`app/api/tasks/[id]/route.ts` and duplicates), filter by both `id` and `org_id` from the verified session. Do not trust middleware alone.
+3. Add tests with two orgs: user A must receive 403/404 on user B’s task GET/PATCH/DELETE. Wire them into `.github/workflows/ci.yml`.
+
+P1:
+4. Replace per-row comment queries in `src/lib/tasks.ts` with one query; paginate `/api/tasks`.
+5. Add retry/backoff in `src/lib/sync.ts` and user-visible resync state.
+6. Add a strict CSP; split `src/lib/sync.ts` into realtime / cache / billing modules; billing stays unshipped.
+
+Do not add features. Do not weaken tests to make them pass.</code></pre>
+    </div>
+    <footer class="foot">
+      <span>vibe-proof-auditor</span>
+      <span>markdown + html · evidence only</span>
+    </footer>
+  </main>
+</body>
+</html>

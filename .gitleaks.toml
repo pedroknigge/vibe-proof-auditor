@@ -1,0 +1,5 @@
+title = "vibe-proof-auditor"
+
+[allowlist]
+description = "Planted eval fixtures are allowed to look like leaks"
+paths = ['''evals/fixtures/''']

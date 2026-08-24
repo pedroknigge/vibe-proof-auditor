@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Render a vibe-proof audit markdown report into a self-contained HTML file.
 
-Stdlib only. Does not invent scores, gates, verdict words, or stage notes —
-it styles whatever the markdown already contains.
+Stdlib only. Offline (system fonts). Does not invent scores, gates, verdict
+words, or stage notes — it styles whatever the markdown already contains.
+Math lives in ``scripts/validate-report.py`` (ADR 0001 / 0002).
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ META_LABELS = (
     "Audit mode",
     "Product type",
     "Overall Score",
+    "Evidence coverage",
     "Status",
     "Stage note",
 )
@@ -343,8 +345,8 @@ CSS = """
   --bg: #0c0c0a;
   --paper: #14140f;
   --ink: #efe8d6;
-  --muted: #9a917c;
-  --faint: #5e594c;
+  --muted: #b7ad96;
+  --faint: #8a8373;
   --line: #2a281f;
   --line-strong: #3d3a2e;
   --blocked: #ff3b30;
@@ -353,10 +355,10 @@ CSS = """
   --pass: #c6f135;
   --partial: #e8a317;
   --fail: #ff3b30;
-  --na: #6d6758;
-  --font-display: "Syne", "Arial Black", Impact, sans-serif;
-  --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --na: #8a8373;
+  --font-display: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -364,8 +366,8 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 body::before {
@@ -393,21 +395,20 @@ body::before {
 }
 .wordmark {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 13px;
-  text-transform: uppercase;
-  line-height: 1.1;
+  line-height: 1.2;
 }
-.wordmark b { display: block; font-size: 22px; letter-spacing: -0.05em; }
-.wordmark span { color: var(--muted); font-family: var(--font-mono); font-weight: 400; font-size: 10px; letter-spacing: 0.28em; }
+.wordmark b { display: block; font-size: 22px; letter-spacing: -0.02em; }
+.wordmark span { color: var(--muted); font-family: var(--font-mono); font-weight: 400; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
 .mast-meta {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
   color: var(--muted);
   text-align: right;
+  line-height: 1.45;
 }
 .hero {
   display: grid;
@@ -427,24 +428,23 @@ body::before {
 }
 .score-block .label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.22em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
 .score {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(4rem, 8vw, 6rem);
-  letter-spacing: -0.06em;
-  line-height: 0.9;
+  font-weight: 700;
+  font-size: clamp(3.4rem, 7vw, 5.2rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
   margin: 12px 0;
-  padding-right: 0.08em;
 }
 .denom {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -460,43 +460,51 @@ body::before {
 .status-block.ready { box-shadow: inset 6px 0 0 var(--ready); }
 .stamp {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  letter-spacing: -0.06em;
-  line-height: 0.9;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.6vw, 2.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   text-transform: uppercase;
 }
-.stamp span { display: block; color: var(--muted); font-size: 0.55em; letter-spacing: -0.03em; }
+.stamp span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68em;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin-top: 0.12em;
+}
 .stamp-blocked { color: var(--blocked); }
 .stamp-harden { color: var(--harden); }
 .stamp-ready { color: var(--ready); }
 .stage-note {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.4;
-  max-width: 42ch;
+  font-size: 17px;
+  line-height: 1.5;
+  max-width: 48ch;
   color: var(--ink);
 }
 .hero-kicker {
   color: var(--muted);
-  font-size: 15px;
-  max-width: 46ch;
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 48ch;
 }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   border: 1px solid var(--line-strong);
   padding: 5px 8px;
   color: var(--ink);
 }
 h2 {
-  font-family: var(--font-display);
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-weight: 500;
   font-size: 13px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   margin: 0 0 14px;
   color: var(--muted);
@@ -514,13 +522,14 @@ h2 {
   padding: 14px 16px 12px;
 }
 .cat header { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.cat-name { font-weight: 600; font-size: 14px; }
+.cat-name { font-weight: 600; font-size: 15px; }
 .cat-score { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 .cat-score b {
   font-family: var(--font-display);
   font-size: 28px;
-  letter-spacing: -0.06em;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   min-width: 1.4ch;
 }
 .ticks { display: flex; gap: 3px; flex: 1; }
@@ -530,11 +539,11 @@ h2 {
 .cat.partial .ticks i.on { background: var(--partial); }
 .cat.pass .ticks i.on { background: var(--pass); }
 .cat.na .cat-score b, .cat.na .cat-name { color: var(--faint); }
-.notes { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.notes { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
 .pill {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 7px;
   border: 1px solid currentColor;
@@ -559,35 +568,37 @@ h2 {
 .gate h3 {
   font-family: var(--font-display);
   font-size: 18px;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 10px 0 8px;
-  text-transform: uppercase;
+  line-height: 1.25;
 }
-.gate p { margin: 0; color: var(--muted); font-size: 13px; }
+.gate p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
 .article {
   border-top: 1px solid var(--line-strong);
   padding-top: 28px;
 }
 .article h2 {
-  font-size: 12px;
+  font-size: 13px;
   margin: 32px 0 12px;
   color: var(--ink);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.12em;
 }
 .article h3 {
   font-family: var(--font-sans);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   margin: 28px 0 10px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
-.article h4 { font-size: 15px; margin: 20px 0 8px; }
-.article p { margin: 0 0 12px; max-width: 72ch; }
-.article ul, .article ol { margin: 0 0 16px; padding-left: 1.2em; max-width: 72ch; }
-.article li { margin: 0 0 6px; }
+.article h4 { font-size: 16px; margin: 20px 0 8px; line-height: 1.35; }
+.article p { margin: 0 0 12px; max-width: 68ch; }
+.article ul, .article ol { margin: 0 0 16px; padding-left: 1.2em; max-width: 68ch; }
+.article li { margin: 0 0 8px; }
 code {
   font-family: var(--font-mono);
-  font-size: 0.86em;
+  font-size: 0.9em;
   background: #1c1c16;
   border: 1px solid var(--line);
   padding: 0.05em 0.35em;
@@ -599,9 +610,9 @@ pre {
   overflow-x: auto;
   margin: 0 0 20px;
 }
-pre code { background: none; border: 0; padding: 0; font-size: 12.5px; line-height: 1.5; }
+pre code { background: none; border: 0; padding: 0; font-size: 13.5px; line-height: 1.55; }
 .table-wrap { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--line); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; }
 th, td {
   text-align: left;
   padding: 8px 10px;
@@ -610,8 +621,8 @@ th, td {
 }
 th {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
   background: var(--paper);
@@ -621,6 +632,8 @@ th {
   padding: 4px 0 4px 14px;
   margin: 0 0 16px;
   max-width: 68ch;
+  font-size: 17px;
+  line-height: 1.55;
 }
 .dunk p { margin: 0; }
 .dunk-p0 { border-left-color: var(--fail); }
@@ -631,8 +644,8 @@ th {
   padding-top: 14px;
   border-top: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--faint);
   display: flex;
@@ -673,10 +686,11 @@ def render_html(md: str) -> str:
     )
 
     chips = []
-    for key in ("Mode", "Audit mode", "Product type", "Date"):
+    for key in ("Mode", "Audit mode", "Product type", "Date", "Evidence coverage"):
         val = meta.get(key)
         if val:
-            chips.append(f'<span class="chip">{esc(val)}</span>')
+            label = val if key != "Evidence coverage" else f"coverage {val}"
+            chips.append(f'<span class="chip">{esc(label)}</span>')
 
     title = f"{name} — {status or 'vibe-proof audit'}"
     path = meta.get("Project", "")
@@ -687,9 +701,6 @@ def render_html(md: str) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{esc(title)}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <style>{CSS}</style>
 </head>
 <body>

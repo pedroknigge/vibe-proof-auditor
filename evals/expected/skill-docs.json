@@ -1,0 +1,8 @@
+{
+  "fixture": "skill-docs",
+  "product_type": "skill/docs",
+  "must_fail_gates": ["testing"],
+  "must_find": [
+    {"id": "no-tests", "path_substr": "scripts/run.py", "mark": "Fail"}
+  ]
+}

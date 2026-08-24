@@ -1,0 +1,30 @@
+name: vibe-proof-validate
+description: Recompute vibe-proof report math and optionally emit JSON/SARIF
+inputs:
+  report:
+    description: Path to vibe-proof-audit-report.md
+    required: false
+    default: vibe-proof-audit-report.md
+  json:
+    description: Optional JSON output path
+    required: false
+    default: ""
+  sarif:
+    description: Optional SARIF output path
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Validate
+      shell: bash
+      run: |
+        set -euo pipefail
+        args=("${{ inputs.report }}")
+        if [ -n "${{ inputs.json }}" ]; then
+          args+=(--json "${{ inputs.json }}")
+        fi
+        if [ -n "${{ inputs.sarif }}" ]; then
+          args+=(--sarif "${{ inputs.sarif }}")
+        fi
+        python3 "${{ github.action_path }}/scripts/validate-report.py" "${args[@]}"

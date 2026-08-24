@@ -1,5 +1,18 @@
 # Vibe-Proof Auditor
 
+**AI writes the happy path. Vibe-Proof audits the consequences.**
+
+```bash
+npx skills add pedroknigge/vibe-proof-auditor -g -y
+```
+
+![ForgeBoard worked example: 5.9 BLOCKED FOR PRODUCTION](docs/example-hero.svg)
+
+[![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
+![vibe-proof BLOCKED](assets/badge-blocked.svg)
+
+Pre-1.0 (`0.6.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
+
 ```
  __     _____ ____  _____
  \ \   / /_ _| __ )| ____|
@@ -10,8 +23,6 @@
          ── auditor ──
     run the roast on yourself
 ```
-
-[![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 
 The internet is very brave about other people's pull requests.
 
@@ -59,12 +70,17 @@ In any supported agent:
 - “listo para prod”
 - “production checklist”
 
-Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
+Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
 
-Every pass writes two artifacts at the project root and opens the HTML:
+Every pass writes markdown + JSON at the project root (HTML opens only on an interactive TTY):
 
-- `vibe-proof-audit-report.md` — the evidence report (source of truth)
-- `vibe-proof-audit-report.html` — styled twin (`scripts/render-report.py`)
+- `vibe-proof-audit-report.md` — evidence report
+- `vibe-proof-audit-report.json` — computed scores / gates / findings
+- `vibe-proof-audit-report.html` — styled twin
+
+`scripts/validate-report.py` recomputes the math. `--sarif` is optional. `scripts/compare-eval.py --baseline` diffs new Fail rows. Say `professional` for a sober **Why this matters** section.
+
+Planted fixtures: `evals/`. Worked HTML: `docs/example-report.html`.
 
 ## One-off without installing
 
@@ -89,9 +105,16 @@ vibe-proof-auditor/
 ├── CHANGELOG.md
 ├── LICENSE
 ├── scripts/
-│   └── render-report.py          # Markdown report → styled HTML
+│   ├── scorelib.py               # Weights, floors, verdict math
+│   ├── validate-report.py        # Census / scores / verdict; --json --sarif
+│   ├── compare-eval.py           # expected.json vs report JSON; --baseline
+│   └── render-report.py          # Markdown → HTML (no scores)
+├── evals/                        # Planted fixtures + expected manifests
 ├── tests/
-│   └── test_render_report.py     # Renderer contract (stdlib unittest)
+│   ├── test_render_report.py
+│   ├── test_scorelib.py
+│   ├── test_validate_report.py
+│   └── test_export_and_eval.py
 ├── references/
 │   ├── checklist.md              # Scored items (only home)
 │   ├── gates.md                  # Verdicts and production gates
@@ -108,7 +131,7 @@ vibe-proof-auditor/
 Python **3.9+**. The renderer is stdlib only.
 
 ```bash
-python3 -m py_compile scripts/render-report.py
+python3 -m py_compile scripts/scorelib.py scripts/validate-report.py scripts/compare-eval.py scripts/render-report.py
 python3 -m unittest discover -s tests -v
 ```
 
@@ -125,7 +148,11 @@ python3 -m unittest discover -s tests -v
 | Report format | `SKILL.md` |
 | HTML render | `scripts/render-report.py` |
 | HTML render does not score | `docs/adr/0001-html-render-does-not-score.md` |
-| One worked report | `references/example-report.md` |
+| Validator recomputes scores / verdict | `scripts/validate-report.py` (`docs/adr/0002-validator-checks-math.md`) |
+| Evidence coverage, insufficient-evidence mark | `references/scoring.md` |
+| One worked report | `references/example-report.md` (`docs/example-report.html`) |
+| Planted evals | `evals/` |
+| JSON / SARIF / baseline | `scripts/validate-report.py`, `scripts/compare-eval.py` |
 
 ## Related skills
 

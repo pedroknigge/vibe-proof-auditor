@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="280" viewBox="0 0 960 280" role="img" aria-label="ForgeBoard 5.9 BLOCKED FOR PRODUCTION">
+  <title>Worked example: ForgeBoard 5.9 BLOCKED FOR PRODUCTION</title>
+  <rect width="960" height="280" fill="#0c0c0a"/>
+  <rect x="24" y="24" width="912" height="232" fill="#14140f" stroke="#2a281f"/>
+  <rect x="24" y="24" width="280" height="232" fill="#14140f" stroke="#2a281f"/>
+  <text x="48" y="64" fill="#b7ad96" font-family="ui-monospace, Menlo, monospace" font-size="12">OVERALL SCORE</text>
+  <text x="48" y="160" fill="#efe8d6" font-family="ui-sans-serif, system-ui, sans-serif" font-size="96" font-weight="700">5.9</text>
+  <text x="48" y="210" fill="#b7ad96" font-family="ui-monospace, Menlo, monospace" font-size="14">/ 10</text>
+  <rect x="304" y="24" width="8" height="232" fill="#ff3b30"/>
+  <text x="336" y="88" fill="#ff3b30" font-family="ui-sans-serif, system-ui, sans-serif" font-size="36" font-weight="700">BLOCKED</text>
+  <text x="336" y="128" fill="#b7ad96" font-family="ui-sans-serif, system-ui, sans-serif" font-size="28" font-weight="700">FOR PRODUCTION</text>
+  <text x="336" y="176" fill="#efe8d6" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16">Not expected. Do not ship.</text>
+  <text x="336" y="214" fill="#b7ad96" font-family="ui-monospace, Menlo, monospace" font-size="12">FORGEBOARD WORKED EXAMPLE · COVERAGE 99% · 0.6</text>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "fixture": "forgeboard",
+  "product_type": "saas-multi-tenant",
+  "must_fail_gates": ["critical security", "testing"],
+  "must_find": [
+    {"id": "idor", "path_substr": "api/tasks", "mark": "Fail"},
+    {"id": "rls-open", "path_substr": "0001_init.sql", "mark": "Fail"},
+    {"id": "isolation-tests", "path_substr": "__tests__", "mark": "Fail"}
+  ]
+}

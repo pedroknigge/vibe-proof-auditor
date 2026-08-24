@@ -78,10 +78,12 @@ Report them in the gates table as Pass / Fail / N/A. They may contribute to `NEE
 Apply only **applicable** absolute gates (skipped/N/A gates ignored):
 
 1. Any applicable absolute gate **Fail** → `BLOCKED FOR PRODUCTION`
-2. Else if overall < 8.0 **or** any applicable scored category < 6 → `NEEDS HARDENING`
-3. Else (all applicable absolute gates Pass, overall ≥ 8.0, no applicable category < 6) → `READY`
+2. Else if overall < 8.0 **or** Evidence coverage < 80% **or** any applicable scored category **except** Product / scope is < 6 → `NEEDS HARDENING`
+3. Else (all applicable absolute gates Pass, overall ≥ 8.0, coverage ≥ 80%, no applicable engineering category < 6) → `READY`
 
-Overall and category scores come from `references/scoring.md`. Do not average gates. Do not Fail because a recommended gate failed.
+Product / scope still sits in overall (`references/scoring.md`). A score below 6 there does **not** by itself produce `BLOCKED FOR PRODUCTION` and does **not** block `READY`.
+
+Overall, category scores, and Evidence coverage come from `references/scoring.md`. Do not average gates. Do not Fail because a recommended gate failed. `scripts/validate-report.py` recomputes this rule; the renderer does not.
 
 ## Stage (Prototype / MVP / Production)
 

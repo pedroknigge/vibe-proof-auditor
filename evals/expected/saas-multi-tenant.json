@@ -1,0 +1,12 @@
+{
+  "fixture": "saas-multi-tenant",
+  "product_type": "saas-multi-tenant",
+  "must_fail_gates": ["critical security", "testing"],
+  "must_find": [
+    {"id": "idor", "path_substr": "api/tasks", "mark": "Fail"},
+    {"id": "client-bundle-secret", "path_substr": "NEXT_PUBLIC_SUPABASE_SERVICE_ROLE", "mark": "Fail"},
+    {"id": "rls-open", "path_substr": "USING (true)", "mark": "Fail"},
+    {"id": "localstorage-jwt", "path_substr": "localStorage", "mark": "Fail"},
+    {"id": "ignore-build-errors", "path_substr": "ignoreBuildErrors", "mark": "Fail"}
+  ]
+}

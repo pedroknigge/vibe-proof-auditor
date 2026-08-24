@@ -9,3 +9,5 @@ __pycache__/
 .venv/
 vibe-proof-audit-report.md
 vibe-proof-audit-report.html
+vibe-proof-audit-report.json
+vibe-proof-audit-report.sarif

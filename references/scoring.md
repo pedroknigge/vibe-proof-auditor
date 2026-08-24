@@ -17,7 +17,7 @@ Single home for **weights**, **formula**, **critical floors**, **scale**, **prod
 | 9 | Process / environments | 1.0 |
 | 10 | Product / scope | 1.0 |
 
-Sum of weights = **12.8**.
+Sum of weights = **11.8**.
 
 ## Extras (report only)
 
@@ -39,14 +39,20 @@ Per applicable checklist item:
 | Partial | 0.5 |
 | Fail | 0 |
 | N/A | excluded (not in numerator or denominator) |
-| insufficient evidence | 0.5 (tool failed or file unreadable). Not a critical Fail. Do not apply a critical floor. |
+| insufficient evidence | excluded from the ratio (tool failed or file unreadable). Not a Partial. Not a critical Fail. Do not apply a critical floor. Counts only in **Evidence coverage**. |
 | not assessed | excluded — human-interview only, never a Fail |
 
-Publish a mark census per category before the ratio: N/A listed separately; `Pass + Partial + Fail + insufficient evidence` **must equal** the applicable count. If they do not sum, recount. Do not divide by a number you did not list.
+Publish a **Mark census** table per `SKILL.md` before the ratio. N/A listed separately. `Pass + Partial + Fail + insufficient evidence` **must equal** the applicable count (items that are not N/A). If they do not sum, recount. Do not divide by a number you did not list.
 
-`category_ratio = sum(marks of applicable items) / count(applicable items)`
+`known = Pass + Partial + Fail`
 
-If count is 0, the category is N/A: omit it from the overall numerator and subtract its weight from the denominator. Never substitute 0.
+`category_ratio = sum(marks of known items) / known`
+
+`insufficient evidence` is not in `known`. If `known` is 0, the category is N/A for the overall (omit it; subtract its weight). Never substitute 0. A category that is all `insufficient evidence` is not Pass.
+
+**Evidence coverage** (report header; not a category score):
+
+`coverage = known / (known + insufficient evidence)` across the ten scored categories. N/A is not in this fraction. Publish as an integer percent, half up. `scripts/validate-report.py` recomputes it.
 
 `category_score = round(category_ratio * 10)` to nearest integer, **half up**.
 
@@ -62,11 +68,11 @@ Floors cap; they never raise a score.
 
 `overall = Σ(weight_i × category_score_i) / D` to **one decimal** (half up).
 
-`D = 12.8` when all ten categories are applicable. If a category is fully N/A, `D` is 12.8 minus that category’s weight.
+`D = 11.8` when all ten categories are applicable. If a category is fully N/A, `D` is 11.8 minus that category’s weight.
 
 Do not include extras in `D` or the numerator.
 
-Feed `overall` and category scores into `references/gates.md` for the verdict and stage note. Do not apply verdict or stage-note logic here.
+Feed `overall`, category scores, and Evidence coverage into `references/gates.md` for the verdict and stage note. Do not apply verdict or stage-note logic here.
 
 ## Category status (report table)
 
@@ -116,7 +122,7 @@ Fictional `saas-multi-tenant` Next.js + Supabase app. Details: `references/examp
 
 N/A: LLM prompt-injection (no LLM); production CORS (same-origin App Router, no cross-origin API); webhook signatures (no Stripe/GitHub/Svix receivers). `insufficient evidence`: secret rotation (leak history unknown). Fail: secret scan in CI, **[C]** object-level AuthZ, frontend as AuthZ boundary, roles on server, datastore rules (RLS off), public storage bucket. Partial: auth rate-limit (Supabase defaults only; no LLM/paid endpoint in tree), brute-force, XSS, security headers. Pass: **[C]** no hardcoded secrets, **[C]** no client-bundle secrets (no `service_role` / `sk_live` / `NEXT_PUBLIC_` server secret in client; `productionBrowserSourceMaps` not enabled), env/gitignore/example, **[C]** AuthN server-side, mature provider, **[C]** session cookies, session invalidation (Supabase Auth `signOut` / provider revoke), **[C]** input validation, parameterized queries, least-privilege DB, CSRF, HTTPS, no public admin/debug, security logs without tokens.
 
-`category_ratio = (14×1 + 4×0.5 + 6×0 + 1×0.5) / 25 = 16.5 / 25 = 0.66` → `round(6.6) = 7` → critical floor caps at **4**.
+`known = 24`. `category_ratio = (14×1 + 4×0.5 + 6×0) / 24 = 16 / 24 = 0.666…` → `round_half_up(6.666…) = 7` → critical floor caps at **4**. The insufficient row is not in the 24.
 
 **Testing (8 applicable, 0 N/A):** 3 Pass + 2 Partial + 3 Fail, including critical isolation-test Fail and critical edge/error-path Fail.
 
@@ -138,9 +144,9 @@ Other category scores: Comprehension 7, Architecture 7, Maintainability 6, Error
 | Dependencies | 8 | 1.0 | 8.0 |
 | Process / environments | 6 | 1.0 | 6.0 |
 | Product / scope | 5 | 1.0 | 5.0 |
-| **Sum** | | **12.8** | **69.6** |
+| **Sum** | | **11.8** | **69.6** |
 
-`overall = 69.6 / 12.8 = 5.4375` → **5.4**
+`overall = 69.6 / 11.8 = 5.898…` → **5.9**
 
 Extras (excluded): Data model 5 (schema Pass, destructive Partial, restorable backup Fail — Vercel rollback is not a DB backup), Docs 6, Mobile 5, Accessibility 4, Observability 5.
 

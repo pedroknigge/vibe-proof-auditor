@@ -1,6 +1,6 @@
 ---
 name: vibe-proof-auditor
-description: Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, or whether a repo is listo para prod. Trigger phrases include auditar proyecto, control de calidad, and similar production-readiness requests on local, mixed, or AI-generated code.
+description: "v2.3. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, or whether a repo is listo para prod. Trigger phrases include auditar proyecto, control de calidad, and similar production-readiness requests on local, mixed, or AI-generated code."
 license: MIT
 metadata:
   version: "2.3"

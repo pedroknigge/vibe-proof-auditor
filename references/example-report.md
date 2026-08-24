@@ -59,17 +59,17 @@ Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict 
 
 ### 1. Security — 4/10 (Fail)
 
-Marks: 24 checklist rows → 1 N/A + 23 applicable: 12 Pass, 4 Partial, 6 Fail, 1 `insufficient evidence` (includes **[C]** object-level AuthZ Fail). Ratio 14.5/23 → 6, then critical floor → **4**. See `references/scoring.md` worked example.
+Marks: 28 checklist rows → 3 N/A + 25 applicable: 14 Pass, 4 Partial, 6 Fail, 1 `insufficient evidence` (includes **[C]** object-level AuthZ Fail). Ratio 16.5/25 → 7, then critical floor → **4**. See `references/scoring.md` worked example.
 
-N/A: LLM prompt-injection (no LLM in the tree).
+N/A: LLM prompt-injection (no LLM in the tree); production CORS (same-origin App Router, no cross-origin API); webhook signatures (billing is an unused Stripe sketch — no receiver).
 
 `insufficient evidence`: secret rotation (no in-tree leak history; git log not proof of a past leak).
 
-Fail: no secret-scan job in CI; **[C]** object-level AuthZ; frontend is the AuthZ boundary; roles not evaluated per resource; RLS off; `task-attachments` public.
+Fail: no secret-scan job in CI; **[C]** object-level AuthZ; frontend is the AuthZ boundary; roles not evaluated per resource; datastore rules (RLS off; would also apply if this were `saas-single-user` with an anon key); `task-attachments` public.
 
-Partial: auth rate-limit (Supabase defaults only); brute-force (same); XSS (`dangerouslySetInnerHTML` in `CommentBody.tsx`); security headers (no CSP).
+Partial: auth rate-limit (Supabase defaults only; no LLM/paid endpoint in tree); brute-force (same); XSS (`dangerouslySetInnerHTML` in `CommentBody.tsx`); security headers (no CSP).
 
-Pass: **[C]** no hardcoded secrets; env/gitignore/`.env.example`; **[C]** AuthN server-side (`supabase.auth.getUser()`); mature provider; **[C]** session cookies (HttpOnly); **[C]** Zod on task routes; parameterized Supabase client; least-privilege anon key (no `service_role` in client); CSRF/SameSite; HTTPS on Vercel; no public admin/debug routes; security logs without tokens.
+Pass: **[C]** no hardcoded secrets; **[C]** no client-bundle secrets (`service_role` / `sk_live` absent from client; no `NEXT_PUBLIC_` server secret; `productionBrowserSourceMaps` not set); env/gitignore/`.env.example`; **[C]** AuthN server-side (`supabase.auth.getUser()`); mature provider; **[C]** session cookies (HttpOnly); session invalidation (Supabase Auth `signOut`); **[C]** Zod on task routes (no hardcoded `true` skip); parameterized Supabase client; least-privilege anon key; CSRF/SameSite; HTTPS on Vercel; no public admin/debug routes; security logs without tokens.
 
 Evidence:
 
@@ -134,7 +134,7 @@ Fix: join/select comments in one query; `limit`/`cursor`.
 
 ### 8. Dependencies — 8/10 (Pass)
 
-Evidence: `package-lock.json`; 11 runtime deps; no unpublished names; `npm audit` in CI with `high` fail.
+Evidence: `package-lock.json`; 11 runtime deps; no unpublished or slopsquatted names; `npm audit` in CI with `high` fail.
 
 Fix: pin `supabase-js` to the minor already in the lockfile in `package.json`.
 
@@ -156,7 +156,7 @@ Fix: delete or hide billing until a written MVP check passes.
 
 | Extra | Score | Notes |
 |-------|-------|-------|
-| Data model / migrations | 7 | `supabase/migrations/` present; no down migrations |
+| Data model / migrations | 5 | Schema versioned (Pass); no down migrations (Partial); restorable backup Fail (`vercel rollback` is not a DB backup) |
 | Docs | 6 | README run/env; no ownership diagram |
 | Mobile / responsive | 5 | Tailwind; no tested breakpoint below `md` |
 | Accessibility | 4 | Icon buttons without names in `TaskRow.tsx` |

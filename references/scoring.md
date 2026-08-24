@@ -93,28 +93,30 @@ Infer type from the tree. Item-level N/A is the mechanism; a category is N/A onl
 
 | Product type | Typically N/A or reduced |
 |--------------|--------------------------|
-| `saas-multi-tenant` | Almost nothing. Tenant isolation / RLS applies. |
-| `saas-single-user` | Cross-user AuthZ, IDOR tests, and tenant RLS N/A if there is no sharing and no user-owned foreign resources. AuthN still applies if accounts exist. |
-| `cli` | Browser XSS/CSP/headers, mobile/responsive, accessibility. AuthN/AuthZ N/A unless the CLI calls user-scoped APIs. |
-| `library` | AuthN/AuthZ, SaaS env isolation, XSS unless it renders HTML, mobile, a11y, service observability. Tests, deps, errors, maintainability still apply. Publish/rollback docs may apply. |
-| `static-site` | Server AuthZ/IDOR, RLS, data rollback, N+1 unless a backend/BFF exists. AuthN N/A unless there is login. |
-| `skill/docs` | Runtime AuthN/AuthZ, HTTP security headers, DB performance, mobile, a11y, deploy envs, error-handling runtime. Still score: secrets in examples, architecture of the package, maintainability, product/scope. Testing N/A unless a runnable contract exists. |
-| `mobile` | Web CSP/headers N/A. Platform storage and platform AuthZ apply. |
-| `infra` | Product UX, mobile, a11y N/A. IAM, secrets, state isolation, rollback apply. |
+| `saas-multi-tenant` | Almost nothing. Datastore rules (RLS / Firebase rules) apply. |
+| `saas-single-user` | Cross-user AuthZ and IDOR tests N/A if there is no sharing and no user-owned foreign resources. AuthN still applies if accounts exist. Datastore rules (RLS / Firebase rules) **apply** when a client key can read rows — not N/A merely because the product is single-user. |
+| `cli` | Browser XSS/CSP/headers/CORS, mobile/responsive, accessibility. AuthN/AuthZ N/A unless the CLI calls user-scoped APIs. Client-bundle secrets N/A unless it ships a browser bundle. Webhooks N/A unless it receives them. |
+| `library` | AuthN/AuthZ, SaaS env isolation, XSS unless it renders HTML, mobile, a11y, service observability, CORS unless it serves HTTP. Tests, deps, errors, maintainability still apply. Publish/rollback docs may apply. Client-bundle secrets N/A unless it ships client JS. Webhooks N/A unless it receives them. |
+| `static-site` | Server AuthZ/IDOR, data rollback, N+1 unless a backend/BFF exists. AuthN N/A unless there is login. Datastore rules apply if a client-reachable datastore exists (e.g. Firebase/Supabase from the static app); N/A if none. |
+| `skill/docs` | Runtime AuthN/AuthZ, HTTP security headers, CORS, DB performance, mobile, a11y, deploy envs, error-handling runtime, webhooks. Still score: secrets in examples, architecture of the package, maintainability, product/scope. Testing N/A unless a runnable contract exists. Client-bundle secrets N/A unless the package ships client JS. |
+| `mobile` | Web CSP/headers N/A. Platform storage and platform AuthZ apply. Datastore rules apply when a client SDK key can read rows. CORS N/A unless the app exposes a browser-cross-origin HTTP API. |
+| `infra` | Product UX, mobile, a11y N/A. IAM, secrets, state isolation, rollback apply. Datastore rules / CORS / client-bundle N/A unless those surfaces exist. |
 
 Auth-provider preference (Clerk / Auth0 / Supabase Auth) applies **only** when the product has users. Do not invent auth for `cli`, `library`, `static-site`, or `skill/docs`.
 
-Prefer mature AuthZ (RLS, server ownership checks) **only** when the product has users and resources.
+Prefer mature AuthZ (RLS / Firebase rules, server ownership checks) when the product has users **and** a client-reachable datastore or user-owned resources — including `saas-single-user` when a client key can read rows. IDOR tests stay N/A only when there is no sharing and no user-owned foreign resources.
+
+Webhook-signature scoring is N/A unless the tree has webhook receivers (Stripe / GitHub / Svix or equivalent). Production CORS is N/A unless there is a browser-cross-origin API. Session invalidation is N/A if there is no cookie/session/JWT auth. Client-bundle secrets are N/A if there is no client/browser bundle. Restorable backup (extra) is N/A if there is no durable user data.
 
 ## Worked example (ForgeBoard)
 
 Fictional `saas-multi-tenant` Next.js + Supabase app. Details: `references/example-report.md`.
 
-**Security (23 applicable, 1 N/A):** 12 Pass + 4 Partial + 6 Fail + 1 `insufficient evidence`, including critical AuthZ Fail.
+**Security (25 applicable, 3 N/A):** 14 Pass + 4 Partial + 6 Fail + 1 `insufficient evidence`, including critical AuthZ Fail.
 
-N/A: LLM prompt-injection (no LLM). `insufficient evidence`: secret rotation (leak history unknown). Fail: secret scan in CI, **[C]** object-level AuthZ, frontend as AuthZ boundary, roles on server, RLS, public storage bucket. Partial: auth rate-limit, brute-force, XSS, security headers. Pass: **[C]** no hardcoded secrets, env/gitignore/example, **[C]** AuthN server-side, mature provider, **[C]** session cookies, **[C]** input validation, parameterized queries, least-privilege DB, CSRF, HTTPS, no public admin/debug, security logs without tokens.
+N/A: LLM prompt-injection (no LLM); production CORS (same-origin App Router, no cross-origin API); webhook signatures (no Stripe/GitHub/Svix receivers). `insufficient evidence`: secret rotation (leak history unknown). Fail: secret scan in CI, **[C]** object-level AuthZ, frontend as AuthZ boundary, roles on server, datastore rules (RLS off), public storage bucket. Partial: auth rate-limit (Supabase defaults only; no LLM/paid endpoint in tree), brute-force, XSS, security headers. Pass: **[C]** no hardcoded secrets, **[C]** no client-bundle secrets (no `service_role` / `sk_live` / `NEXT_PUBLIC_` server secret in client; `productionBrowserSourceMaps` not enabled), env/gitignore/example, **[C]** AuthN server-side, mature provider, **[C]** session cookies, session invalidation (Supabase Auth `signOut` / provider revoke), **[C]** input validation, parameterized queries, least-privilege DB, CSRF, HTTPS, no public admin/debug, security logs without tokens.
 
-`category_ratio = (12×1 + 4×0.5 + 6×0 + 1×0.5) / 23 = 14.5 / 23 = 0.6304` → `round(6.304) = 6` → critical floor caps at **4**.
+`category_ratio = (14×1 + 4×0.5 + 6×0 + 1×0.5) / 25 = 16.5 / 25 = 0.66` → `round(6.6) = 7` → critical floor caps at **4**.
 
 **Testing (8 applicable, 0 N/A):** 3 Pass + 2 Partial + 3 Fail, including critical isolation-test Fail and critical edge/error-path Fail.
 
@@ -140,6 +142,6 @@ Other category scores: Comprehension 7, Architecture 7, Maintainability 6, Error
 
 `overall = 69.6 / 12.8 = 5.4375` → **5.4**
 
-Extras (excluded): Data model 7, Docs 6, Mobile 5, Accessibility 4, Observability 5.
+Extras (excluded): Data model 5 (schema Pass, destructive Partial, restorable backup Fail — Vercel rollback is not a DB backup), Docs 6, Mobile 5, Accessibility 4, Observability 5.
 
 Verdict: apply `references/gates.md` (absolute Security and Testing fail) → `BLOCKED FOR PRODUCTION`.

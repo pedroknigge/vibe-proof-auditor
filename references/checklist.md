@@ -17,6 +17,7 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 ### Secrets
 
 - [ ] **[C]** No hardcoded secrets in source (API keys, tokens, passwords, JWT secrets, connection strings).
+- [ ] **[C]** No secrets in the client bundle: no public env prefix (`NEXT_PUBLIC_`, `VITE_`, `EXPO_PUBLIC_`, or equivalent) wrapping a server secret; no `service_role` / `sk_live` / equivalent in client components or shipped JS; production source maps do not expose secrets. N/A if there is no client/browser bundle. **Fail** if a server secret is readable from shipped client JS or prod source maps.
 - [ ] Secrets only in env or a secret manager; `.env` gitignored; `.env.example` present without real values.
 - [ ] Secret scan in CI or documented equivalent (gitleaks, TruffleHog, GitHub secret scanning) — `insufficient evidence` if tools cannot run, not Fail.
 - [ ] If a secret ever landed in git, rotation is documented in-tree. If unknown, `insufficient evidence`, not Fail.
@@ -25,23 +26,25 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 
 - [ ] **[C]** Authentication is server-side (not client-only middleware or localStorage checks).
 - [ ] Mature provider when the product **has users** (Clerk, Auth0, Supabase Auth, Better Auth, NextAuth). N/A if no users. Do not invent auth for CLIs, libraries, or static sites.
-- [ ] Rate limiting on login, register, and auth endpoints.
+- [ ] Rate limiting on login, register, and auth endpoints, **and** on expensive / LLM / paid-API endpoints when those exist. N/A the LLM/paid sub-path if the product has none. A frontend-only limiter is not Pass (Partial at best if the server/edge limiter is missing).
 - [ ] Brute-force / credential-stuffing protections (lockout, backoff, or provider equivalent).
 - [ ] **[C]** Session or JWT cookies: HttpOnly, Secure, SameSite, short expiry (or provider equivalent). N/A if no cookie/session auth. **Fail** if the session is JS-readable (`localStorage` JWT, or cookies with HttpOnly off). **Partial** if HttpOnly is on but Secure/SameSite is missing or max-age is months/years.
+- [ ] Session invalidation: logout and server-side revoke (or provider equivalent) when cookie/session/JWT auth exists. N/A if no such auth. **Fail** if sessions cannot be ended. **Partial** if logout exists but stolen tokens cannot be revoked.
 
 ### Authorization (N/A if no users and resources)
 
 - [ ] **[C]** Object-level authorization (IDOR / BOLA) on every sensitive resource.
 - [ ] Frontend is not the authorization boundary.
 - [ ] Roles and permissions evaluated on the server.
-- [ ] Tenant isolation / RLS when `saas-multi-tenant`. N/A otherwise.
+- [ ] Datastore rules (Postgres RLS, Firebase Security Rules, or equivalent) when the product has users **and** a client-reachable datastore (anon/authenticated client key, mobile SDK, etc.). Applies to `saas-single-user` when a client key can read rows — not only `saas-multi-tenant`. N/A if there is no client-reachable datastore. **Fail** if rules are off, missing, or open (`USING (true)`, allow-all Firebase rules, or equivalent).
 
 ### Input / output
 
-- [ ] **[C]** Server-side input validation on entry points.
+- [ ] **[C]** Server-side input validation on entry points. **Fail** if a hardcoded `true` (or equivalent) skips validation on a live path.
 - [ ] Parameterized queries / safe ORM (no string-concat SQL/NoSQL).
 - [ ] Output encoding / XSS prevention. N/A if no HTML UI.
 - [ ] Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) when an HTTP app serves browsers.
+- [ ] Production CORS is not `Access-Control-Allow-Origin: *` with credentials, and not a prod wildcard that lets any origin call credentialed APIs. N/A if there is no browser-cross-origin API. **Fail** if `*` plus credentials, or prod `*` on a credentialed API. **Partial** if `*` without credentials on a public API.
 
 ### Data stores
 
@@ -55,6 +58,7 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 - [ ] No public admin, debug, or sensitive health endpoints.
 - [ ] Security events logged without PII or tokens.
 - [ ] If the app uses LLMs: prompt-injection controls. N/A if no LLM.
+- [ ] Webhook signatures verified (Stripe / GitHub / Svix or equivalent) when those handlers exist. N/A if there are no webhook receivers.
 
 ---
 
@@ -88,7 +92,7 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 - [ ] Happy path covered for critical features.
 - [ ] Coverage measured on critical modules, or documented why not.
 - [ ] Regression suite exists (new changes do not silently break old paths).
-- [ ] “Works on my machine / demo” is not the only check.
+- [ ] “Works on my machine / demo” is not the only check. `ignoreBuildErrors` / `eslint.ignoreDuringBuilds` (or equivalent) is evidence against Pass.
 
 ---
 
@@ -147,7 +151,7 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 ## 8. Dependencies
 
 - [ ] Each dependency is justified (prefer stdlib or small audited packages).
-- [ ] No hallucinated, abandoned, or unnecessary packages.
+- [ ] No hallucinated, abandoned, unnecessary, or **slopsquatted** packages (names the model invented that are unpublished, or newly registered squatters of those names).
 - [ ] Pinned versions and lockfiles present.
 - [ ] SBOM or a generated dependency inventory, or `npm/pip/cargo audit` equivalent in CI.
 - [ ] API / token costs estimated and alerted when paid APIs exist. N/A otherwise.
@@ -194,6 +198,7 @@ Same marks. Category scores optional. Excluded from overall: `references/scoring
 
 - [ ] Schema is versioned (migrations or equivalent).
 - [ ] Destructive changes are explicit and reversible when data is critical.
+- [ ] Restorable backup for data-critical systems, distinct from platform deploy rollback (Vercel/Heroku/image rollback is not a database backup). N/A if no durable user data.
 
 ### Docs
 

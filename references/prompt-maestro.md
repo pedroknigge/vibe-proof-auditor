@@ -20,6 +20,7 @@ Rules:
 8. Deep + host can spawn parallel agents: fan-out per SKILL.md Parallelism. Coordinator owns merge and gates. Never fan-out the verdict.
 9. The audit report is the only user-facing output. No planner chatter.
 10. Per-category mark counts must sum (see references/scoring.md).
+11. After technical detail, write "Why this dunks" in plain language for vibe coders (what shipped, the screenshot, the risk, the smallest model ask). Keep the senior evidence.
 ```
 
 ## Cursor / AGENTS.md variant

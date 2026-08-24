@@ -162,6 +162,14 @@ Fix: delete or hide billing until a written MVP check passes.
 | Accessibility | 4 | Icon buttons without names in `TaskRow.tsx` |
 | Observability | 5 | `console.log` only |
 
+## Why this dunks (plain language)
+
+**P0 — anyone can open someone else's task.** The API loads a task by `id` and never checks org. A logged-in user who guesses (or lists) another org's id can read and edit it. That screenshot is the classic IDOR dunk. Ignore it and you leak customer data the day you have two tenants. Tell the model: *filter every task/comment query by `org_id` from the verified session, enable RLS with the same rule, private bucket + signed URLs.*
+
+**P0 — you never proved user A can't see user B.** Happy-path tests exist. There is no test with two orgs. Seniors will say you only tested the demo. Without that test, the IDOR fix can regress next week. Tell the model: *two seeded orgs; A gets 403/404 on B's GET/PATCH/DELETE; fail CI if that fails.*
+
+**P1 — the list endpoint queries comments once per row.** Works with 10 tasks. Falls over with 500. Tell the model: *one query for comments; paginate `/api/tasks`.*
+
 ## Prioritized Remediation
 
 1. **P0** — Object-level AuthZ + RLS + private storage on tasks, comments, attachments.

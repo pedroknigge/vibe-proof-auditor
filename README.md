@@ -23,6 +23,8 @@ This skill is the roast, bottled. We scooped up what people actually mock when s
 
 If you're shipping with AI anyway — good. Run the roast on yourself before someone does it for clout.
 
+The report talks to two people at once. A senior gets paths, marks, gates, and a copy-paste fix prompt. A vibe coder gets **Why this dunks**: what you shipped, what would get screenshot-quoted, what happens if you ignore it, and the smallest thing to tell the model. Same audit. No dumbed-down scores.
+
 Install once. It lands in every coding agent the [Skills CLI](https://github.com/vercel-labs/skills) finds (Grok, Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and 70+ more).
 
 ## Install (all your agents, all projects)
@@ -57,7 +59,7 @@ In any supported agent:
 - “listo para prod”
 - “production checklist”
 
-Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict.
+Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass. If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
 
 ## One-off without installing
 

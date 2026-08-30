@@ -1,10 +1,10 @@
 ---
 name: vibe-proof-auditor
-description: "v0.6. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, or whether a repo is listo para prod. Trigger phrases include auditar proyecto, control de calidad, and similar production-readiness requests on local, mixed, or AI-generated code."
+description: "v0.7. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, or whether a repo is listo para prod. Trigger phrases include auditar proyecto, control de calidad, and similar production-readiness requests on local, mixed, or AI-generated code."
 license: MIT
 compatibility: Requires a filesystem, a shell, git, and Python 3.9+. ripgrep (rg) recommended for Deep security greps.
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
   author: pedroknigge
 ---
 
@@ -32,9 +32,9 @@ A production-readiness or anti-vibe audit of a project path.
 
 4. **Gates.** `references/gates.md` only. Verdict first, then the matching stage note. Mode does not change gates.
 
-5. **Report.** Format below. Include **Mark census**, **Evidence coverage**, and **Findings** (id, mark, path, note) for planted dunks and P0s. Verdicts and stage notes from `references/gates.md` only. Write `<project>/vibe-proof-audit-report.md`. Run `python3 <this-skill>/scripts/validate-report.py` on that file with `--json <project>/vibe-proof-audit-report.json`; add `--sarif` if asked. If it exits non-zero, fix the arithmetic from the script output (do not invent marks to make the math work). Then render HTML with `scripts/render-report.py`. Open the HTML only if stdin is a TTY and `CI` is unset. Also emit the markdown in chat. No planner chatter.
+5. **Report.** Format below. Include **Mark census**, **Evidence coverage**, and **Findings** (id, mark, path, note) for planted dunks and P0s. Verdicts and stage notes from `references/gates.md` only. Write `<project>/vibe-proof-audit-report.md`. Run `python3 -m vibe_proof_auditor.validate_report` on that file with `--json <project>/vibe-proof-audit-report.json`; add `--sarif` if asked. If it exits non-zero, fix the arithmetic from the script output (do not invent marks to make the math work). Then render HTML with `python3 -m vibe_proof_auditor.render_report`. Open the HTML only if stdin is a TTY and `CI` is unset. Also emit the markdown in chat. No planner chatter.
 
-6. **Optional.** Cover + marked checklist, AGENTS.md rules, remediation prompt. Voice `professional` / `cliente` / `sober`: heading **Why this matters** (same four beats, no dunk slang). Default voice is roast (**Why this dunks**). If the user says `baseline` and a previous `vibe-proof-audit-report.json` exists, run `scripts/compare-eval.py --baseline OLD.json NEW.json` and report only new Fail gates/findings.
+6. **Optional.** Cover + marked checklist, AGENTS.md rules, remediation prompt. Voice `professional` / `cliente` / `sober`: heading **Why this matters** (same four beats, no dunk slang). Default voice is roast (**Why this dunks**). If the user says `baseline` and a previous `vibe-proof-audit-report.json` exists, run `python3 -m vibe_proof_auditor.compare_eval --baseline OLD.json NEW.json` and report only new Fail gates/findings.
 
 ## Audit depth
 
@@ -81,7 +81,7 @@ Deep **and** host can spawn agents → fan-out. Coordinator: 1–2, N/A, merge, 
 | 1. Security | | | | | | yes/no | |
 | ... | | | | | | | |
 
-`Pass + Partial + Fail + insufficient evidence` must equal applicable count. Score column is after floors (`references/scoring.md`). `scripts/validate-report.py` recomputes it.
+`Pass + Partial + Fail + insufficient evidence` must equal applicable count. Score column is after floors (`references/scoring.md`). `python3 -m vibe_proof_auditor.validate_report` recomputes it.
 
 ## Category Scores
 | Category | Score | Status | Notes |
@@ -123,8 +123,8 @@ Each P0: what shipped, the screenshot, the risk, smallest model ask. Translate j
 - `references/scoring.md` / `gates.md` — numbers / verdict / stage notes
 - `references/security-deep.md` — Security, Deep
 - `references/prompt-maestro.md` / `example-report.md` — export / example
-- `scripts/validate-report.py` — census / scores / verdict / stage note; `--json` / `--sarif`
-- `scripts/compare-eval.py` — fixture expected.json vs report JSON; `--baseline`
-- `scripts/render-report.py` — markdown → HTML (does not score)
+- `vibe_proof_auditor.validate_report` — census / scores / verdict / stage note; `--json` / `--sarif`
+- `vibe_proof_auditor.compare_eval` — fixture expected.json vs report JSON; `--baseline`
+- `vibe_proof_auditor.render_report` — markdown → HTML (does not score)
 - `evals/` — planted fixtures + expected manifests
 - `assets/checklist-template.md` — cover

@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-Pre-1.0 (`0.6.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
+Pre-1.0 (`0.7.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
 
 ```
  __     _____ ____  _____
@@ -30,6 +30,8 @@ Every week the timeline invents a new reason vibe coding is going to sink produc
 
 Here's the bit they skip: **every one of those dunks is a checklist item.** Secrets in git. IDOR because the UI "hides" the button. No user-A / user-B tests. "It worked on my machine." That's not a personality. That's an audit.
 
+And the dunk that aged best: **shipping is the easy part.** Wait until that codebase has to be maintained by someone who didn't write it. Six months later is where the real test begins — when state never had a home, the only plan is rebuild, and "it works" was never "it's ready."
+
 This skill is the roast, bottled. We scooped up what people actually mock when someone codes with AI, and we pointed an agent at it. The model already trained on those threads. It already knows the lecture. It just needed a north star instead of vibes.
 
 If you're shipping with AI anyway — good. Run the roast on yourself before someone does it for clout.
@@ -44,7 +46,15 @@ Install once. It lands in every coding agent the [Skills CLI](https://github.com
 npx skills add pedroknigge/vibe-proof-auditor -g -y
 ```
 
-`-g` = global (home directory, every project). Omit it to install only in the current repo. `-y` skips prompts. The CLI auto-detects installed agents and **symlinks** them to one copy, so updates are a single pull.
+Antigravity (`agy`) often needs explicit agents — `npx skills` can miss `antigravity-cli`:
+
+```bash
+npx skills add pedroknigge/vibe-proof-auditor -g -y -a antigravity -a antigravity-cli
+# or close the gap without the skills CLI:
+./install.sh
+```
+
+`-g` = global (home directory, every project). Omit it to install only in the current repo. `-y` skips prompts. The CLI auto-detects installed agents and **symlinks** them to one copy, so updates are a single pull. `./install.sh` always lands the skill in `~/.agents/skills` plus the Gemini/Antigravity trees (`config/skills`, `antigravity-cli/skills`, `antigravity/skills`) so you do not hand-symlink for `agy`.
 
 This repo is a valid Agent Skill (`SKILL.md` at the root) per [agentskills.io](https://agentskills.io/specification).
 
@@ -71,6 +81,16 @@ In any supported agent:
 - “production checklist”
 
 Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
+
+After an audit, harden without pasting the remediation prompt by hand into Antigravity:
+
+```bash
+python3 -m vibe_proof_auditor.harden_agy ./vibe-proof-audit-report.md
+# preview only:
+python3 -m vibe_proof_auditor.harden_agy ./vibe-proof-audit-report.md --dry-run
+```
+
+Or tell the agent: “harden with agy”. That runs the report’s Remediation Prompt via `agy -p --add-dir <project>`.
 
 Every pass writes markdown + JSON at the project root (HTML opens only on an interactive TTY):
 
@@ -108,13 +128,16 @@ vibe-proof-auditor/
 │   ├── scorelib.py               # Weights, floors, verdict math
 │   ├── validate-report.py        # Census / scores / verdict; --json --sarif
 │   ├── compare-eval.py           # expected.json vs report JSON; --baseline
-│   └── render-report.py          # Markdown → HTML (no scores)
+│   ├── render-report.py          # Markdown → HTML (no scores)
+│   └── harden_agy.py             # Remediation Prompt → agy -p
+├── install.sh                    # Agents + Antigravity (agy) skill dirs
 ├── evals/                        # Planted fixtures + expected manifests
 ├── tests/
 │   ├── test_render_report.py
 │   ├── test_scorelib.py
 │   ├── test_validate_report.py
-│   └── test_export_and_eval.py
+│   ├── test_export_and_eval.py
+│   └── test_harden_agy.py
 ├── references/
 │   ├── checklist.md              # Scored items (only home)
 │   ├── gates.md                  # Verdicts and production gates
@@ -125,7 +148,8 @@ vibe-proof-auditor/
 ├── docs/adr/
 │   └── 0001-html-render-does-not-score.md
 └── assets/
-    └── checklist-template.md     # Cover sheet (not a second item list)
+    ├── checklist-template.md     # Cover sheet (not a second item list)
+    └── maintenance-policy-template.md  # Stranger-handoff starter
 ```
 
 Python **3.9+**. The renderer is stdlib only.
@@ -153,6 +177,7 @@ python3 -m unittest discover -s tests -v
 | One worked report | `references/example-report.md` (`docs/example-report.html`) |
 | Planted evals | `evals/` |
 | JSON / SARIF / baseline | `vibe_proof_auditor/validate_report.py`, `vibe_proof_auditor/compare_eval.py` |
+| Harden via Antigravity (`agy`) | `vibe_proof_auditor/harden_agy.py`, `./install.sh` |
 
 ## Related skills
 

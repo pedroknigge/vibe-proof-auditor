@@ -1,6 +1,16 @@
 # Changelog
 
-Public numbering is **0.6.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+Public numbering is **0.7.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+
+## 0.7.0
+
+- Maintainability dunk pack (**additive**, not only rewrites): stranger handoff, onboarding, maintenance policy, ownership map, accidental complexity, rebuild-trap; Architecture state ownership + complexity-matches-problem; Process README-commands-run + iterative delivery; Product who-it's-for + landing-over-product; Comprehension failure-mode findability.
+- **Aggregate write boundary** (Adrian Nuske / DDD dunk): durable writes through an aggregate root; finding id `aggregate-bypass`. Checklist growth rule: repeated dunks improve a row; new dunks add a row.
+- New Extra: **Handoff readiness** (report-only). New recommended gate: Maintainability / stranger handoff. Finding-id vocabulary in `references/checklist.md`. Asset: `assets/maintenance-policy-template.md`.
+- Maintainability weight **1.0 → 1.3** (weight sum **12.1**). ForgeBoard overall still **5.9**.
+- Principles + README: shipping is the easy part — score whether someone who didn’t write it can still change it.
+- **Antigravity (`agy`) harness + harden:** `./install.sh` lands the skill in `~/.gemini/config/skills`, `antigravity-cli/skills`, and `antigravity/skills` (no manual symlink). `python3 -m vibe_proof_auditor.harden_agy REPORT.md` runs the Remediation Prompt via `agy -p`. Skill trigger: harden / agy / antigravity.
+- Description and H1 lead with full semver (`v0.7.0`); report header includes **Skill version**.
 
 ## 0.6.0
 

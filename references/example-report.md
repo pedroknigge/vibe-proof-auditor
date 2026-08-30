@@ -2,6 +2,7 @@
 
 **Project:** `/Users/demo/forgeboard`  
 **Date:** 2026-08-24  
+**Skill version:** 0.7.0  
 **Mode:** Production  
 **Audit mode:** Deep  
 **Product type:** `saas-multi-tenant`  
@@ -34,32 +35,32 @@ Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict 
 | Category | Pass | Partial | Fail | insufficient evidence | N/A | Critical Fail | Score |
 |----------|------|---------|------|----------------------|-----|---------------|-------|
 | 1. Security | 14 | 4 | 6 | 1 | 3 | yes | 4 |
-| 2. Comprehension | 4 | 0 | 2 | 0 | 0 | no | 7 |
+| 2. Comprehension | 5 | 0 | 2 | 0 | 0 | no | 7 |
 | 3. Testing | 3 | 2 | 3 | 0 | 0 | yes | 5 |
-| 4. Architecture | 5 | 3 | 1 | 0 | 0 | no | 7 |
-| 5. Maintainability | 3 | 4 | 1 | 0 | 0 | no | 6 |
+| 4. Architecture | 6 | 5 | 2 | 0 | 0 | no | 7 |
+| 5. Maintainability | 4 | 6 | 2 | 0 | 0 | no | 6 |
 | 6. Error handling | 4 | 3 | 1 | 0 | 0 | no | 7 |
 | 7. Performance | 3 | 3 | 1 | 0 | 0 | no | 6 |
 | 8. Dependencies | 5 | 1 | 1 | 0 | 0 | no | 8 |
-| 9. Process / environments | 3 | 3 | 1 | 0 | 0 | no | 6 |
-| 10. Product / scope | 1 | 3 | 1 | 0 | 0 | no | 5 |
+| 9. Process / environments | 3 | 4 | 2 | 0 | 0 | no | 6 |
+| 10. Product / scope | 1 | 5 | 1 | 0 | 0 | no | 5 |
 
-Known marks 89 + 1 insufficient → coverage 99%. Score column is after floors.
+Known marks 102 + 1 insufficient → coverage 99%. Score column is after floors.
 
 ## Category Scores
 
 | Category | Score | Status | Notes |
 |----------|-------|--------|-------|
 | 1. Security | 4 | Fail | Critical AuthZ Fail; floor applied (`references/scoring.md`) |
-| 2. Comprehension | 7 | Partial | README flow; 912-line `sync.ts` |
+| 2. Comprehension | 7 | Partial | README flow; 912-line `sync.ts`; debug path thin |
 | 3. Testing | 5 | Fail | Critical isolation-test and edge/error-path Fail |
-| 4. Architecture | 7 | Partial | Clear folders; tenant column unused |
-| 5. Maintainability | 6 | Partial | God file; untracked TODOs |
+| 4. Architecture | 7 | Partial | Folders ok; state unclear; `aggregate-bypass` |
+| 5. Maintainability | 6 | Partial | God file; stranger handoff Fail; no maintenance policy |
 | 6. Error handling | 7 | Partial | No user-facing stacks; reconnect logs, no retry |
 | 7. Performance | 6 | Partial | N+1 on task comments |
 | 8. Dependencies | 8 | Pass | Lockfile, no hallucinated packages |
-| 9. Process / environments | 6 | Partial | Preview + prod; rollback via Vercel |
-| 10. Product / scope | 5 | Partial | MVP named; no user evidence in-tree |
+| 9. Process / environments | 6 | Partial | Preview + prod; README commands not all proven |
+| 10. Product / scope | 5 | Partial | MVP named; who-for weak; no user evidence |
 
 ## Production Gates
 
@@ -73,6 +74,7 @@ Known marks 89 + 1 insufficient → coverage 99%. Score column is after floors.
 | Dependency audit | Pass | `package-lock.json`; `npm audit` in CI; 11 runtime deps |
 | Minimal docs | Pass | README runbook exists; env vars listed |
 | Basic observability | Fail | `console.log` only; no request ids, metrics, or alerts |
+| Maintainability / stranger handoff | Fail | Maintainability score 6 meets floor, but `stranger-handoff` Fail on `src/lib/sync.ts` (912-line dump; no traced critical-path walkthrough) |
 
 ## Findings
 
@@ -81,6 +83,12 @@ Known marks 89 + 1 insufficient → coverage 99%. Score column is after floors.
 | idor | Fail | `app/api/tasks/[id]/route.ts` | GET/PATCH/DELETE by id, no org_id |
 | rls-open | Fail | `supabase/migrations/0001_init.sql` | no ENABLE ROW LEVEL SECURITY |
 | isolation-tests | Fail | `__tests__/` | no user A vs user B |
+| aggregate-bypass | Fail | `app/api/tasks/[id]/route.ts` | route writes task/comment rows; no aggregate root |
+| stranger-handoff | Fail | `src/lib/sync.ts` | 912-line god file; stranger would rewrite |
+| state-orphan | Partial | `src/lib/sync.ts` | client + sync + Postgres; no state ownership note |
+| rebuild-trap | Partial | `src/lib/sync.ts` | next rational move is split-or-rewrite |
+| maintenance-policy-missing | Fail | _(absent)_ | no CONTRIBUTING / release runbook |
+| landing-over-product | Partial | `README.md` | MVP named; no user evidence |
 
 ## Category Detail
 
@@ -135,15 +143,15 @@ Fix: two seeded orgs; assert 404/403 on cross-org GET/PATCH/DELETE; add webhook 
 
 ### 4. Architecture — 7/10 (Partial)
 
-Evidence: `app/api/` vs `src/lib/` separation. `tasks.org_id` exists but is not consulted in handlers. Server Actions and REST handlers duplicate writes.
+Evidence: `app/api/` vs `src/lib/` separation. `tasks.org_id` exists but is not consulted in handlers. Server Actions and REST handlers duplicate writes. Client + `sync.ts` + Postgres share task state with no single ownership note (Partial on “where state lives”). Fail: `aggregate-bypass` — task and comment rows are written from route handlers with no aggregate root enforcing invariants.
 
-Fix: one repository module that always filters by `org_id`; delete the duplicate Server Action path.
+Fix: one repository/aggregate module that always filters by `org_id` and owns task+comment writes; delete the duplicate Server Action path; document state homes in the README architecture section.
 
 ### 5. Maintainability — 6/10 (Partial)
 
-Evidence: consistent Prettier/TS. `src/lib/sync.ts` god file. `TODO: fix later` in `src/lib/billing.ts` with no ticket.
+Evidence: consistent Prettier/TS. Pass: naming, onboarding README exists. Partial: god-file size, debt untracked, accidental complexity (duplicate Server Action + REST writes). Fail: `stranger-handoff` on `src/lib/sync.ts`; `maintenance-policy-missing` (no CONTRIBUTING / release runbook).
 
-Fix: split sync; file the billing TODO or delete the dead path.
+Fix: split sync; add CONTRIBUTING with change + release steps; traced walkthrough of create→list→sync; file or delete billing TODO.
 
 ### 6. Error handling — 7/10 (Partial)
 
@@ -175,15 +183,16 @@ Fix: protect `main`; require CI + one review.
 
 ### 10. Product / scope — 5/10 (Partial)
 
-Evidence: README claims “MVP: shared task board”. No interviews, metrics, or cut-list in-tree. `src/lib/billing.ts` is an unused Stripe sketch.
+Evidence: README claims “MVP: shared task board”. No interviews, metrics, or cut-list in-tree. `src/lib/billing.ts` is an unused Stripe sketch. Landing copy in README outruns any user validation (Partial on marketing-vs-problem).
 
-Fix: delete or hide billing until a written MVP check passes.
+Fix: delete or hide billing until a written MVP check passes; record one real-user note before more surface polish.
 
 ## Extras (not in overall)
 
 | Extra | Score | Notes |
 |-------|-------|-------|
-| Data model / migrations | 5 | Schema versioned (Pass); no down migrations (Partial); restorable backup Fail (`vercel rollback` is not a DB backup) |
+| Handoff readiness | 4 | No stranger walkthrough; no failure runbook; debt unowned; rewrite is the silent default on `sync.ts` |
+| Data model / migrations | 4 | Schema versioned (Pass); no down migrations (Partial); restorable backup Fail; invariants not on write path (Partial, aligns with `aggregate-bypass`) |
 | Docs | 6 | README run/env; no ownership diagram |
 | Mobile / responsive | 5 | Tailwind; no tested breakpoint below `md` |
 | Accessibility | 4 | Icon buttons without names in `TaskRow.tsx` |
@@ -194,6 +203,8 @@ Fix: delete or hide billing until a written MVP check passes.
 **P0 — anyone can open someone else's task.** The API loads a task by `id` and never checks org. A logged-in user who guesses (or lists) another org's id can read and edit it. That screenshot is the classic IDOR dunk. Ignore it and you leak customer data the day you have two tenants. Tell the model: *filter every task/comment query by `org_id` from the verified session, enable RLS with the same rule, private bucket + signed URLs.*
 
 **P0 — you never proved user A can't see user B.** Happy-path tests exist. There is no test with two orgs. Seniors will say you only tested the demo. Without that test, the IDOR fix can regress next week. Tell the model: *two seeded orgs; A gets 403/404 on B's GET/PATCH/DELETE; fail CI if that fails.*
+
+**P1 — six months later, who maintains `sync.ts`?** Shipping was easy. The 912-line dump is the handoff dunk: a stranger's rational move is rebuild. No CONTRIBUTING, no ownership map, no walkthrough. Tell the model: *split realtime/cache/billing; add a critical-path walkthrough; write a one-page maintenance policy.*
 
 **P1 — the list endpoint queries comments once per row.** Works with 10 tasks. Falls over with 500. Tell the model: *one query for comments; paginate `/api/tasks`.*
 

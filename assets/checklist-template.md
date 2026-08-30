@@ -41,6 +41,7 @@ Gates / verdict words / stage notes: `references/gates.md`
 
 | Extra | Score | Notes |
 |-------|-------|-------|
+| Handoff readiness | | |
 | Data model / migrations | | |
 | Docs | | |
 | Mobile / responsive | | |
@@ -61,6 +62,7 @@ Fill from `references/gates.md` only. Do not invent rows or verdict words.
 | Dependency audit (recommended) | | |
 | Minimal docs (recommended) | | |
 | Basic observability (recommended) | | |
+| Maintainability / stranger handoff (recommended) | | |
 
 **Overall score:** __._ / 10  _(formula: `references/scoring.md`)_  
 **Status:** _(exact strings: `references/gates.md`)_  

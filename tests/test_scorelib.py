@@ -108,7 +108,7 @@ class ScorelibTests(unittest.TestCase):
         ):
             found[m.group(1).strip().lower()] = float(m.group(2))
         self.assertEqual(found, scorelib.WEIGHTS)
-        self.assertAlmostEqual(sum(scorelib.WEIGHTS.values()), 11.8)
+        self.assertAlmostEqual(sum(scorelib.WEIGHTS.values()), 12.1)
 
     def test_floors_named_in_scoring_md(self) -> None:
         self.assertIn("cap Security at 4", SCORING)

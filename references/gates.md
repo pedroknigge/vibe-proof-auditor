@@ -70,6 +70,7 @@ These never produce `BLOCKED FOR PRODUCTION` by themselves:
 - Dependency audit (lockfile, no known critical CVEs, no hallucinated packages).
 - Minimal docs (README **or equivalent** onboarding hub: what it is, how to run, env vars — `AGENTS.md` + `.env.example` counts if a newcomer can start without hunting).
 - Basic observability (structured logs at least).
+- Maintainability / stranger handoff (Maintainability score ≥ 6 **and** stranger-handoff is not Fail when applicable — README + critical-path trace + change safety net). Six-month maintainability is scored and recommended, not an absolute gate. Do not Fail this gate because a human was not interviewed.
 
 Report them in the gates table as Pass / Fail / N/A. They may contribute to `NEEDS HARDENING` only through category scores, not as extra verdict vocabulary.
 
@@ -113,4 +114,4 @@ After Status, copy **one** stage note from this table. Do not paraphrase.
 
 ## Report table
 
-Use the report format in `SKILL.md`. Header includes `Stage note` (exact string from the table above). Rows: the four absolute gates, then the four recommended gates. Status per row: Pass / Fail / N/A plus evidence paths.
+Use the report format in `SKILL.md`. Header includes `Stage note` (exact string from the table above). Rows: the four absolute gates, then the five recommended gates. Status per row: Pass / Fail / N/A plus evidence paths.

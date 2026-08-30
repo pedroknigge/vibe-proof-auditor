@@ -8,15 +8,15 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 
-# Must match references/scoring.md weight table (sum 11.8).
+# Must match references/scoring.md weight table (sum 12.1).
 WEIGHTS: dict[str, float] = {
     "security": 2.0,
     "comprehension": 1.0,
     "testing": 1.5,
     "architecture": 1.3,
-    "maintainability": 1.0,
+    "maintainability": 1.3,
     "error handling": 1.0,
     "performance": 1.0,
     "dependencies": 1.0,

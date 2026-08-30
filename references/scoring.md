@@ -10,19 +10,20 @@ Single home for **weights**, **formula**, **critical floors**, **scale**, **prod
 | 2 | Comprehension | 1.0 |
 | 3 | Testing | 1.5 |
 | 4 | Architecture | 1.3 |
-| 5 | Maintainability | 1.0 |
+| 5 | Maintainability | 1.3 |
 | 6 | Error handling | 1.0 |
 | 7 | Performance | 1.0 |
 | 8 | Dependencies | 1.0 |
 | 9 | Process / environments | 1.0 |
 | 10 | Product / scope | 1.0 |
 
-Sum of weights = **11.8**.
+Sum of weights = **12.1**.
 
 ## Extras (report only)
 
 Score for the report, **exclude from overall**:
 
+- Handoff readiness
 - Data model / migrations
 - Docs
 - Mobile / responsive
@@ -68,7 +69,7 @@ Floors cap; they never raise a score.
 
 `overall = Σ(weight_i × category_score_i) / D` to **one decimal** (half up).
 
-`D = 11.8` when all ten categories are applicable. If a category is fully N/A, `D` is 11.8 minus that category’s weight.
+`D = 12.1` when all ten categories are applicable. If a category is fully N/A, `D` is 12.1 minus that category’s weight.
 
 Do not include extras in `D` or the numerator.
 
@@ -138,16 +139,16 @@ Other category scores: Comprehension 7, Architecture 7, Maintainability 6, Error
 | Comprehension | 7 | 1.0 | 7.0 |
 | Testing | 5 | 1.5 | 7.5 |
 | Architecture | 7 | 1.3 | 9.1 |
-| Maintainability | 6 | 1.0 | 6.0 |
+| Maintainability | 6 | 1.3 | 7.8 |
 | Error handling | 7 | 1.0 | 7.0 |
 | Performance | 6 | 1.0 | 6.0 |
 | Dependencies | 8 | 1.0 | 8.0 |
 | Process / environments | 6 | 1.0 | 6.0 |
 | Product / scope | 5 | 1.0 | 5.0 |
-| **Sum** | | **11.8** | **69.6** |
+| **Sum** | | **12.1** | **71.4** |
 
-`overall = 69.6 / 11.8 = 5.898…` → **5.9**
+`overall = 71.4 / 12.1 = 5.900…` → **5.9**
 
-Extras (excluded): Data model 5 (schema Pass, destructive Partial, restorable backup Fail — Vercel rollback is not a DB backup), Docs 6, Mobile 5, Accessibility 4, Observability 5.
+Extras (excluded): Handoff readiness 4, Data model 4 (schema Pass, destructive Partial, restorable backup Fail — Vercel rollback is not a DB backup; invariants not on write path), Docs 6, Mobile 5, Accessibility 4, Observability 5.
 
 Verdict and stage note: apply `references/gates.md` (absolute Security and Testing fail).

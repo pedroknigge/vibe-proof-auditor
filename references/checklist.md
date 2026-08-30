@@ -2,6 +2,8 @@
 
 Single home for **scored items**. Do not copy this list into `assets/checklist-template.md` (that file is a cover: metadata, score table, gates). Marks: Pass / Partial / Fail / N/A. Numeric mapping, floors, and N/A matrix: `references/scoring.md`. Verdicts and gate thresholds: `references/gates.md`. Security expansion (grep playbook): `references/security-deep.md`.
 
+**Growth rule:** this list is allowed to grow. A repeated dunk **improves** an existing row. A new dunk **adds** a row. Do not refuse a real production dunk because the list feels long enough.
+
 **Critical** items are marked `[C]`. Floors: `references/scoring.md` (do not restate them here).
 
 **Evidence:** paths, snippets, or absence. Absence of a required, applicable control is Fail. Tool failure is `insufficient evidence`, not a critical Fail. Human-interview items are listed separately: `not assessed` if unasked — never Fail, never a gate.
@@ -72,14 +74,16 @@ Score only what the tree shows. Do not Fail this category because a human was no
 - [ ] No unexplained god files hiding the critical path.
 - [ ] Critical features have a documented or easily traced in-tree walkthrough.
 - [ ] Connections between pieces are visible without a human narrator.
+- [ ] Failure modes of the critical path are findable from the tree (logs, errors, or a short debug note) without the author on call.
 
 ### Human interview (not scored / not a gate)
 
 Mark `not assessed` unless the user was actually asked. Never Fail a gate on these.
 
 - [ ] Author can explain the architecture and main flow in under 3 minutes without the AI.
-- [ ] AI-generated diffs were read and understood before accept.
+- [ ] AI-generated diffs were read and understood before accept (not “it looks done”).
 - [ ] A human can debug a critical flow without 100% AI dependence.
+- [ ] “It works” was not treated as “it’s ready” — tests or equivalent were run before calling it shippable.
 
 ---
 
@@ -98,28 +102,43 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 
 ## 4. Architecture
 
-- [ ] Minimal spec or design in-tree before large features.
+- [ ] Minimal spec or design in-tree before large features (not one-shot “build the whole product”).
 - [ ] Clear separation of concerns (domain vs infrastructure, modules, layers).
 - [ ] Features are not stacked at random (no accretion-only design).
+- [ ] Where state lives is explicit: client / server / durable store — not inferred from a finished-looking UI. **Fail** if critical state has no owner and no single home in the tree. Finding id: `state-orphan`.
 - [ ] Data model is consistent (no improvised field drift).
 - [ ] Data flows are documented or easily traced.
 - [ ] Naming, folder structure, and patterns are followed.
 - [ ] No serious circular dependencies.
-- [ ] Extensible without a rewrite of the core.
+- [ ] Complexity matches the problem (no premature microservices / event-bus / distributed theater for a simple MVP). **Partial** if the stack is heavier than the stated problem; **Fail** if the complexity is the product.
+- [ ] Durable writes go through an **aggregate root** (or one clear transactional write boundary per business entity). Dependent entities are persisted only through that root; invariants are enforced there — not in the route, the UI, or a random util. **Fail** if handlers/adapters write child tables directly and bypass the root. Finding id: `aggregate-bypass`. N/A if the product has no durable business writes (typical `cli` / `library` / static / docs-only).
+- [ ] One aggregate (or write boundary) per business entity; adapters may wrap external deps, but DB writes are not scattered across features. **Partial** if only some entities obey it; **Fail** if every feature opens the DB and writes whatever it wants.
+- [ ] Extensible without a rewrite of the core. **Fail** if the realistic next step for a stranger is “rebuild,” not change.
 - [ ] Important decisions recorded (short ADRs or equivalent).
 
 ---
 
 ## 5. Maintainability
 
+Shipping is the easy part. Score whether someone who **did not write this** can still change it six months later.
+
 - [ ] Readable, consistent style and patterns.
 - [ ] Clear naming.
 - [ ] Reasonable function/module size (no god classes / god files).
 - [ ] No critical “TODO: fix later” without a ticket or context.
-- [ ] Refactor is possible without fear of silent breakage.
-- [ ] New-developer onboarding is viable from the tree (README + layout).
+- [ ] Refactor is possible without fear of silent breakage. **Pass** needs a safety net on the critical path (tests or equivalent). Demo-only confidence is **Fail**.
+- [ ] New-developer onboarding is viable from the tree (README + layout + how to run).
+- [ ] Stranger handoff: a developer who did not author the code can find and change a critical path from the tree alone (README + layout + traced flow). **Fail** if the only workable path is the original chat thread or “ask the model that wrote it.” Finding id: `stranger-handoff`.
+- [ ] Maintenance policy in-tree: how to change, how to release, and what “done” means after the first ship (CONTRIBUTING, runbook, or equivalent). Finding id: `maintenance-policy-missing`.
+- [ ] Ownership of critical modules is visible (CODEOWNERS, OWNERS, or a short ownership map). N/A for solo prototypes with no shared repo claim.
+- [ ] Accidental complexity controlled: no duplicate write paths, dead feature sketches, or unjustified abstraction layers as the main surface. AI-sped delivery is not an excuse for two systems that do one job.
 - [ ] Technical debt is tracked (issues, ADRs, or an in-tree list).
-- [ ] No unreadable generated slop as the main implementation.
+- [ ] No unreadable generated slop as the main implementation (model dump that cannot be maintained without the original prompt history). Finding id: `rebuild-trap` when a stranger’s rational move is rewrite.
+
+### Human interview (not scored / not a gate)
+
+- [ ] Author believes a stranger could maintain this six months later without a full rewrite.
+- [ ] Author can name who owns each critical module (even if “me, solo”).
 
 ---
 
@@ -170,7 +189,9 @@ Repo-evidence only for scored items.
 - [ ] Rollback path for data-critical systems (docs, scripts, or platform config).
 - [ ] Code review required before merge to the default branch.
 - [ ] Branch protection + CI (tests, lint, security scans) on the default branch.
-- [ ] Changes land as small reviewed diffs (no unreviewed mass rewrites as the norm).
+- [ ] Changes land as small reviewed diffs (no unreviewed mass rewrites as the norm). Finding id: `one-shot-dump` when history is one mega-commit that drops the app.
+- [ ] Claimed install / run / test commands from README (or equivalent) were executed in this audit snapshot and exited 0 — or failure is recorded as evidence. **Fail** if the docs promise a command that was never run and cannot be shown to work. Tool missing → `insufficient evidence`.
+- [ ] Iterative delivery evidence: features land in steps with verification between them (commits, PRs, or changelog), not one prompt → whole product.
 
 ### Human interview (not scored / not a gate)
 
@@ -182,10 +203,12 @@ Repo-evidence only for scored items.
 
 Score from the tree (README, spec, issues, changelog). Missing product evidence is Partial, not a security Fail.
 
+- [ ] Target user and problem stated in-tree (who it is for, what pain). **Fail** if the tree never says who it solves for.
 - [ ] Validated with real users or strong in-tree evidence before overbuilding.
-- [ ] MVP defined and respected.
+- [ ] MVP defined and respected (one small problem first — not “build everything at once”).
 - [ ] New features justified (issue, spec, or README).
 - [ ] Scope creep controlled (no infinite “one more feature” log without cuts).
+- [ ] Marketing / landing polish does not dominate the tree while the core problem is still unproven. **Partial** if the landing is the product; **Fail** if there is no in-tree evidence of the actual problem being solved. Finding id: `landing-over-product`.
 - [ ] Success metrics defined.
 
 ---
@@ -194,11 +217,21 @@ Score from the tree (README, spec, issues, changelog). Missing product evidence 
 
 Same marks. Category scores optional. Excluded from overall: `references/scoring.md`.
 
+### Handoff readiness
+
+Six-month test. Score for the report; does not change overall or absolute gates.
+
+- [ ] Critical-path walkthrough a stranger can follow without the author.
+- [ ] Top failure modes have a runbook or equivalent (what breaks, how to see it, how to recover).
+- [ ] Debt list with owners or dates (not only “TODO later”).
+- [ ] “Rebuild vs refactor” is an explicit decision when a module is past recovery — not the silent default.
+
 ### Data model / migrations
 
 - [ ] Schema is versioned (migrations or equivalent).
 - [ ] Destructive changes are explicit and reversible when data is critical.
 - [ ] Restorable backup for data-critical systems, distinct from platform deploy rollback (Vercel/Heroku/image rollback is not a database backup). N/A if no durable user data.
+- [ ] Critical entity invariants live on the write path (aggregate / domain), not only as UI validation. N/A if no durable business writes. Aligns with Architecture `aggregate-bypass`.
 
 ### Docs
 
@@ -217,3 +250,25 @@ Same marks. Category scores optional. Excluded from overall: `references/scoring
 
 - [ ] Structured logs.
 - [ ] Metrics and alerts for critical paths when the system is deployed. N/A for `skill/docs`.
+
+---
+
+## Common finding IDs
+
+Use these ids in the Findings table when the dunk matches. Security ids also live in `references/security-deep.md`.
+
+| ID | Typical mark | Means |
+|----|--------------|-------|
+| `stranger-handoff` | Fail / Partial | Only the original author or chat thread can change the critical path |
+| `state-orphan` | Fail / Partial | UI looks done; no owner for client / server / durable state |
+| `aggregate-bypass` | Fail / Partial | DB writes skip the aggregate root / write boundary; children written from routes/adapters |
+| `rebuild-trap` | Fail | Rational next step for a stranger is rewrite, not refactor |
+| `maintenance-policy-missing` | Fail / Partial | No in-tree how-to-change / how-to-release after first ship |
+| `one-shot-dump` | Fail / Partial | One mega-commit or one prompt dropped the whole app |
+| `landing-over-product` | Fail / Partial | Marketing surface dominates; problem unproven |
+| `idor` | Fail | Object-level AuthZ missing |
+| `isolation-tests` | Fail | No user A vs user B proof |
+| `rls-open` | Fail | Datastore rules missing or open |
+| `client-bundle-secret` | Fail | Server secret in shipped client |
+| `localstorage-jwt` | Fail | Session readable from JS |
+| `ignore-build-errors` | Fail | Build/lint errors ignored to ship the demo |

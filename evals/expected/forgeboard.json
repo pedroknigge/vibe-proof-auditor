@@ -5,6 +5,8 @@
   "must_find": [
     {"id": "idor", "path_substr": "api/tasks", "mark": "Fail"},
     {"id": "rls-open", "path_substr": "0001_init.sql", "mark": "Fail"},
-    {"id": "isolation-tests", "path_substr": "__tests__", "mark": "Fail"}
+    {"id": "isolation-tests", "path_substr": "__tests__", "mark": "Fail"},
+    {"id": "stranger-handoff", "path_substr": "sync.ts", "mark": "Fail"},
+    {"id": "maintenance-policy-missing", "path_substr": "absent", "mark": "Fail"}
   ]
 }

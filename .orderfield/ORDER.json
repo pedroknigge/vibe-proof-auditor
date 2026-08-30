@@ -1,7 +1,7 @@
 {
   "v": 1,
   "id": "ord_77167110",
-  "rev": 5,
+  "rev": 7,
   "mission": "Analizar el repositorio, proponer mejoras, aplicar las mejoras y publicar en GitHub",
   "phase": "deliver",
   "done_when": [
@@ -9,7 +9,14 @@
   ],
   "constraints": [
     "slaves do not mutate ORDER",
-    "one phase at a time"
+    "one phase at a time",
+    "The decoupling mechanism guards boundaries: all concrete types inside business logic and inter-feature dependencies must be resolved by the decoupling mechanism.",
+    "Features never share dependencies directly; they communicate exclusively through their composition root.",
+    "All external dependencies must have adapters registered in the decoupling mechanism, named [fileName].adapter.ts, located in a feature's /Externals directory.",
+    "Each feature must have an admision.ts file resolving its business objects and external adapters (conditionally for local-dev infra adapters: [name].adapter.dev.ts).",
+    "Writes to the database must exclusively happen through an AGGREGATE root. Each dependency has its own adapter, but writes are strictly through aggregates.",
+    "One aggregate per business entity; dependent entities are saved only through the aggregate root, strictly enforcing invariants.",
+    "Strict rules (decoupling boundaries, aggregates, adapters, admision.ts) apply primarily to new features and those directly related to them."
   ],
   "workspace": {
     "readable": [

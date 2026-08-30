@@ -78,7 +78,7 @@ Every pass writes markdown + JSON at the project root (HTML opens only on an int
 - `vibe-proof-audit-report.json` — computed scores / gates / findings
 - `vibe-proof-audit-report.html` — styled twin
 
-`scripts/validate-report.py` recomputes the math. `--sarif` is optional. `scripts/compare-eval.py --baseline` diffs new Fail rows. Say `professional` for a sober **Why this matters** section.
+`vibe_proof_auditor/validate_report.py` recomputes the math. `--sarif` is optional. `vibe_proof_auditor/compare_eval.py --baseline` diffs new Fail rows. Say `professional` for a sober **Why this matters** section.
 
 Planted fixtures: `evals/`. Worked HTML: `docs/example-report.html`.
 
@@ -104,7 +104,7 @@ vibe-proof-auditor/
 ├── README.md
 ├── CHANGELOG.md
 ├── LICENSE
-├── scripts/
+├── vibe_proof_auditor/
 │   ├── scorelib.py               # Weights, floors, verdict math
 │   ├── validate-report.py        # Census / scores / verdict; --json --sarif
 │   ├── compare-eval.py           # expected.json vs report JSON; --baseline
@@ -131,7 +131,7 @@ vibe-proof-auditor/
 Python **3.9+**. The renderer is stdlib only.
 
 ```bash
-python3 -m py_compile scripts/scorelib.py scripts/validate-report.py scripts/compare-eval.py scripts/render-report.py
+python3 -m py_compile vibe_proof_auditor/scorelib.py vibe_proof_auditor/validate_report.py vibe_proof_auditor/compare_eval.py vibe_proof_auditor/render_report.py
 python3 -m unittest discover -s tests -v
 ```
 
@@ -146,13 +146,13 @@ python3 -m unittest discover -s tests -v
 | Scored items and human-interview (unscored) items | `references/checklist.md` (only home; the template is a cover) |
 | Security grep playbook | `references/security-deep.md` |
 | Report format | `SKILL.md` |
-| HTML render | `scripts/render-report.py` |
+| HTML render | `vibe_proof_auditor/render_report.py` |
 | HTML render does not score | `docs/adr/0001-html-render-does-not-score.md` |
-| Validator recomputes scores / verdict | `scripts/validate-report.py` (`docs/adr/0002-validator-checks-math.md`) |
+| Validator recomputes scores / verdict | `vibe_proof_auditor/validate_report.py` (`docs/adr/0002-validator-checks-math.md`) |
 | Evidence coverage, insufficient-evidence mark | `references/scoring.md` |
 | One worked report | `references/example-report.md` (`docs/example-report.html`) |
 | Planted evals | `evals/` |
-| JSON / SARIF / baseline | `scripts/validate-report.py`, `scripts/compare-eval.py` |
+| JSON / SARIF / baseline | `vibe_proof_auditor/validate_report.py`, `vibe_proof_auditor/compare_eval.py` |
 
 ## Related skills
 

@@ -10,14 +10,15 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "render-report.py"
+SCRIPT = ROOT / "vibe_proof_auditor" / "render_report.py"
 EXAMPLE = ROOT / "references" / "example-report.md"
 
 
 def run(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), *args],
+        [sys.executable, "-m", f"vibe_proof_auditor.{SCRIPT.stem}", *args],
         capture_output=True,
+        env={"PYTHONPATH": str(ROOT), **__import__("os").environ},
         text=True,
         check=False,
     )

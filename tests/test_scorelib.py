@@ -9,8 +9,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
-import scorelib  # noqa: E402
+sys.path.insert(0, str(ROOT))
+from vibe_proof_auditor import scorelib  # noqa: E402
 
 SCORING = (ROOT / "references" / "scoring.md").read_text(encoding="utf-8")
 GATES = (ROOT / "references" / "gates.md").read_text(encoding="utf-8")

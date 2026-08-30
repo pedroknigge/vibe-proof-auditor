@@ -11,16 +11,17 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VALIDATE = ROOT / "scripts" / "validate-report.py"
-COMPARE = ROOT / "scripts" / "compare-eval.py"
+VALIDATE = ROOT / "vibe_proof_auditor" / "validate_report.py"
+COMPARE = ROOT / "vibe_proof_auditor" / "compare_eval.py"
 EXAMPLE = ROOT / "references" / "example-report.md"
 FORGE = ROOT / "evals" / "expected" / "forgeboard.json"
 
 
 def run(script: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(script), *args],
+        [sys.executable, "-m", f"vibe_proof_auditor.{script.stem}", *args],
         capture_output=True,
+        env={"PYTHONPATH": str(ROOT), **__import__("os").environ},
         text=True,
         check=False,
     )

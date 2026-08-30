@@ -9,17 +9,30 @@ permissions:
   contents: read
 
 jobs:
-  renderer:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov mypy ruff
+      - name: Lint with ruff
+        run: ruff check vibe_proof_auditor tests
+      - name: Format check with ruff
+        run: ruff format --check vibe_proof_auditor tests
+      - name: Type check with mypy
+        run: mypy vibe_proof_auditor tests
       - name: Compile
-        run: python3 -m py_compile scripts/scorelib.py scripts/validate-report.py scripts/compare-eval.py scripts/render-report.py
-      - name: Test
-        run: python3 -m unittest discover -s tests -v
+        run: python3 -m py_compile vibe_proof_auditor/*.py
+      - name: Test with pytest
+        run: PYTHONPATH=. pytest --cov=vibe_proof_auditor tests/ -v
 
   gitleaks:
     runs-on: ubuntu-latest

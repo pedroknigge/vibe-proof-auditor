@@ -1,0 +1,50 @@
+{
+  "v": 1,
+  "id": "ord_77167110",
+  "rev": 5,
+  "mission": "Analizar el repositorio, proponer mejoras, aplicar las mejoras y publicar en GitHub",
+  "phase": "deliver",
+  "done_when": [
+    "current phase criteria closed with evidence"
+  ],
+  "constraints": [
+    "slaves do not mutate ORDER",
+    "one phase at a time"
+  ],
+  "workspace": {
+    "readable": [
+      ".orderfield/ORDER.json",
+      "."
+    ],
+    "writable_by_slaves": [
+      ".orderfield/work/scratch/"
+    ],
+    "forbidden": [
+      ".orderfield/ORDER.json",
+      ".orderfield/state.json"
+    ]
+  },
+  "thresholds": {
+    "tool_failures": 2,
+    "divergence": 0.4,
+    "local_budget_pct": 80,
+    "novelty": true
+  },
+  "caps": {
+    "max_children": 4,
+    "max_depth": 2,
+    "max_across_per_wave": 1,
+    "cooldown_waves_after_across": 1
+  },
+  "enabled_regimes": [
+    "escalate_up",
+    "scale_out",
+    "scale_across",
+    "scale_up",
+    "human",
+    "hold",
+    "phase"
+  ],
+  "done_when_closed": false,
+  "notes": ""
+}

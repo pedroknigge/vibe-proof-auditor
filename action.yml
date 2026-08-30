@@ -27,4 +27,4 @@ runs:
         if [ -n "${{ inputs.sarif }}" ]; then
           args+=(--sarif "${{ inputs.sarif }}")
         fi
-        python3 "${{ github.action_path }}/scripts/validate-report.py" "${args[@]}"
+        PYTHONPATH="${{ github.action_path }}" python3 -m vibe_proof_auditor.validate_report "${args[@]}"

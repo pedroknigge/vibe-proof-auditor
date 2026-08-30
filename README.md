@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-Pre-1.0 (`0.7.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
+Pre-1.0 (`0.8.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
 
 ```
  __     _____ ____  _____

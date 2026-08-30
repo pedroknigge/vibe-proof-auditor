@@ -1,6 +1,11 @@
 # Changelog
 
-Public numbering is **0.7.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+Public numbering is **0.8.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+
+## 0.8.0
+
+- CI fix: Add `.orderfield`, `.gstack` and python cache directories to `.gitignore`.
+- CI fix: Resolve Python static type checking (mypy) and linting issues.
 
 ## 0.7.0
 

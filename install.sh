@@ -5,6 +5,7 @@
 set -euo pipefail
 
 NAME="vibe-proof-auditor"
+DEMO_NAME="demo-skill"
 REPO_URL="${VIBE_PROOF_REPO:-https://github.com/pedroknigge/vibe-proof-auditor.git}"
 
 SRC="$(cd "$(dirname "$0")" 2>/dev/null && pwd || true)"
@@ -53,7 +54,7 @@ else
 fi
 
 copy_one() {
-  local dest="$1"
+  local dest="$1" source="${2:-$SRC}"
   mkdir -p "$(dirname "$dest")"
   rm -rf "$dest"
   mkdir -p "$dest"
@@ -63,9 +64,9 @@ copy_one() {
       --exclude .orderfield \
       --exclude '__pycache__' \
       --exclude 'vibe-proof-audit-report.*' \
-      "$SRC/" "$dest/"
+      "$source/" "$dest/"
   else
-    cp -R "$SRC"/. "$dest/"
+    cp -R "$source"/. "$dest/"
     rm -rf "$dest/.git" "$dest/.orderfield"
     find "$dest" -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
   fi
@@ -97,6 +98,14 @@ agy_dests() {
   fi
 }
 
+demo_agy_dests() {
+  if [[ "$MODE" == "global" ]]; then
+    printf '%s\n' \
+      "$base/.gemini/config/skills/$DEMO_NAME" \
+      "$base/.gemini/antigravity-cli/skills/$DEMO_NAME"
+  fi
+}
+
 should_install_agy_dest() {
   local dest="$1" parent
   parent="$(dirname "$(dirname "$dest")")"
@@ -116,6 +125,11 @@ if [[ "$UNINSTALL" -eq 1 ]]; then
       removed=$((removed + 1))
     fi
   done < <(agy_dests)
+  while IFS= read -r dest; do
+    if remove_one "$dest"; then
+      removed=$((removed + 1))
+    fi
+  done < <(demo_agy_dests)
   echo "removed from $removed location(s)"
   exit 0
 fi
@@ -127,9 +141,17 @@ while IFS= read -r dest; do
   fi
 done < <(agy_dests)
 
+while IFS= read -r dest; do
+  if should_install_agy_dest "$dest"; then
+    copy_one "$dest" "$SRC/evals/fixtures/skill-docs"
+    copied=$((copied + 1))
+  fi
+done < <(demo_agy_dests)
+
 echo "copied to $copied skill dir(s)"
 echo "generic: $base/.agents/skills/$NAME"
 if command -v agy >/dev/null 2>&1; then
   echo "agy harden: python3 -m vibe_proof_auditor.harden_agy path/to/vibe-proof-audit-report.md"
+  echo "agy fixture: /$DEMO_NAME"
 fi
 echo "or: npx skills add pedroknigge/vibe-proof-auditor -g -y -a antigravity -a antigravity-cli"

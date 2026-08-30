@@ -10,7 +10,7 @@ Five planted fixtures plus expected-finding manifests. The agent still classifie
 | `fixtures/saas-single-user` | `saas-single-user` | Firebase `allow read, write: if true` (datastore rules apply; isolation tests N/A) |
 | `fixtures/cli` | `cli` | Empty `catch`; no HTTP/auth |
 | `fixtures/library` | `library` | Hallucinated package `react-sate-managment`, no lockfile |
-| `fixtures/skill-docs` | `skill/docs` | Runnable script, zero tests |
+| `fixtures/skill-docs` | `skill/docs` | Native AGY discovery docs, runnable script, zero tests |
 
 `expected/forgeboard.json` is the golden for `references/example-report.md` (CI).
 

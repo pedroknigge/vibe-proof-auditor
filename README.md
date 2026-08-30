@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-Pre-1.0 (`0.8.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
+Pre-1.0 (`0.9.0`). A good adversarial agent skill with a deterministic validator. Not a production certification.
 
 ```
  __     _____ ____  _____
@@ -54,7 +54,16 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y -a antigravity -a antigravit
 ./install.sh
 ```
 
-`-g` = global (home directory, every project). Omit it to install only in the current repo. `-y` skips prompts. The CLI auto-detects installed agents and **symlinks** them to one copy, so updates are a single pull. `./install.sh` always lands the skill in `~/.agents/skills` plus the Gemini/Antigravity trees (`config/skills`, `antigravity-cli/skills`, `antigravity/skills`) so you do not hand-symlink for `agy`.
+`-g` = global (home directory, every project). Omit it to install only in the current repo. `-y` skips prompts. The CLI auto-detects installed agents and **symlinks** them to one copy, so updates are a single pull. `./install.sh` lands the auditor in `~/.agents/skills` plus the Gemini/Antigravity trees (`config/skills`, `antigravity-cli/skills`, `antigravity/skills`) so you do not hand-symlink for `agy`.
+
+The same installer materializes the testless `demo-skill` fixture as a direct AGY child in both native roots:
+
+```text
+~/.gemini/config/skills/demo-skill
+~/.gemini/antigravity-cli/skills/demo-skill
+```
+
+Invoke it as `/demo-skill`. AGY has no `~/.agy/skills` directory. Run `./install.sh --uninstall` to remove both the auditor and direct fixture copies.
 
 This repo is a valid Agent Skill (`SKILL.md` at the root) per [agentskills.io](https://agentskills.io/specification).
 
@@ -69,6 +78,8 @@ Or update every installed skill:
 ```bash
 npx skills update -g -y
 ```
+
+After a Skills CLI update, run `./install.sh` again to refresh the direct AGY `demo-skill` copies.
 
 ## Use
 
@@ -132,12 +143,14 @@ vibe-proof-auditor/
 │   └── harden_agy.py             # Remediation Prompt → agy -p
 ├── install.sh                    # Agents + Antigravity (agy) skill dirs
 ├── evals/                        # Planted fixtures + expected manifests
+│   └── fixtures/skill-docs/      # demo-skill 0.9.0; native AGY, intentionally testless
 ├── tests/
 │   ├── test_render_report.py
 │   ├── test_scorelib.py
 │   ├── test_validate_report.py
 │   ├── test_export_and_eval.py
-│   └── test_harden_agy.py
+│   ├── test_harden_agy.py
+│   └── test_packaging.py
 ├── references/
 │   ├── checklist.md              # Scored items (only home)
 │   ├── gates.md                  # Verdicts and production gates
@@ -178,6 +191,7 @@ python3 -m unittest discover -s tests -v
 | Planted evals | `evals/` |
 | JSON / SARIF / baseline | `vibe_proof_auditor/validate_report.py`, `vibe_proof_auditor/compare_eval.py` |
 | Harden via Antigravity (`agy`) | `vibe_proof_auditor/harden_agy.py`, `./install.sh` |
+| Native AGY `demo-skill` fixture | `evals/fixtures/skill-docs/SKILL.md`, `./install.sh` |
 
 ## Related skills
 

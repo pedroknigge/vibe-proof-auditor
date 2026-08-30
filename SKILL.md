@@ -1,14 +1,14 @@
 ---
 name: vibe-proof-auditor
-description: "v0.8.0. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
+description: "v0.9.0. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
 license: MIT
 compatibility: Requires a filesystem, a shell, git, and Python 3.9+. ripgrep (rg) recommended for Deep security greps.
 metadata:
-  version: "0.8.0"
+  version: "0.9.0"
   author: pedroknigge
 ---
 
-# Vibe-Proof Auditor (v0.8.0)
+# Vibe-Proof Auditor (v0.9.0)
 
 Numbers, gates, verdict words, and stage notes live only in `references/` — never invent them. Announce this skill version in the report header (`Skill version`) so the reader can tell a stale install from the latest.
 
@@ -131,7 +131,7 @@ Each P0: what shipped, the screenshot, the risk, smallest model ask. Prefer hand
 - `vibe_proof_auditor.compare_eval` — fixture expected.json vs report JSON; `--baseline`
 - `vibe_proof_auditor.render_report` — markdown → HTML (does not score)
 - `vibe_proof_auditor.harden_agy` — Remediation Prompt → `agy -p` (Antigravity harden)
-- `install.sh` — skill dirs including Antigravity / `agy` (no manual symlink)
+- `install.sh` — native Antigravity / `agy` dirs, including the direct `demo-skill` fixture
 - `evals/` — planted fixtures + expected manifests
 - `assets/checklist-template.md` — cover
 - `assets/maintenance-policy-template.md` — stranger-handoff starter for audited repos

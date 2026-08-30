@@ -1,6 +1,12 @@
 # Changelog
 
-Public numbering is **0.8.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+Public numbering is **0.9.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+
+## 0.9.0
+
+- Version the `demo-skill` fixture as 0.9.0 with native Antigravity (`agy`) discovery documentation while preserving its planted runnable-script/zero-tests contract.
+- `./install.sh` now materializes and uninstalls `demo-skill` as a direct child of both `~/.gemini/config/skills` and `~/.gemini/antigravity-cli/skills`; it never invents `~/.agy/skills`.
+- Add hermetic installer, uninstall, fixture-contract, and version-synchronization coverage.
 
 ## 0.8.0
 

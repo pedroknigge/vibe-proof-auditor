@@ -11,6 +11,9 @@ vibe-proof-audit-report.md
 vibe-proof-audit-report.html
 vibe-proof-audit-report.json
 vibe-proof-audit-report.sarif
-.orderfield/state.json
-.orderfield/waves/
-.orderfield/work/
+.orderfield/
+.gstack/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/

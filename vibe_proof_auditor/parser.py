@@ -12,6 +12,7 @@ def parse_int(raw: str, *, default: int = 0) -> int:
         return default
     return int(float(text))
 
+
 def table_map(table: list[list[str]] | None) -> tuple[list[str], list[list[str]]]:
     """table_map function."""
     if not table or len(table) < 2:
@@ -19,12 +20,14 @@ def table_map(table: list[list[str]] | None) -> tuple[list[str], list[list[str]]
     header = [h.strip().lower() for h in table[0]]
     return header, table[1:]
 
+
 def col(header: list[str], *names: str) -> int | None:
     """col function."""
     for name in names:
         if name in header:
             return header.index(name)
     return None
+
 
 def census_rows(table: list[list[str]] | None) -> list[dict]:
     """census_rows function."""
@@ -41,6 +44,7 @@ def census_rows(table: list[list[str]] | None) -> list[dict]:
     i_score = col(header, "score")
     if None in (i_cat, i_pass, i_partial, i_fail, i_ins, i_na, i_crit):
         return []
+    assert i_cat is not None
     out = []
     for row in rows:
         if i_cat >= len(row):
@@ -49,10 +53,10 @@ def census_rows(table: list[list[str]] | None) -> list[dict]:
         if name not in scorelib.WEIGHTS:
             continue
 
-        def cell(idx: int | None) -> str:
-            if idx is None or idx >= len(row):
+        def cell(idx: int | None, row_ref=row) -> str:
+            if idx is None or idx >= len(row_ref):
                 return ""
-            return row[idx]
+            return row_ref[idx]
 
         out.append(
             {
@@ -68,6 +72,7 @@ def census_rows(table: list[list[str]] | None) -> list[dict]:
         )
     return out
 
+
 def category_score_map(table: list[list[str]] | None) -> dict[str, tuple[str, str]]:
     """category_score_map function."""
     header, rows = table_map(table)
@@ -81,9 +86,14 @@ def category_score_map(table: list[list[str]] | None) -> dict[str, tuple[str, st
         if i_cat >= len(row) or i_score >= len(row):
             continue
         name = scorelib.norm_cat(row[i_cat])
-        status = row[i_status].strip() if i_status is not None and i_status < len(row) else ""
+        status = (
+            row[i_status].strip()
+            if i_status is not None and i_status < len(row)
+            else ""
+        )
         out[name] = (row[i_score].strip(), status)
     return out
+
 
 def gate_status_map(table: list[list[str]] | None) -> dict[str, str]:
     """gate_status_map function."""
@@ -99,6 +109,7 @@ def gate_status_map(table: list[list[str]] | None) -> dict[str, str]:
         out[scorelib.norm_gate(row[i_gate])] = row[i_status].strip()
     return out
 
+
 def parse_overall(raw: str) -> float | None:
     """parse_overall function."""
     text = (raw or "").strip()
@@ -108,6 +119,7 @@ def parse_overall(raw: str) -> float | None:
         return float(text.split("/")[0].strip())
     except ValueError:
         return None
+
 
 def parse_coverage(raw: str) -> int | None:
     """parse_coverage function."""
@@ -119,6 +131,7 @@ def parse_coverage(raw: str) -> int | None:
     except ValueError:
         return None
 
+
 def expected_cat_status(score: int | None, critical_fail: bool) -> str:
     """expected_cat_status function."""
     if score is None:
@@ -128,6 +141,7 @@ def expected_cat_status(score: int | None, critical_fail: bool) -> str:
     if score <= 7:
         return "Partial"
     return "Pass"
+
 
 def parse_findings(table: list[list[str]] | None) -> list[dict[str, str]]:
     """parse_findings function."""
@@ -140,10 +154,11 @@ def parse_findings(table: list[list[str]] | None) -> list[dict[str, str]]:
     i_note = col(header, "note")
     out: list[dict[str, str]] = []
     for row in rows:
-        def cell(idx: int | None) -> str:
-            if idx is None or idx >= len(row):
+
+        def cell(idx: int | None, row_ref=row) -> str:
+            if idx is None or idx >= len(row_ref):
                 return ""
-            return row[idx].strip()
+            return row_ref[idx].strip()
 
         ident = cell(i_id)
         mark = cell(i_mark)

@@ -47,16 +47,23 @@ def eval_against_expected(expected: dict, report: dict) -> list[str]:
     if want_type and want_type not in got_type:
         errors.append(f"product_type {got_type!r} does not include {want_type!r}")
 
-    gates = {k.lower(): (v or "").strip().lower() for k, v in (report.get("gates") or {}).items()}
+    gates = {
+        k.lower(): (v or "").strip().lower()
+        for k, v in (report.get("gates") or {}).items()
+    }
     for name in expected.get("must_fail_gates") or []:
         if gates.get(name.lower()) != "fail":
-            errors.append(f"gate {name} should be Fail, got {gates.get(name.lower())!r}")
+            errors.append(
+                f"gate {name} should be Fail, got {gates.get(name.lower())!r}"
+            )
     for name in expected.get("must_na_gates") or []:
         if gates.get(name.lower()) != "n/a":
             errors.append(f"gate {name} should be N/A, got {gates.get(name.lower())!r}")
     for name in expected.get("must_pass_gates") or []:
         if gates.get(name.lower()) != "pass":
-            errors.append(f"gate {name} should be Pass, got {gates.get(name.lower())!r}")
+            errors.append(
+                f"gate {name} should be Pass, got {gates.get(name.lower())!r}"
+            )
 
     findings = report.get("findings") or []
     must = expected.get("must_find") or []

@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from vibe_proof_auditor import harden_agy  # noqa: E402
+from vibe_proof_auditor import harden_agy
 
 EXAMPLE = ROOT / "references" / "example-report.md"
 

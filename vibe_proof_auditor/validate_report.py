@@ -14,8 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-from vibe_proof_auditor import scorelib, render_report, parser
-
+from vibe_proof_auditor import parser, render_report, scorelib
 
 
 def validate(md: str) -> tuple[list[str], dict]:
@@ -57,7 +56,9 @@ def validate(md: str) -> tuple[list[str], dict]:
                 try:
                     reported = int(float(raw.split("/")[0].strip()))
                 except ValueError:
-                    errors.append(f"{row['category']}: census Score not an integer: {raw}")
+                    errors.append(
+                        f"{row['category']}: census Score not an integer: {raw}"
+                    )
                     continue
                 if reported != score:
                     errors.append(
@@ -76,20 +77,25 @@ def validate(md: str) -> tuple[list[str], dict]:
             continue
         reported_raw, reported_status = scores_table[key]
         if score is None:
-            if reported_raw.upper() not in {"N/A", "NA"} and reported_status.upper() != "N/A":
+            if (
+                reported_raw.upper() not in {"N/A", "NA"}
+                and reported_status.upper() != "N/A"
+            ):
                 errors.append(f"{key}: table should be N/A, got score={reported_raw}")
             continue
         try:
             reported = int(float(reported_raw.split("/")[0].strip()))
         except ValueError:
-            errors.append(f"{key}: Category Scores value not an integer: {reported_raw}")
+            errors.append(
+                f"{key}: Category Scores value not an integer: {reported_raw}"
+            )
             continue
         if reported != score:
             errors.append(f"{key}: table score {reported} != computed {score}")
-        row = next((r for r in census if r["category"] == key), None)
-        if row is None:
+        row_match = next((r for r in census if r["category"] == key), None)
+        if row_match is None:
             continue
-        expect_status = parser.expected_cat_status(score, row["critical_fail"])
+        expect_status = parser.expected_cat_status(score, row_match["critical_fail"])
         if reported_status and reported_status != expect_status:
             errors.append(
                 f"{key}: table status {reported_status} != expected {expect_status}"
@@ -118,23 +124,32 @@ def validate(md: str) -> tuple[list[str], dict]:
             errors.append(f"absolute gate missing: {key}")
 
     sec = computed.get("security")
-    if gates.get("critical security", "").lower() == "pass" and sec is not None:
-        if sec < scorelib.SECURITY_GATE_MIN:
-            errors.append(
-                f"Critical security cannot be Pass with Security score {sec} (need ≥ {scorelib.SECURITY_GATE_MIN})"
-            )
+    if (
+        gates.get("critical security", "").lower() == "pass"
+        and sec is not None
+        and sec < scorelib.SECURITY_GATE_MIN
+    ):
+        errors.append(
+            f"Critical security cannot be Pass with Security score {sec} (need ≥ {scorelib.SECURITY_GATE_MIN})"
+        )
     tes = computed.get("testing")
-    if gates.get("testing", "").lower() == "pass" and tes is not None:
-        if tes < scorelib.TESTING_GATE_MIN:
-            errors.append(
-                f"Testing gate cannot be Pass with Testing score {tes} (need ≥ {scorelib.TESTING_GATE_MIN})"
-            )
+    if (
+        gates.get("testing", "").lower() == "pass"
+        and tes is not None
+        and tes < scorelib.TESTING_GATE_MIN
+    ):
+        errors.append(
+            f"Testing gate cannot be Pass with Testing score {tes} (need ≥ {scorelib.TESTING_GATE_MIN})"
+        )
     err = computed.get("error handling")
-    if gates.get("error handling", "").lower() == "pass" and err is not None:
-        if err < scorelib.ERROR_GATE_MIN:
-            errors.append(
-                f"Error handling gate cannot be Pass with score {err} (need ≥ {scorelib.ERROR_GATE_MIN})"
-            )
+    if (
+        gates.get("error handling", "").lower() == "pass"
+        and err is not None
+        and err < scorelib.ERROR_GATE_MIN
+    ):
+        errors.append(
+            f"Error handling gate cannot be Pass with score {err} (need ≥ {scorelib.ERROR_GATE_MIN})"
+        )
 
     expect_verdict = scorelib.verdict(
         overall_score=overall,
@@ -144,7 +159,9 @@ def validate(md: str) -> tuple[list[str], dict]:
     )
     reported_status = (meta.get("Status") or "").strip()
     if reported_status not in scorelib.VERDICTS:
-        errors.append(f"Status must be one of {scorelib.VERDICTS}, got {reported_status!r}")
+        errors.append(
+            f"Status must be one of {scorelib.VERDICTS}, got {reported_status!r}"
+        )
     elif reported_status != expect_verdict:
         errors.append(f"Status {reported_status!r} != computed {expect_verdict!r}")
 
@@ -196,10 +213,9 @@ def validate(md: str) -> tuple[list[str], dict]:
     return errors, payload
 
 
-
 def to_sarif(payload: dict) -> dict:
     """to_sarif function."""
-    results = []
+    results: list[dict] = []
     for gate, status in (payload.get("gates") or {}).items():
         if (status or "").lower() != "fail":
             continue
@@ -276,7 +292,10 @@ def main(argv: list[str]) -> int:
             src = Path(args[i])
             i += 1
     if src is None:
-        print("usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif]", file=sys.stderr)
+        print(
+            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif]",
+            file=sys.stderr,
+        )
         return 2
     if not src.is_file():
         print(f"error: markdown not found: {src}", file=sys.stderr)
@@ -288,9 +307,13 @@ def main(argv: list[str]) -> int:
         return 1
     errors, payload = validate(md)
     if json_out:
-        json_out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        json_out.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
     if sarif_out:
-        sarif_out.write_text(json.dumps(to_sarif(payload), indent=2) + "\n", encoding="utf-8")
+        sarif_out.write_text(
+            json.dumps(to_sarif(payload), indent=2) + "\n", encoding="utf-8"
+        )
     if errors:
         print(f"{src}: {len(errors)} error(s)", file=sys.stderr)
         for err in errors:

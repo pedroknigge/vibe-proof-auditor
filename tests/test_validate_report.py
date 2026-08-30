@@ -43,7 +43,9 @@ class ValidateReportTests(unittest.TestCase):
 
     def test_wrong_overall_fails(self) -> None:
         text = EXAMPLE.read_text(encoding="utf-8")
-        text = text.replace("**Overall Score:** 5.9 / 10", "**Overall Score:** 9.9 / 10")
+        text = text.replace(
+            "**Overall Score:** 5.9 / 10", "**Overall Score:** 9.9 / 10"
+        )
         with tempfile.TemporaryDirectory() as tmp:
             src = Path(tmp) / "bad.md"
             src.write_text(text, encoding="utf-8")

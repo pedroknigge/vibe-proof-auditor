@@ -77,7 +77,7 @@ STAGE_NOTES: dict[tuple[str, str], str] = {
 
 
 def round_half_up(value: float, ndigits: int = 0) -> float:
-    quant = Decimal("1") if ndigits == 0 else Decimal("0." + "0" * (ndigits - 1) + "1")
+    quant = Decimal(1) if ndigits == 0 else Decimal("0." + "0" * (ndigits - 1) + "1")
     return float(Decimal(str(value)).quantize(quant, rounding=ROUND_HALF_UP))
 
 

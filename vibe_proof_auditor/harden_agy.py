@@ -28,9 +28,7 @@ def extract_remediation_prompt(markdown: str) -> str:
             start = i + 1
             break
     if start is None:
-        raise ValueError(
-            f"no `{PROMPT_HEADING}` section found — run an audit first"
-        )
+        raise ValueError(f"no `{PROMPT_HEADING}` section found — run an audit first")
 
     fence_open = None
     for i in range(start, len(lines)):

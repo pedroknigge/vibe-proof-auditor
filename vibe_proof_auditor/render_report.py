@@ -123,7 +123,7 @@ def project_name(path: str) -> str:
 
 
 def ticks(score: float | None) -> str:
-    filled = 0 if score is None else max(0, min(10, int(round(score))))
+    filled = 0 if score is None else max(0, min(10, round(score)))
     cells = []
     for i in range(10):
         cls = "on" if i < filled else "off"
@@ -149,7 +149,11 @@ def render_scorecard(table: list[list[str]] | None) -> str:
         cat = strip_inline_md(row[i_cat])
         score_raw = strip_inline_md(row[i_score])
         status = strip_inline_md(row[i_status])
-        notes = strip_inline_md(row[i_notes]) if i_notes is not None and i_notes < len(row) else ""
+        notes = (
+            strip_inline_md(row[i_notes])
+            if i_notes is not None and i_notes < len(row)
+            else ""
+        )
         n = score_number(score_raw)
         cls = mark_class(status)
         notes_html = f'<p class="notes">{inline(notes)}</p>' if notes else ""
@@ -168,7 +172,11 @@ def render_scorecard(table: list[list[str]] | None) -> str:
         )
     if not cards:
         return ""
-    return '<section class="scorecard"><h2>Category scores</h2><div class="cat-grid">' + "".join(cards) + "</div></section>"
+    return (
+        '<section class="scorecard"><h2>Category scores</h2><div class="cat-grid">'
+        + "".join(cards)
+        + "</div></section>"
+    )
 
 
 def render_gates(table: list[list[str]] | None) -> str:
@@ -187,7 +195,9 @@ def render_gates(table: list[list[str]] | None) -> str:
             continue
         gate = strip_inline_md(row[i_gate])
         status = strip_inline_md(row[i_status])
-        evidence = strip_inline_md(row[i_ev]) if i_ev is not None and i_ev < len(row) else ""
+        evidence = (
+            strip_inline_md(row[i_ev]) if i_ev is not None and i_ev < len(row) else ""
+        )
         cls = mark_class(status)
         ev_html = f"<p>{inline(evidence)}</p>" if evidence else ""
         tiles.append(
@@ -199,7 +209,11 @@ def render_gates(table: list[list[str]] | None) -> str:
         )
     if not tiles:
         return ""
-    return '<section class="gates"><h2>Production gates</h2><div class="gate-grid">' + "".join(tiles) + "</div></section>"
+    return (
+        '<section class="gates"><h2>Production gates</h2><div class="gate-grid">'
+        + "".join(tiles)
+        + "</div></section>"
+    )
 
 
 def split_cells(line: str) -> list[str]:
@@ -207,7 +221,9 @@ def split_cells(line: str) -> list[str]:
 
 
 def is_sep_row(cells: list[str]) -> bool:
-    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", c.replace(" ", "")) for c in cells)
+    return bool(cells) and all(
+        re.fullmatch(r":?-{3,}:?", c.replace(" ", "")) for c in cells
+    )
 
 
 def md_body_html(md: str) -> str:
@@ -681,9 +697,7 @@ def render_html(md: str) -> str:
     if m:
         kicker = f'<p class="hero-kicker">{inline(m.group(1))}</p>'
     stage_note = meta.get("Stage note", "")
-    stage_html = (
-        f'<p class="stage-note">{inline(stage_note)}</p>' if stage_note else ""
-    )
+    stage_html = f'<p class="stage-note">{inline(stage_note)}</p>' if stage_note else ""
 
     chips = []
     for key in ("Mode", "Audit mode", "Product type", "Date", "Evidence coverage"):

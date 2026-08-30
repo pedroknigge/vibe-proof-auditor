@@ -32,7 +32,9 @@ class ExportAndEvalTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             report = Path(tmp) / "report.json"
             sarif = Path(tmp) / "report.sarif"
-            proc = run(VALIDATE, [str(EXAMPLE), "--json", str(report), "--sarif", str(sarif)])
+            proc = run(
+                VALIDATE, [str(EXAMPLE), "--json", str(report), "--sarif", str(sarif)]
+            )
             self.assertEqual(proc.returncode, 0, proc.stderr)
             payload = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(payload["schema"], "vibe-proof-report/0.6")
@@ -60,7 +62,9 @@ class ExportAndEvalTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            proc = run(COMPARE, [str(ROOT / "evals" / "expected" / "cli.json"), str(report)])
+            proc = run(
+                COMPARE, [str(ROOT / "evals" / "expected" / "cli.json"), str(report)]
+            )
         self.assertEqual(proc.returncode, 1)
         self.assertIn("missing finding", proc.stderr)
 
@@ -68,8 +72,14 @@ class ExportAndEvalTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             old = Path(tmp) / "old.json"
             new = Path(tmp) / "new.json"
-            old.write_text(json.dumps({"gates": {"testing": "Pass"}, "findings": []}), encoding="utf-8")
-            new.write_text(json.dumps({"gates": {"testing": "Fail"}, "findings": []}), encoding="utf-8")
+            old.write_text(
+                json.dumps({"gates": {"testing": "Pass"}, "findings": []}),
+                encoding="utf-8",
+            )
+            new.write_text(
+                json.dumps({"gates": {"testing": "Fail"}, "findings": []}),
+                encoding="utf-8",
+            )
             proc = run(COMPARE, ["--baseline", str(old), str(new)])
         self.assertEqual(proc.returncode, 1)
         self.assertIn("new Fail gate", proc.stderr)
@@ -77,7 +87,10 @@ class ExportAndEvalTests(unittest.TestCase):
     def test_baseline_clean(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             old = Path(tmp) / "old.json"
-            payload = {"gates": {"testing": "Fail"}, "findings": [{"id": "idor", "mark": "Fail"}]}
+            payload = {
+                "gates": {"testing": "Fail"},
+                "findings": [{"id": "idor", "mark": "Fail"}],
+            }
             old.write_text(json.dumps(payload), encoding="utf-8")
             proc = run(COMPARE, ["--baseline", str(old), str(old)])
         self.assertEqual(proc.returncode, 0)

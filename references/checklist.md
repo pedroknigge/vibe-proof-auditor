@@ -147,6 +147,9 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 
 ---
 
+- [ ] Maintenance cost and longevity: explicit recognition (in docs, runbooks, or policy) that maintenance is harder and more costly than the initial build. The app is architected for continuous updates, not just to live for a week (vibe-coded obsolescence). Finding id: `vibe-coded-obsolescence`.
+- [ ] Intrinsic business understanding vs raw code: the code reflects a deep understanding of the business domain, not just generated boilerplate. **Fail** if the team treats 1:1 cloning without business context as a fatal competitor threat, ignoring that raw code is commoditized. Finding id: `raw-code-delusion`.
+
 ## 6. Error handling
 
 - [ ] **[C]** Errors are not swallowed (`catch` empty, ignored promises, discarded results).
@@ -222,6 +225,9 @@ Score from the tree (README, spec, issues, changelog). Missing product evidence 
 - [ ] Success metrics defined.
 
 ---
+
+- [ ] User moat and platform friction: the product strategy (README, docs) acknowledges that owning users and creating friction to switch is the real moat, not "uncloneable" software. Finding id: `clone-vulnerable`.
+- [ ] SLA, infra costs, and support: expectations for Service Level Agreements (SLAs), uptime, and infrastructure costs are explicitly handled or documented. It proves it is a maintained service (SaaS), not just a raw app (AaaS). Finding id: `missing-sla`.
 
 ## Extras (not in overall)
 

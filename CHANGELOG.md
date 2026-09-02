@@ -1,4 +1,11 @@
 # Changelog
+## 0.9.4
+
+- **Vibe Coding vs Software Engineering Checks**: Added checks to prevent aesthetic deception and change management hell (silent AI drift).
+  - Maintainability: Added "Aesthetic deception vs Engineering" to fail code that looks visually neat (comments, indents) but lacks fundamental structural design (`aesthetic-deception`).
+  - Process: Added "Silent AI drift (Change Management Hell)" to fail if history shows the agent routinely modifying or dropping unrelated code during updates (`ai-code-drift`).
+
+Public numbering is **0.9.4**. 2.4–2.6 were internal contract drafts, not a 1.x release.
 ## 0.9.3
 
 - **AGI Limitations & Context Rot Checks**: Added checks to prevent open-ended AI traps and blind acceptance of hallucinated code.

@@ -2,7 +2,7 @@
 
 **Project:** `/Users/demo/forgeboard`  
 **Date:** 2026-08-24  
-**Skill version:** 0.9.3
+**Skill version:** 0.9.4
 **Mode:** Production  
 **Audit mode:** Deep  
 **Product type:** `saas-multi-tenant`  

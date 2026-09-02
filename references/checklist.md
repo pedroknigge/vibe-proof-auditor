@@ -138,6 +138,7 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] Technical debt is tracked (issues, ADRs, or an in-tree list).
 - [ ] No unreadable generated slop as the main implementation (model dump that cannot be maintained without the original prompt history). Finding id: `rebuild-trap` when a stranger’s rational move is rewrite.
 - [ ] **[C]** Autonomous debuggability ("Until the first bug"): the code is structured, logged, and explicit enough that a human could isolate a bug without pasting the entire file back into an AI. **Fail** if a critical path bug forces full context-window reliance to even understand what failed. Finding id: `ai-debug-dependency`.
+- [ ] **[C]** Aesthetic deception vs Engineering: the code is structurally sound, not just visually formatted (nice comments/indents hiding weak logic). **Fail** if the codebase looks neat but lacks fundamental software engineering design (state management, boundaries) when scrutinized. Finding id: `aesthetic-deception`.
 
 ### Human interview (not scored / not a gate)
 
@@ -199,6 +200,7 @@ Repo-evidence only for scored items.
 - [ ] Upfront planning evidence ("what to do and what not"): issues, spec, or ADRs show the author planned the boundary of the work before shipping it. Speed of execution did not skip the planning phase. Finding id: `skipped-planning`.
 - [ ] **[C]** Convergent problem framing ("condiciones de contorno"): open-ended problems are broken down into testable, convergent boundaries or explicit contracts before code is written. **Fail** if the author prompted an open-ended feature without defining strict boundaries, leading to hallucinated or inconsistent logic. Finding id: `open-ended-trap`.
 - [ ] **[C]** Technocritical validation: evidence that AI-generated logic and library choices were validated against ground truth (e.g., explicit tests, accurate API usage, no hallucinated imports). **Fail** if the code relies on hallucinated patterns or "context rot" that the author blindly accepted. Finding id: `blind-acceptance`.
+- [ ] **[C]** Silent AI drift (Change Management Hell): updates and new features do not silently drop, hallucinate, or rewrite unrelated code. **Fail** if history shows agentic changes routinely breaking or rewriting unrelated code without explicit instructions (vibe coding drift). Finding id: `ai-code-drift`.
 
 ### Human interview (not scored / not a gate)
 
@@ -282,6 +284,8 @@ Use these ids in the Findings table when the dunk matches. Security ids also liv
 | `ai-debug-dependency` | Fail | Code cannot be debugged by a human without pasting back into AI |
 | `open-ended-trap` | Fail | Prompted an open-ended problem without defining strict boundary conditions |
 | `blind-acceptance` | Fail | Accepted hallucinated logic or context rot without technocritical validation |
+| `aesthetic-deception` | Fail | Code looks neat visually but lacks structural software engineering design |
+| `ai-code-drift` | Fail | AI agent routinely dropped or modified unrelated code during updates |
 | `idor` | Fail | Object-level AuthZ missing |
 | `isolation-tests` | Fail | No user A vs user B proof |
 | `rls-open` | Fail | Datastore rules missing or open |

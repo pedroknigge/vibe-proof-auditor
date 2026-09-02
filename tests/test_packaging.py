@@ -36,7 +36,7 @@ def run_installer(home: Path, *args: str) -> subprocess.CompletedProcess[str]:
 class VersionSyncTests(unittest.TestCase):
     def test_version_surfaces_agree(self) -> None:
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        self.assertEqual(version, "0.9.3")
+        self.assertEqual(version, "0.9.4")
         self.assertIn(
             f'version: "{version}"', (ROOT / "SKILL.md").read_text(encoding="utf-8")
         )
@@ -105,7 +105,7 @@ class InstallScriptTests(unittest.TestCase):
                 )
                 self.assertTrue((dest / "scripts" / "run.py").is_file(), dest)
                 self.assertEqual(
-                    (dest / "VERSION").read_text(encoding="utf-8").strip(), "0.9.3"
+                    (dest / "VERSION").read_text(encoding="utf-8").strip(), "0.9.4"
                 )
                 self.assertFalse((dest / "tests").exists(), dest)
             self.assertFalse((home / ".agents" / "skills" / "demo-skill").exists())

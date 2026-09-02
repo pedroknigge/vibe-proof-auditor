@@ -111,9 +111,11 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 - [ ] Naming, folder structure, and patterns are followed.
 - [ ] No serious circular dependencies.
 - [ ] Complexity matches the problem (no premature microservices / event-bus / distributed theater for a simple MVP). **Partial** if the stack is heavier than the stated problem; **Fail** if the complexity is the product.
+- [ ] **[C]** Architectural foresight (no "road ends in a lake"): the design anticipates known limits, scale boundaries, or data model dead ends before writing the code. **Fail** if a foreseeable roadblock will require a total rewrite. Finding id: `architectural-dead-end`.
 - [ ] Durable writes go through an **aggregate root** (or one clear transactional write boundary per business entity). Dependent entities are persisted only through that root; invariants are enforced there — not in the route, the UI, or a random util. **Fail** if handlers/adapters write child tables directly and bypass the root. Finding id: `aggregate-bypass`. N/A if the product has no durable business writes (typical `cli` / `library` / static / docs-only).
 - [ ] One aggregate (or write boundary) per business entity; adapters may wrap external deps, but DB writes are not scattered across features. **Partial** if only some entities obey it; **Fail** if every feature opens the DB and writes whatever it wants.
 - [ ] Extensible without a rewrite of the core. **Fail** if the realistic next step for a stranger is “rebuild,” not change.
+- [ ] **[C]** Structural understanding (Civil Engineer vs Bricklayer): the architecture shows intentional design (proper decoupling, data flow, error boundaries) rather than just API glue that happens to compile. **Fail** if the system is a fragile house of cards stitched together without understanding of the underlying frameworks. Finding id: `fragile-api-glue`.
 - [ ] Important decisions recorded (short ADRs or equivalent).
 
 ---
@@ -132,8 +134,10 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] Maintenance policy in-tree: how to change, how to release, and what “done” means after the first ship (CONTRIBUTING, runbook, or equivalent). Finding id: `maintenance-policy-missing`.
 - [ ] Ownership of critical modules is visible (CODEOWNERS, OWNERS, or a short ownership map). N/A for solo prototypes with no shared repo claim.
 - [ ] Accidental complexity controlled: no duplicate write paths, dead feature sketches, or unjustified abstraction layers as the main surface. AI-sped delivery is not an excuse for two systems that do one job.
+- [ ] Code volume control (less is more): prefers standard libraries, managed services, or established patterns over custom AI-generated code. **Fail** if the AI generated a massive custom solution for a solved problem. Finding id: `over-generation`.
 - [ ] Technical debt is tracked (issues, ADRs, or an in-tree list).
 - [ ] No unreadable generated slop as the main implementation (model dump that cannot be maintained without the original prompt history). Finding id: `rebuild-trap` when a stranger’s rational move is rewrite.
+- [ ] **[C]** Autonomous debuggability ("Until the first bug"): the code is structured, logged, and explicit enough that a human could isolate a bug without pasting the entire file back into an AI. **Fail** if a critical path bug forces full context-window reliance to even understand what failed. Finding id: `ai-debug-dependency`.
 
 ### Human interview (not scored / not a gate)
 
@@ -192,6 +196,9 @@ Repo-evidence only for scored items.
 - [ ] Changes land as small reviewed diffs (no unreviewed mass rewrites as the norm). Finding id: `one-shot-dump` when history is one mega-commit that drops the app.
 - [ ] Claimed install / run / test commands from README (or equivalent) were executed in this audit snapshot and exited 0 — or failure is recorded as evidence. **Fail** if the docs promise a command that was never run and cannot be shown to work. Tool missing → `insufficient evidence`.
 - [ ] Iterative delivery evidence: features land in steps with verification between them (commits, PRs, or changelog), not one prompt → whole product.
+- [ ] Upfront planning evidence ("what to do and what not"): issues, spec, or ADRs show the author planned the boundary of the work before shipping it. Speed of execution did not skip the planning phase. Finding id: `skipped-planning`.
+- [ ] **[C]** Convergent problem framing ("condiciones de contorno"): open-ended problems are broken down into testable, convergent boundaries or explicit contracts before code is written. **Fail** if the author prompted an open-ended feature without defining strict boundaries, leading to hallucinated or inconsistent logic. Finding id: `open-ended-trap`.
+- [ ] **[C]** Technocritical validation: evidence that AI-generated logic and library choices were validated against ground truth (e.g., explicit tests, accurate API usage, no hallucinated imports). **Fail** if the code relies on hallucinated patterns or "context rot" that the author blindly accepted. Finding id: `blind-acceptance`.
 
 ### Human interview (not scored / not a gate)
 
@@ -207,6 +214,7 @@ Score from the tree (README, spec, issues, changelog). Missing product evidence 
 - [ ] Validated with real users or strong in-tree evidence before overbuilding.
 - [ ] MVP defined and respected (one small problem first — not “build everything at once”).
 - [ ] New features justified (issue, spec, or README).
+- [ ] Product judgment explicit ("what to build and why"): clear reasoning exists for why a feature was built, not just that it could be built quickly. Finding id: `missing-product-judgment`.
 - [ ] Scope creep controlled (no infinite “one more feature” log without cuts).
 - [ ] Marketing / landing polish does not dominate the tree while the core problem is still unproven. **Partial** if the landing is the product; **Fail** if there is no in-tree evidence of the actual problem being solved. Finding id: `landing-over-product`.
 - [ ] Success metrics defined.
@@ -266,6 +274,14 @@ Use these ids in the Findings table when the dunk matches. Security ids also liv
 | `maintenance-policy-missing` | Fail / Partial | No in-tree how-to-change / how-to-release after first ship |
 | `one-shot-dump` | Fail / Partial | One mega-commit or one prompt dropped the whole app |
 | `landing-over-product` | Fail / Partial | Marketing surface dominates; problem unproven |
+| `architectural-dead-end` | Fail | Design hits a foreseeable limit that requires a total rewrite |
+| `over-generation` | Fail / Partial | Generated a massive custom solution for a solved problem (should write less code) |
+| `skipped-planning` | Fail / Partial | Shipped code blindly without planning what to do and what not to do |
+| `missing-product-judgment` | Fail / Partial | Missing reasoning for what to build and why |
+| `fragile-api-glue` | Fail | System is stitched together without understanding of underlying frameworks |
+| `ai-debug-dependency` | Fail | Code cannot be debugged by a human without pasting back into AI |
+| `open-ended-trap` | Fail | Prompted an open-ended problem without defining strict boundary conditions |
+| `blind-acceptance` | Fail | Accepted hallucinated logic or context rot without technocritical validation |
 | `idor` | Fail | Object-level AuthZ missing |
 | `isolation-tests` | Fail | No user A vs user B proof |
 | `rls-open` | Fail | Datastore rules missing or open |

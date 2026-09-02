@@ -1,6 +1,26 @@
 # Changelog
+## 0.9.3
 
-Public numbering is **0.9.0**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+- **AGI Limitations & Context Rot Checks**: Added checks to prevent open-ended AI traps and blind acceptance of hallucinated code.
+  - Process: Added "Convergent problem framing (condiciones de contorno)" to ensure open-ended features are broken down into testable boundaries before generating code (`open-ended-trap`).
+  - Process: Added "Technocritical validation" to ensure AI-generated logic and library choices are actively validated against ground truth rather than blindly accepted (`blind-acceptance`).
+
+Public numbering is **0.9.3**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+## 0.9.2
+
+- **Illusion of Competence checks (Script Kiddie vs Civil Engineer)**: Added checks targeting AI-generated code that compiles but cannot be debugged or structurally understood by the author.
+  - Architecture: Ensure the system demonstrates intentional design (decoupling, data flow), not just fragile API glue (`fragile-api-glue`).
+  - Maintainability: "Until the first bug" check—ensure the original author can debug the code without pasting the whole file back into the AI (`ai-debug-dependency`).
+
+Public numbering is **0.9.2**. 2.4–2.6 were internal contract drafts, not a 1.x release.
+
+## 0.9.1
+
+- **AI Senior vs Junior checks**: Added checks to enforce human judgment, foresight, code minimization, and upfront planning based on community feedback.
+  - Architecture: Anticipate dead ends / limits ("road ends in a lake", `architectural-dead-end`).
+  - Maintainability: Prefer standard libraries over custom generated logic; avoid massive custom solutions for solved problems (`over-generation`).
+  - Process: Require upfront planning evidence (issues, specs, ADRs) before shipping (`skipped-planning`).
+  - Product: Explicit product judgment for what to build and why (`missing-product-judgment`).
 
 ## 0.9.0
 

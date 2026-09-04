@@ -1,6 +1,6 @@
 # Evals
 
-Five planted fixtures plus expected-finding manifests. The agent still classifies evidence. These files measure whether it found the planted dunks.
+Five planted fixtures plus expected-finding manifests. The fixtures plant the same class of public dunks the auditor is built from (secrets, weak auth, demo-only tests, and neighbors). The agent still classifies evidence. These files measure whether it found the planted dunks.
 
 ## Fixtures
 

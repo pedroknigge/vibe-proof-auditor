@@ -1,6 +1,6 @@
 # Prompt maestro
 
-Copy-paste export for other agents. **Not** a second skill. Do not invent scores, gates, category lists, or verdict words. Load this package.
+Copy-paste export for other agents. **Not** a second skill. The rubric is public dunks of vibe-coded apps, turned into an evidence checklist so the user does not have to know it by heart. Do not invent scores, gates, category lists, or verdict words. Load this package.
 
 ## Full prompt
 

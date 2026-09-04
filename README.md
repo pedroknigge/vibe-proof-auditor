@@ -1,6 +1,6 @@
 # Vibe-Proof Auditor
 
-**AI writes the happy path. Vibe-Proof audits the consequences.**
+**People roast vibe-coded apps in public. I collected those critiques and turned them into an auditor, so any vibe coder can catch the same issues — secrets, weak auth, demo-only tests — without having to know the checklist by heart.**
 
 ```bash
 npx skills add pedroknigge/vibe-proof-auditor -g -y
@@ -21,22 +21,14 @@ Pre-1.0 (`0.9.4`). A good adversarial agent skill with a deterministic validator
     \_/  |___|____/|_____|
             p r o o f
          ── auditor ──
-    run the roast on yourself
+     catch the dunks yourself
 ```
 
-The internet is very brave about other people's pull requests.
+The dunks are the same every week. Auth that only lives in `localStorage`. Tests that cover the demo. Secrets in git. IDOR because the UI "hides" the button. A 900-line `utils.ts` that "the model wrote." Those threads already named the failure modes. This skill is that list, pointed at your tree.
 
-Every week the timeline invents a new reason vibe coding is going to sink production. Auth that only lives in `localStorage`. Tests that cover the demo and nothing else. A 900-line `utils.ts` that "the model wrote." A senior quote-tweets a screenshot, the dunks pile up, and someone who actually shipped gets told they aren't a real engineer.
+You do not memorize it. The agent walks the checklist, scores with evidence, and writes the report. A senior still gets paths, marks, gates, and a copy-paste fix prompt. A vibe coder gets **Why this dunks**: what shipped, what would get screenshot-quoted, and the smallest thing to tell the model. Same audit. No dumbed-down scores.
 
-Here's the bit they skip: **every one of those dunks is a checklist item.** Secrets in git. IDOR because the UI "hides" the button. No user-A / user-B tests. "It worked on my machine." That's not a personality. That's an audit.
-
-And the dunk that aged best: **shipping is the easy part.** Wait until that codebase has to be maintained by someone who didn't write it. Six months later is where the real test begins — when state never had a home, the only plan is rebuild, and "it works" was never "it's ready."
-
-This skill is the roast, bottled. We scooped up what people actually mock when someone codes with AI, and we pointed an agent at it. The model already trained on those threads. It already knows the lecture. It just needed a north star instead of vibes.
-
-If you're shipping with AI anyway — good. Run the roast on yourself before someone does it for clout.
-
-The report talks to two people at once. A senior gets paths, marks, gates, and a copy-paste fix prompt. A vibe coder gets **Why this dunks**: what you shipped, what would get screenshot-quoted, what happens if you ignore it, and the smallest thing to tell the model. Same audit. No dumbed-down scores.
+Shipping is the easy part. Six months later — when someone who did not write it has to change it — is the rest of the test. That is in the checklist too.
 
 Install once. It lands in every coding agent the [Skills CLI](https://github.com/vercel-labs/skills) finds (Grok, Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and 70+ more).
 
@@ -91,7 +83,7 @@ In any supported agent:
 - “listo para prod”
 - “production checklist”
 
-Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can learn the finding without losing the path-level proof.
+Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can act on the finding without knowing the checklist by heart — and without losing the path-level proof.
 
 After an audit, harden without pasting the remediation prompt by hand into Antigravity:
 

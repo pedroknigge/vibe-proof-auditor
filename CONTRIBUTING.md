@@ -1,5 +1,7 @@
 # Contributing to vibe-proof-auditor
 
+The checklist is collected public critiques of vibe-coded apps (secrets, weak auth, demo-only tests, and the rest). Repeated dunks improve an existing row; new dunks add a row in `references/checklist.md`. Do not shrink the list to stay neat.
+
 First off, thank you for considering contributing to `vibe-proof-auditor`.
 
 ## Development Setup

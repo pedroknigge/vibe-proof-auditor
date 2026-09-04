@@ -14,7 +14,7 @@ Numbers, gates, verdict words, and stage notes live only in `references/` — ne
 
 ## When to Use
 
-A production-readiness or anti-vibe audit of a project path.
+A production-readiness or anti-vibe audit of a project path. Catch the public dunks (secrets, weak auth, demo-only tests) as an evidence checklist so the user does not have to know it by heart.
 
 ## When NOT to Use
 

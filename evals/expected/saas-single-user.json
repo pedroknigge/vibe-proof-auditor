@@ -3,7 +3,7 @@
   "product_type": "saas-single-user",
   "must_fail_gates": ["critical security"],
   "must_find": [
-    {"id": "datastore-rules-open", "path_substr": "allow read, write: if true", "mark": "Fail"}
+    {"id": "rls-open", "path_substr": "allow read, write: if true", "mark": "Fail"}
   ],
   "must_not_find_as_fail": [
     {"id": "isolation-tests", "path_substr": "user B"}

@@ -214,6 +214,91 @@ rg -n "productionBrowserSourceMaps:\\s*true" --glob 'next.config.*'
 
 ---
 
+## 13. Resource lifecycle: unbounded buffers, leaks, covert recursion
+
+Not an OWASP category on its own, but the same greps serve the availability side (A04/A05: a
+process that grows until the OOM killer takes it is an outage). Hits map onto Performance
+`unbounded-buffer` / `resource-leak`, Error handling `cleanup-on-failure-missing`, and
+Architecture `covert-recursion` in `references/checklist.md` — not onto new mega-items.
+
+**Unbounded in-memory accumulators** — map to **`unbounded-buffer`**:
+
+```bash
+# module-level mutable state that only ever grows
+rg -n "^(const|let|var)\s+\w+\s*[:=]\s*(new (Map|Set|WeakMap)\(|\[\]|\{\})" --glob '*.{ts,js}'
+rg -n "^\w+\s*[:=]\s*(\[\]|\{\}|set\(\)|dict\(\)|defaultdict)" --glob '*.py'
+# growth with no eviction: push/append/set with no delete/evict/shift/maxsize nearby
+rg -n "\.(push|append|add|set)\(" --glob '*.{ts,js,py,go}' -A2 | rg -v "delete|evict|shift|splice|pop|clear|maxsize|maxLen|capacity"
+# caches and queues declared without a bound
+rg -n "lru|LRUCache|node-cache|cacheable|Queue\(|deque\(" --glob '*.{ts,js,py}' | rg -v "max|ttl|capacity|bound"
+```
+
+Red flags: a `Map` of sessions/sockets/jobs at module scope with no `delete`; `deque()` with no
+`maxlen`; an in-process job list that is the queue. Pass needs the bound **and** the documented
+behaviour at the bound (drop / block / evict).
+
+**Hand-rolled circular / ring buffers** — the SPEC's "buffer circular malformado". Map to
+**`unbounded-buffer`**:
+
+```bash
+rg -n "ring|circular.?buffer|RingBuffer|head\s*=\s*\(|tail\s*=\s*\(|%\s*(size|capacity|len)" --glob '*.{ts,js,py,go,c,cc,cpp,rs}'
+```
+
+Then read the wrap arithmetic and look for a test that crosses it. **Fail** if `head == tail`
+is the only full-vs-empty discriminator with no count/sentinel, or if no test drives the buffer
+past `capacity`. This is the canonical "compiles, looks right, corrupts under load" shape:
+absence of a wrap-crossing test is the evidence, not a hunch.
+
+**Acquire without release** — map to **`resource-leak`**:
+
+```bash
+rg -n "createConnection|createPool|new Pool\(|connect\(|createClient\(" --glob '*.{ts,js,py,go}'
+rg -n "open\(|fs\.(open|createReadStream|createWriteStream)|tempfile" --glob '*.{ts,js,py}'
+rg -n "setInterval|setTimeout|\.watch\(|new Worker\(|spawn\(|Thread\(" --glob '*.{ts,js,py}'
+rg -n "addEventListener|\.on\(|subscribe\(" --glob '*.{ts,tsx,js,jsx}'
+# now count the matching releases
+rg -c "close\(\)|end\(\)|release\(\)|destroy\(\)|dispose\(\)|clearInterval|clearTimeout|removeEventListener|unsubscribe\(|\.terminate\(\)" --glob '*.{ts,tsx,js,jsx,py,go}'
+```
+
+Red flags: `createPool` per request instead of per process; `setInterval` in a component or
+request handler with no `clearInterval`; `subscribe` with no `unsubscribe` in teardown; a
+transport or long-lived service that opens per call and never closes. In Python, prefer the
+absence of `with` / `contextlib.closing` as the evidence:
+
+```bash
+rg -n "=\s*open\(" --glob '*.py' | rg -v "with\s"
+```
+
+**Cleanup missing on the failure path** — map to **`cleanup-on-failure-missing`**:
+
+```bash
+# try blocks with no finally / defer / context manager
+rg -n --multiline "try\s*\{[\s\S]{0,600}?\}\s*catch[\s\S]{0,400}?\}(?!\s*finally)" --glob '*.{ts,js}'
+rg -c "finally" --glob '*.{ts,js,py}'
+rg -c "defer " --glob '*.go'
+```
+
+Red flag: an early `return` or `throw` between the acquire and the release, so the happy path
+cleans up and the error path does not.
+
+**Covert circular implementation** — the SPEC's "implementación circular encubierta". Map to
+**`covert-recursion`**:
+
+```bash
+# runtime re-entry through events, hooks, middleware or ORM callbacks
+rg -n "emit\(|dispatch\(|publish\(|trigger\(" --glob '*.{ts,js,py}'
+rg -n "afterSave|afterUpdate|post_save|@receiver|beforeCreate|hooks:" --glob '*.{ts,js,py}'
+# recursion with no depth bound
+rg -n "depth|maxDepth|_seen|visited|recursion" --glob '*.{ts,js,py}'
+```
+
+Red flags: a `post_save` / `afterUpdate` hook that writes the same table it fires on; a
+middleware that re-issues the request it is handling; a retry wrapper that calls a function
+which retries. Static import-cycle tools (`madge`, `import-linter`) do **not** catch these —
+that is why the checklist keeps this row separate from the import-cycle row.
+
+---
+
 ## Other high-yield vibe-coding greps
 
 Map hits onto existing checklist rows.

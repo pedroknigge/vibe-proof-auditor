@@ -116,6 +116,9 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 - [ ] One aggregate (or write boundary) per business entity; adapters may wrap external deps, but DB writes are not scattered across features. **Partial** if only some entities obey it; **Fail** if every feature opens the DB and writes whatever it wants.
 - [ ] Extensible without a rewrite of the core. **Fail** if the realistic next step for a stranger is “rebuild,” not change.
 - [ ] **[C]** Structural understanding (Civil Engineer vs Bricklayer): the architecture shows intentional design (proper decoupling, data flow, error boundaries) rather than just API glue that happens to compile. **Fail** if the system is a fragile house of cards stitched together without understanding of the underlying frameworks. Finding id: `fragile-api-glue`.
+- [ ] No covert circular implementation: no runtime mutual-call or re-entrant loop hidden behind layers (A calls B, B calls back into A through an event, hook, middleware, or ORM callback). Distinct from the import-cycle row above, which is static. **Fail** if a request can re-enter its own handler with no depth bound and no idempotence guard. Finding id: `covert-recursion`.
+- [ ] **[C]** Procedure completeness: where the code implements a known protocol, algorithm, or state machine (handshake, retry/backoff, transaction, pagination cursor, auth flow, upload lifecycle), the required intermediate steps are present and ordered — not compressed to the two endpoints that make a demo pass. **Fail** if a step whose omission is invisible on the happy path (ack, commit, revoke, close, verify, checkpoint) is missing. Finding id: `step-skipped`. N/A if the tree implements no such protocol.
+- [ ] Cohesive system, not a patchwork of micro-systems: features share their transport, auth, config, and error conventions instead of each shipping its own. **Partial** if two features solve the same cross-cutting concern differently; **Fail** if the integration surface grows at least as fast as the feature count. Finding id: `micro-system-patchwork`.
 - [ ] Important decisions recorded (short ADRs or equivalent).
 
 ---
@@ -139,6 +142,8 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] No unreadable generated slop as the main implementation (model dump that cannot be maintained without the original prompt history). Finding id: `rebuild-trap` when a stranger’s rational move is rewrite.
 - [ ] **[C]** Autonomous debuggability ("Until the first bug"): the code is structured, logged, and explicit enough that a human could isolate a bug without pasting the entire file back into an AI. **Fail** if a critical path bug forces full context-window reliance to even understand what failed. Finding id: `ai-debug-dependency`.
 - [ ] **[C]** Aesthetic deception vs Engineering: the code is structurally sound, not just visually formatted (nice comments/indents hiding weak logic). **Fail** if the codebase looks neat but lacks fundamental software engineering design (state management, boundaries) when scrutinized. Finding id: `aesthetic-deception`.
+- [ ] Maintenance cost and longevity: explicit recognition (in docs, runbooks, or policy) that maintenance, integration, and evolution are harder and more costly than the initial build, and that the cost grows with every feature. The app is architected for continuous updates, not just to live for a week (vibe-coded obsolescence). Finding id: `vibe-coded-obsolescence`.
+- [ ] Intrinsic business understanding vs raw code: the code reflects a deep understanding of the business domain, not just generated boilerplate. **Fail** if the team treats 1:1 cloning without business context as a fatal competitor threat, ignoring that raw code is commoditized. Finding id: `raw-code-delusion`.
 
 ### Human interview (not scored / not a gate)
 
@@ -146,9 +151,6 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] Author can name who owns each critical module (even if “me, solo”).
 
 ---
-
-- [ ] Maintenance cost and longevity: explicit recognition (in docs, runbooks, or policy) that maintenance is harder and more costly than the initial build. The app is architected for continuous updates, not just to live for a week (vibe-coded obsolescence). Finding id: `vibe-coded-obsolescence`.
-- [ ] Intrinsic business understanding vs raw code: the code reflects a deep understanding of the business domain, not just generated boilerplate. **Fail** if the team treats 1:1 cloning without business context as a fatal competitor threat, ignoring that raw code is commoditized. Finding id: `raw-code-delusion`.
 
 ## 6. Error handling
 
@@ -160,6 +162,7 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] Distinct user-facing vs developer error messages.
 - [ ] Security decisions fail closed.
 - [ ] No silent broken states (failed writes reported, jobs marked failed).
+- [ ] Cleanup happens on the failure path too (`finally` / `defer` / context manager / `try`-scoped teardown), not only on the happy path. **Fail** if an early `return` or `throw` between acquire and release leaks the resource. Finding id: `cleanup-on-failure-missing`.
 
 ---
 
@@ -172,6 +175,8 @@ Shipping is the easy part. Score whether someone who **did not write this** can 
 - [ ] Realistic load considered (not only a 10-user demo).
 - [ ] Basic performance metrics or a documented plan to measure.
 - [ ] Frontend Core Web Vitals acceptable if there is a UI. N/A otherwise.
+- [ ] Bounded buffers, queues, and caches: every in-memory accumulator has an explicit bound and a defined behaviour at the bound (drop, block, evict). Ring/circular buffers have their wrap and full-vs-empty arithmetic covered by a test. **Fail** if an unbounded structure grows with traffic, or if a hand-rolled circular buffer has no test that crosses the wrap point. Finding id: `unbounded-buffer`. N/A if the product holds no in-memory state across requests.
+- [ ] Resource release: connections, file handles, subscriptions, timers, watchers, and workers are released by whoever acquires them. **Partial** if some paths clean up; **Fail** if a long-lived service acquires without a matching release on the critical path. Finding id: `resource-leak`.
 
 ---
 
@@ -292,6 +297,16 @@ Use these ids in the Findings table when the dunk matches. Security ids also liv
 | `blind-acceptance` | Fail | Accepted hallucinated logic or context rot without technocritical validation |
 | `aesthetic-deception` | Fail | Code looks neat visually but lacks structural software engineering design |
 | `ai-code-drift` | Fail | AI agent routinely dropped or modified unrelated code during updates |
+| `vibe-coded-obsolescence` | Fail / Partial | No recognition that maintenance, integration and evolution cost more than the build |
+| `raw-code-delusion` | Fail / Partial | Treats cloneable code as the moat; no business-domain understanding in the tree |
+| `unbounded-buffer` | Fail / Partial | In-memory accumulator with no bound, or an untested ring-buffer wrap |
+| `resource-leak` | Fail / Partial | Connections, handles, subscriptions, timers or workers acquired without release |
+| `cleanup-on-failure-missing` | Fail / Partial | Teardown only on the happy path; an early return/throw leaks the resource |
+| `covert-recursion` | Fail | Runtime re-entrant or mutual-call loop hidden behind an event, hook or middleware |
+| `step-skipped` | Fail | Protocol compressed to its endpoints; a required intermediate step is missing |
+| `micro-system-patchwork` | Fail / Partial | Features each ship their own transport/auth/config instead of shared conventions |
+| `clone-vulnerable` | Fail / Partial | Strategy relies on code being uncloneable rather than on users and switching friction |
+| `missing-sla` | Fail / Partial | No documented SLA, uptime expectation, infra cost or support posture |
 | `idor` | Fail | Object-level AuthZ missing |
 | `isolation-tests` | Fail | No user A vs user B proof |
 | `rls-open` | Fail | Datastore rules missing or open |

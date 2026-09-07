@@ -1,4 +1,19 @@
 # Changelog
+## 0.9.5
+
+- **Structural AI-failure checks**: Added scored rows for the failure modes AI propagates when it fills a pattern it does not understand.
+  - Architecture: Procedure completeness — a known protocol/state machine keeps its intermediate steps instead of being compressed to the two endpoints that make a demo pass (`step-skipped`).
+  - Architecture: No covert circular implementation — runtime re-entry hidden behind an event, hook, middleware or ORM callback (`covert-recursion`).
+  - Architecture: Cohesive system, not a patchwork of micro-systems with per-feature transport/auth/config (`micro-system-patchwork`).
+  - Performance: Bounded buffers, queues and caches, including ring-buffer wrap coverage (`unbounded-buffer`).
+  - Performance: Resource release for connections, handles, subscriptions, timers and workers (`resource-leak`).
+  - Error handling: Cleanup on the failure path, not only the happy path (`cleanup-on-failure-missing`).
+- **Deep-mode greps**: `references/security-deep.md` gained "Resource lifecycle", an `rg` playbook mapping hits onto the four resource/recursion ids.
+- **Evals**: New `evals/fixtures/worker-protocol` plants a broker lease protocol whose `renew`/`ack`/`nack` are defined but never called, with `evals/expected/worker-protocol.json` exercising `step-skipped` end to end.
+- **Eval manifest contract**: Manifests are now checked against the fixture trees and against the checklist's finding ids; `saas-single-user.json` used `datastore-rules-open`, which the checklist never declared, and now uses `rls-open`.
+- **Version drift**: All version surfaces re-unified on 0.9.5, and `tests/test_packaging.py` reads `VERSION` instead of hardcoding the number.
+
+Public numbering is **0.9.5**. 2.4–2.6 were internal contract drafts, not a 1.x release.
 ## 0.9.4
 
 - **Vibe Coding vs Software Engineering Checks**: Added checks to prevent aesthetic deception and change management hell (silent AI drift).

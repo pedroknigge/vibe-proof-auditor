@@ -1,4 +1,15 @@
 # Changelog
+## 0.9.7
+
+- **Pending security validations from the Twitter thread**: four checks that the checklist implied but never scored on their own row, each with a finding id and a Deep-mode grep playbook.
+  - Security / Input-output: **Block field tampering, trim API responses** — writes bind an explicit allowlist instead of spreading the request body, and reads do not serialize whole rows. Covers both halves of the same defect: privilege escalation on write (`role`, `is_admin`, `credits`, `owner_id`) and over-fetching on read (password hashes, tokens, other tenants' fields). Finding id `mass-assignment-open`; playbook in `references/security-deep.md` §15.
+  - Security / Input-output: **Restrict file uploads** — server-side type *and* size allowlist, a server-generated stored name, and non-public, non-executable storage. Finding id `unrestricted-file-upload`; playbook §16.
+  - Security / Authentication: the **rate limiting** row now carries `missing-rate-limit`, requires the limiter to run server-side or at the edge and key on something the caller cannot rotate, and the brute-force row is extended to **bot protection** (CAPTCHA / Turnstile / device check) on login, signup, and public write forms. Playbook §14 catches the two vibe-coded shapes: a `useState` counter in the form, and an in-process `Map` that a serverless cold start resets.
+  - Security / Authorization: **Lock record access** — the `[C]` object-level AuthZ row now names the *stranger permission test* (authenticate as user B, request user A's id, expect 403/404) as the request-level proof, and is explicitly disambiguated from datastore rules: `idor` is the application check on the server path, `rls-open` is the datastore policy, and both can fail independently. Playbook §17.
+- **Finding IDs table**: `mass-assignment-open`, `missing-rate-limit`, `unrestricted-file-upload`, and the `idor-open` alias joined the common-ids table. `idor` stays the canonical id used by the eval manifests; `idor-open` is accepted in reports.
+- **Version drift**: all version surfaces re-unified on 0.9.7.
+
+Public numbering is **0.9.7**. 2.4-2.6 were internal contract drafts, not a 1.x release.
 ## 0.9.6
 
 - **Fixtures for the structural AI-failure ids**: the three checks 0.9.5 added to the checklist without a planted tree now have one each, end to end.

@@ -1,0 +1,7 @@
+{
+  "fixture": "micro-system-patchwork",
+  "product_type": "saas-single-user",
+  "must_find": [
+    {"id": "micro-system-patchwork", "path_substr": "reports/index.ts", "mark": "Fail"}
+  ]
+}

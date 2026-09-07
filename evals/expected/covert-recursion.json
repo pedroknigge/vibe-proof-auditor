@@ -1,0 +1,8 @@
+{
+  "fixture": "covert-recursion",
+  "product_type": "cli",
+  "must_na_gates": ["environment isolation"],
+  "must_find": [
+    {"id": "covert-recursion", "path_substr": "orders.py", "mark": "Fail"}
+  ]
+}

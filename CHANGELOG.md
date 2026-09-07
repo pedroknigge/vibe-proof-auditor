@@ -1,4 +1,14 @@
 # Changelog
+## 0.9.6
+
+- **Fixtures for the structural AI-failure ids**: the three checks 0.9.5 added to the checklist without a planted tree now have one each, end to end.
+  - `evals/fixtures/unbounded-buffer` (`cli`): a per-label series map with no bound, no TTL and no eviction, plus a hand-rolled ring buffer whose wrap and full-vs-empty arithmetic no test crosses. Manifest `evals/expected/unbounded-buffer.json` requires `unbounded-buffer` **Fail** on `aggregator.py`.
+  - `evals/fixtures/covert-recursion` (`cli`): handler -> `save_order()` -> ORM after-save hook -> event bus -> the same handler, with no depth bound and no idempotence guard. No single file shows the loop. Manifest `evals/expected/covert-recursion.json` requires `covert-recursion` **Fail** on `orders.py`.
+  - `evals/fixtures/micro-system-patchwork` (`saas-single-user`): `billing` and `reports` solve transport, auth, logging, config and error shape five different ways (express/JWT/pino/env/4xx vs `node:http`/API key file/pipe-delimited `console.log`/JSON file/200-with-`ok:false`). Manifest `evals/expected/micro-system-patchwork.json` requires `micro-system-patchwork` **Fail** on `reports/index.ts`.
+- **Eval inventory**: `evals/README.md` now lists all ten fixture trees; `resource-leak` was missing from the table since 0.9.5.
+- **Version drift**: all version surfaces re-unified on 0.9.6.
+
+Public numbering is **0.9.6**. 2.4–2.6 were internal contract drafts, not a 1.x release.
 ## 0.9.5
 
 - **Structural AI-failure checks**: Added scored rows for the failure modes AI propagates when it fills a pattern it does not understand.

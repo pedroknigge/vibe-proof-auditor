@@ -1,0 +1,8 @@
+{
+  "fixture": "unbounded-buffer",
+  "product_type": "cli",
+  "must_na_gates": ["environment isolation"],
+  "must_find": [
+    {"id": "unbounded-buffer", "path_substr": "aggregator.py", "mark": "Fail"}
+  ]
+}

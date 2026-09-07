@@ -1,6 +1,6 @@
 # Evals
 
-Six planted fixtures plus expected-finding manifests. The fixtures plant the same class of public dunks the auditor is built from (secrets, weak auth, demo-only tests, and neighbors). The agent still classifies evidence. These files measure whether it found the planted dunks.
+Ten planted fixtures plus expected-finding manifests. The fixtures plant the same class of public dunks the auditor is built from (secrets, weak auth, demo-only tests, and neighbors). The agent still classifies evidence. These files measure whether it found the planted dunks.
 
 ## Fixtures
 
@@ -12,6 +12,10 @@ Six planted fixtures plus expected-finding manifests. The fixtures plant the sam
 | `fixtures/library` | `library` | Hallucinated package `react-sate-managment`, no lockfile |
 | `fixtures/skill-docs` | `skill/docs` | Native AGY discovery docs, runnable script, zero tests |
 | `fixtures/worker-protocol` | `cli` | Broker lease protocol compressed to `receive` + write; `renew`/`ack`/`nack` never called |
+| `fixtures/resource-leak` | `library` | SQLite connection left open on the early-return error path (`resource-leak`, `cleanup-on-failure-missing`) |
+| `fixtures/unbounded-buffer` | `cli` | Per-label series map with no bound or eviction, plus a hand-rolled ring buffer whose wrap is never exercised |
+| `fixtures/covert-recursion` | `cli` | Handler -> save -> ORM hook -> event -> same handler, no depth bound and no idempotence guard |
+| `fixtures/micro-system-patchwork` | `saas-single-user` | `billing` and `reports` each ship their own transport, auth, logging, config and error shape |
 
 `expected/forgeboard.json` is the golden for `references/example-report.md` (CI).
 

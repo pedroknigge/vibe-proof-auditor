@@ -1,0 +1,11 @@
+{
+  "name": "opsdesk",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "express": "4.19.2",
+    "jsonwebtoken": "9.0.2",
+    "pino": "9.3.2"
+  }
+}

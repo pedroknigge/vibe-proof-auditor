@@ -1,6 +1,6 @@
 # Evals
 
-Five planted fixtures plus expected-finding manifests. The fixtures plant the same class of public dunks the auditor is built from (secrets, weak auth, demo-only tests, and neighbors). The agent still classifies evidence. These files measure whether it found the planted dunks.
+Six planted fixtures plus expected-finding manifests. The fixtures plant the same class of public dunks the auditor is built from (secrets, weak auth, demo-only tests, and neighbors). The agent still classifies evidence. These files measure whether it found the planted dunks.
 
 ## Fixtures
 
@@ -11,6 +11,7 @@ Five planted fixtures plus expected-finding manifests. The fixtures plant the sa
 | `fixtures/cli` | `cli` | Empty `catch`; no HTTP/auth |
 | `fixtures/library` | `library` | Hallucinated package `react-sate-managment`, no lockfile |
 | `fixtures/skill-docs` | `skill/docs` | Native AGY discovery docs, runnable script, zero tests |
+| `fixtures/worker-protocol` | `cli` | Broker lease protocol compressed to `receive` + write; `renew`/`ack`/`nack` never called |
 
 `expected/forgeboard.json` is the golden for `references/example-report.md` (CI).
 

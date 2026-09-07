@@ -1,0 +1,9 @@
+{
+  "fixture": "resource-leak",
+  "product_type": "library",
+  "must_na_gates": ["environment isolation"],
+  "must_find": [
+    {"id": "resource-leak", "path_substr": "worker.py", "mark": "Fail"},
+    {"id": "cleanup-on-failure-missing", "path_substr": "worker.py", "mark": "Fail"}
+  ]
+}

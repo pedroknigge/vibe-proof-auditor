@@ -28,14 +28,14 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 
 - [ ] **[C]** Authentication is server-side (not client-only middleware or localStorage checks).
 - [ ] Mature provider when the product **has users** (Clerk, Auth0, Supabase Auth, Better Auth, NextAuth). N/A if no users. Do not invent auth for CLIs, libraries, or static sites.
-- [ ] Rate limiting on login, register, and auth endpoints, **and** on expensive / LLM / paid-API endpoints when those exist. N/A the LLM/paid sub-path if the product has none. A frontend-only limiter is not Pass (Partial at best if the server/edge limiter is missing).
-- [ ] Brute-force / credential-stuffing protections (lockout, backoff, or provider equivalent).
+- [ ] Rate limiting on login, register, password-reset, and auth endpoints, **and** on expensive / LLM / paid-API endpoints when those exist. The limiter runs server-side or at the edge and keys on something the caller cannot freely rotate (account + IP, or the provider's own limiter) — not on a client counter. N/A the LLM/paid sub-path if the product has none. **Fail** if a live auth or paid endpoint has no server/edge limiter at all. **Partial** if a limiter exists but misses the auth path, or keys only on a header the caller controls. A frontend-only limiter is never Pass. Finding id: `missing-rate-limit`.
+- [ ] Brute-force / credential-stuffing and bot protection (lockout, exponential backoff, CAPTCHA / Turnstile / device check, or provider equivalent) on login, signup, and public write forms. **Partial** if only one of lockout/backoff/bot-check is present on a public signup or login. Maps to `missing-rate-limit` when the endpoint has no throttle of any kind.
 - [ ] **[C]** Session or JWT cookies: HttpOnly, Secure, SameSite, short expiry (or provider equivalent). N/A if no cookie/session auth. **Fail** if the session is JS-readable (`localStorage` JWT, or cookies with HttpOnly off). **Partial** if HttpOnly is on but Secure/SameSite is missing or max-age is months/years.
 - [ ] Session invalidation: logout and server-side revoke (or provider equivalent) when cookie/session/JWT auth exists. N/A if no such auth. **Fail** if sessions cannot be ended. **Partial** if logout exists but stolen tokens cannot be revoked.
 
 ### Authorization (N/A if no users and resources)
 
-- [ ] **[C]** Object-level authorization (IDOR / BOLA) on every sensitive resource. **Pass** requires a server ownership/tenant check on the resource path **and** an isolation test or equivalent request-level proof (user A cannot access user B). Grep / “the UI hides the button” only is **Partial**, never Pass.
+- [ ] **[C]** Object-level authorization — lock record access (IDOR / BOLA) on every sensitive resource. Every read, update, and delete that takes an id from the request re-derives the owner/tenant server-side; a stranger who guesses or increments the id gets 403/404, not the record. **Pass** requires the server ownership/tenant predicate on the resource path **and** an isolation test or equivalent request-level proof (the *stranger permission test*: authenticate as user B, request user A's id, expect denied). Grep / “the UI hides the button” only is **Partial**, never Pass. Finding id: `idor` (alias `idor-open`). Distinct from datastore rules below: this row is the **application** ownership check on the server path; `rls-open` is the **datastore** policy that protects the same rows when a client key reaches the database directly. Both can Fail independently — score them separately, and do not Pass this row because RLS exists.
 - [ ] Frontend is not the authorization boundary.
 - [ ] Roles and permissions evaluated on the server.
 - [ ] Datastore rules (Postgres RLS, Firebase Security Rules, or equivalent) when the product has users **and** a client-reachable datastore (anon/authenticated client key, mobile SDK, etc.). Applies to `saas-single-user` when a client key can read rows — not only `saas-multi-tenant`. N/A if there is no client-reachable datastore. **Fail** if rules are off, missing, or open (`USING (true)`, allow-all Firebase rules, or equivalent).
@@ -44,6 +44,8 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 
 - [ ] **[C]** Server-side input validation on entry points. **Fail** if a hardcoded `true` (or equivalent) skips validation on a live path.
 - [ ] Parameterized queries / safe ORM (no string-concat SQL/NoSQL).
+- [ ] Block field tampering on writes, and trim what reads return. Writes bind an explicit allowlist of client-settable fields (schema `.pick()`, DTO, `strict()` / `attr_accessible` equivalent) so a caller cannot smuggle `role`, `is_admin`, `price`, `owner_id`, `credits`, or `status` into an update; reads return only the fields the caller needs. **Fail** if a handler spreads the raw request body into a create/update (`{...req.body}`, `Model(**payload)`, `Object.assign(entity, body)`, `update(body)`) on a table holding privilege, money, or ownership columns, or if an endpoint serializes a whole user/account row (password hash, tokens, internal ids, other tenants' fields) to the client. **Partial** if some routes bind explicitly and others do not, or if writes are guarded but responses over-fetch. N/A if the product has no client-supplied writes and no API responses. Finding id: `mass-assignment-open`.
+- [ ] Restrict file uploads. N/A if the product accepts no uploads. Otherwise **Pass** needs, on the server: an extension **and** content-type allowlist (not a denylist, and not the client-declared MIME type alone), a maximum size enforced before the file is buffered to memory or disk, a stored name the server generates (no caller-controlled path — no `../`, no raw filename), and storage that does not execute or serve what was uploaded from an app-executable path (private bucket / non-web-root, signed URLs with short expiry, no `Content-Type` reflected back from the upload). **Fail** if any of those is missing on a live upload path, if uploads land in a public bucket or a web-served directory, or if the only check is client-side. **Partial** if the size and type checks exist but storage is public or the filename is caller-controlled. Finding id: `unrestricted-file-upload`.
 - [ ] Output encoding / XSS prevention. N/A if no HTML UI.
 - [ ] Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) when an HTTP app serves browsers.
 - [ ] Production CORS is not `Access-Control-Allow-Origin: *` with credentials, and not a prod wildcard that lets any origin call credentialed APIs. N/A if there is no browser-cross-origin API. **Fail** if `*` plus credentials, or prod `*` on a credentialed API. **Partial** if `*` without credentials on a public API.
@@ -307,9 +309,13 @@ Use these ids in the Findings table when the dunk matches. Security ids also liv
 | `micro-system-patchwork` | Fail / Partial | Features each ship their own transport/auth/config instead of shared conventions |
 | `clone-vulnerable` | Fail / Partial | Strategy relies on code being uncloneable rather than on users and switching friction |
 | `missing-sla` | Fail / Partial | No documented SLA, uptime expectation, infra cost or support posture |
-| `idor` | Fail | Object-level AuthZ missing |
-| `isolation-tests` | Fail | No user A vs user B proof |
-| `rls-open` | Fail | Datastore rules missing or open |
+| `idor` | Fail | Object-level AuthZ missing: a request id is trusted without a server-side owner/tenant check |
+| `idor-open` | Fail | Alias of `idor`. Accepted in reports; `idor` stays the canonical id used by eval manifests |
+| `isolation-tests` | Fail | No user A vs user B proof (the stranger permission test was never run) |
+| `rls-open` | Fail | Datastore rules missing or open. Datastore layer — not a substitute for `idor` on the app path |
+| `mass-assignment-open` | Fail / Partial | Raw request body bound into a create/update (field tampering), or responses over-fetch privileged fields |
+| `missing-rate-limit` | Fail / Partial | No server/edge rate limit or bot protection on login, signup, or expensive/paid endpoints |
+| `unrestricted-file-upload` | Fail / Partial | Uploads without a server-side type/size allowlist, with caller-controlled names, or stored publicly/executably |
 | `client-bundle-secret` | Fail | Server secret in shipped client |
 | `localstorage-jwt` | Fail | Session readable from JS |
 | `ignore-build-errors` | Fail | Build/lint errors ignored to ship the demo |

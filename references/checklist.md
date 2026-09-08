@@ -59,10 +59,15 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 
 - [ ] CSRF protection where cookie sessions apply.
 - [ ] HTTPS only in deployed environments (N/A for local libraries).
+- [ ] Generic authentication responses on login and password reset. The server returns "Invalid email or password" or "If an account exists, we sent instructions" without exposing whether the account exists. **Fail** if the app leaks account existence to unauthenticated callers.
+- [ ] Agent-specific configuration and hooks (e.g., `.serena/project.yml`, MCP config, editor tasks, environment files) are reviewed before executing in an isolated environment, treating unfamiliar repositories as hostile.
+- [ ] Spend controls and budget alerts configured for paid APIs and downstream providers.
 - [ ] No public admin, debug, or sensitive health endpoints.
 - [ ] Security events logged without PII or tokens.
 - [ ] If the app uses LLMs: prompt-injection controls. N/A if no LLM.
 - [ ] Webhook signatures verified (Stripe / GitHub / Svix or equivalent) when those handlers exist. N/A if there are no webhook receivers.
+- [ ] Automated security scanning (e.g., Codex Security, Claude security-guidance, `npm audit`, `pip-audit`) is run, and the stack is patched against known vulnerabilities before release. **Partial** if only a lightweight scan is used without addressing critical advisories.
+- [ ] Privacy notice exists that accurately maps what the app exposes, collects, why, who receives it, and user rights. N/A for internal-only tools without personal data.
 
 ---
 
@@ -319,3 +324,8 @@ Use these ids in the Findings table when the dunk matches. Security ids also liv
 | `client-bundle-secret` | Fail | Server secret in shipped client |
 | `localstorage-jwt` | Fail | Session readable from JS |
 | `ignore-build-errors` | Fail | Build/lint errors ignored to ship the demo |
+| `auth-enumeration` | Fail | App leaks account existence to unauthenticated callers (no generic responses) |
+| `hostile-repo-config` | Fail | Unreviewed agent hooks/config execute untrusted code in an isolated environment |
+| `missing-spend-limits` | Fail / Partial | No budget alerts or provider spend controls configured |
+| `missing-security-scan` | Fail / Partial | Automated security scan is missing or vulnerabilities are unpatched before release |
+| `missing-privacy-notice` | Fail / Partial | Privacy notice missing or inaccurate |

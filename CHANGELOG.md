@@ -1,4 +1,11 @@
 # Changelog
+## 0.9.8
+
+- **Vibe Coder Playbook Integration**: Deeply embedded the Pre-Launch Playbook for vibe-coded apps.
+  - Added four new grep playbooks to `security-deep.md`: Hostile Agent Configuration (Vibe Coder Trap), Attack the Authentication Flow (Smoke Tests), Abuse/Spending/Cost Amplification, and Automated Deep Security Review.
+  - Added matching rules and finding IDs to `checklist.md`: `auth-enumeration`, `hostile-repo-config`, `missing-spend-limits`, `missing-security-scan`, `missing-privacy-notice`.
+  - Updated the Remediation Prompt in `SKILL.md` to use the four exact playbook prompts for architecture, auth isolation, secrets/validation, and abuse/cost.
+
 ## 0.9.7
 
 - **Pending security validations from the Twitter thread**: four checks that the checklist implied but never scored on their own row, each with a finding id and a Deep-mode grep playbook.

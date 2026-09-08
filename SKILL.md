@@ -1,14 +1,14 @@
 ---
 name: vibe-proof-auditor
-description: "v0.9.7. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
+description: "v0.9.8. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
 license: MIT
 compatibility: Requires a filesystem, a shell, git, and Python 3.9+. ripgrep (rg) recommended for Deep security greps.
 metadata:
-  version: "0.9.7"
+  version: "0.9.8"
   author: pedroknigge
 ---
 
-# Vibe-Proof Auditor (v0.9.7)
+# Vibe-Proof Auditor (v0.9.8)
 
 Numbers, gates, verdict words, and stage notes live only in `references/` — never invent them. Announce this skill version in the report header (`Skill version`) so the reader can tell a stale install from the latest.
 
@@ -118,7 +118,19 @@ Each P0: what shipped, the screenshot, the risk, smallest model ask. Prefer hand
 3. P2 ...
 
 ## Remediation Prompt (copy-paste)
-...
+When the audit detects severe vibe-coding vulnerabilities, generate these four exact prompts for the user to run in their agent environment:
+
+**Prompt 1: Architecture and threat model**
+`Map this application's trust boundaries, public entry points, privileged components, sensitive data, third-party dependencies, and irreversible actions. Identify plausible attacker goals and abuse paths. Cite the exact files and routes that create each boundary. Do not propose fixes until the map is complete.`
+
+**Prompt 2: Authorization and tenant isolation**
+`Review authentication, authorization, database grants, Row Level Security policies, storage policies, views, and server functions. For every potential cross-user or cross-tenant access path, provide the exact file or policy, exploit preconditions, likely impact, and a test using two users plus an anonymous session.`
+
+**Prompt 3: Secrets, validation, and output**
+`Trace untrusted input from every public route to database queries, shell commands, templates, logs, and API calls. Find exposed credentials, over-broad API responses, unsafe logging, missing server-side validation, injection paths, and context-specific output-encoding problems. Provide file-and-line evidence and a test for every finding.`
+
+**Prompt 4: Abuse, cost, and dependencies**
+`Review login, signup, password reset, public forms, uploads, webhooks, and paid API routes for abuse and cost-amplification risks. Check dependencies and framework versions against current advisories. For each issue, provide evidence, a reproducible test, a proposed control, and the remaining risk after the fix.`
 ```
 
 ## Resources

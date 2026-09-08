@@ -422,6 +422,9 @@ Map hits onto existing checklist rows.
 | Unsigned webhooks | A08 | Checklist **webhook signatures**. See §11. |
 | `eval` / `new Function` | A03 | `rg -n "\beval\(|new Function\(" --glob '*.{ts,js,py}'` |
 | Debug endpoints | A05 | `rg -n "debug=true|/debug|/admin" --glob '*.{ts,js,py}'` plus auth check. |
+| Auth enumeration | A02 | `rg -n "email not found|user does not exist|already registered" --glob '*.{ts,js,py}'` (`auth-enumeration`) |
+| Hostile repo config | A05 | `rg -n "build:|preinstall:|prebuild:" --glob 'package.json'`; check `.serena/project.yml` (`hostile-repo-config`) |
+| Missing privacy notice | A01 | `rg -n "privacy|gdpr" --glob '*.md'` or UI files (`missing-privacy-notice`) |
 
 ---
 
@@ -430,3 +433,71 @@ Map hits onto existing checklist rows.
 For each finding: path + line, what is missing, which checklist row it marks. Example: `` `app/api/tasks/[id]/route.ts` loads by `id` with no `org_id` → AuthZ `[C]` Fail ``.
 
 Do not score “attacker imagination” without a path. Do not Pass because the demo login works.
+
+## 18. Hostile Agent Configuration (Vibe Coder Trap)
+
+**OWASP:** A05 Security Misconfiguration. Map to checklist **agent hooks** — finding id **`hostile-repo-config`**. 
+Agents operating in unfamiliar or third-party repositories can be hijacked by hidden execution hooks.
+
+```bash
+# Check for agent-specific configurations that might execute code
+rg -n "build:|preinstall:|prebuild:" --glob 'package.json'
+rg -n "\.serena/|mcp_config|codex-security|claude-plugins" --glob '**/*'
+```
+
+**The Threat:** In August 2024, GitLab disclosed that agent configurations like `.serena/project.yml` could execute attacker-controlled code when a repository is merely opened by an agent.
+**Evidence:** If an unfamiliar repository contains undocumented agent instructions, hooks, editor tasks, or MCP configurations, it must be opened in an isolated environment with low-privilege credentials. **Fail** if these are present and unreviewed.
+
+---
+
+## 19. Attack the Authentication Flow (Smoke Tests)
+
+**OWASP:** A02 Cryptographic Failures / A07 Identification and Authentication Failures. Map to checklist **Generic authentication responses** — finding id **`auth-enumeration`**.
+
+Testing the "happy path" is not enough for vibe-coded apps. You must attack the flow.
+
+```bash
+# Check for account enumeration leaks in error responses
+rg -n "User not found|Email not found|Account does not exist|Invalid password|Incorrect password" --glob '*.{ts,js,py,go}'
+# Check for token expiration and single-use constraints
+rg -n "expiresIn|maxAge|exp" --glob '*.{ts,js,py}'
+```
+
+**The Smoke Tests:**
+1. Submit wrong passwords: verify backoff/lockout.
+2. Password reset for unknown email: must return same generic response as a known email ("If an account exists...").
+3. Reuse reset link: must expire or be single-use.
+4. Signup existing email: must not expose account state before user proves control.
+
+**Fail** if the app leaks whether an account exists or uses explicit errors ("Invalid password"). Pass requires generic responses ("Invalid email or password").
+
+---
+
+## 20. Abuse, Spending, and Cost Amplification
+
+**OWASP:** A04 Insecure Design. Map to checklist **Spend controls** — finding id **`missing-spend-limits`**.
+A polished UI with a paid API (like OpenAI) behind it is a vulnerability if not bounded.
+
+```bash
+# Look for paid API usage
+rg -n "openai|anthropic|stripe|replicate|aws|billing" --glob '*.{ts,js,py}'
+# Look for local rate limiters or budget checks
+rg -n "rateLimit|upstash|bottleneck|Turnstile|budget|spend_limit" --glob '*.{ts,js,py}'
+```
+
+**The Threat:** An unprotected endpoint lets a script call a paid API thousands of times.
+**Evidence:** Do not rely on one universal requests-per-minute number. Choose limits based on expected behavior and endpoint cost. **Fail** if paid endpoints lack concurrency limits, cost budgets, or enforced provider spend limits.
+
+---
+
+## 21. Automated Deep Security Review
+
+**OWASP:** A06 Vulnerable and Outdated Components. Map to checklist **Automated security scanning** — finding id **`missing-security-scan`**.
+
+```bash
+# Check if a deep scanner is configured in CI
+rg -n "codex-security scan|claude-security|npm audit|pip-audit|trufflehog" --glob '.github/workflows/*.yml' --glob 'package.json'
+```
+
+**The Threat:** A security scanner cannot compensate for choosing to run a version with a known critical vulnerability (e.g., Next.js August 25 AVIF RCE). 
+**Evidence:** **Fail** if the stack is not patched against known advisories before scanning.

@@ -1,4 +1,8 @@
 # Changelog
+## 1.0.1
+
+- Multi-harness Agentic CI: Replaced `harden_agy.py` with `harden.py`, adding `--adapter` flag to support autonomous execution via `grok`, `claude`, and `cursor` in addition to `agy`.
+
 ## 1.0.0
 
 - Deterministic and autonomous (v1.0.0): Replaced subjective checklist items with AST/Semgrep metric rules.

@@ -1,14 +1,14 @@
 ---
 name: vibe-proof-auditor
-description: "v1.0.0. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
+description: "v1.0.1. Use when the user asks for a vibe-proof audit, production gates, a production checklist, an anti-vibe or anti-slop review, whether a repo is listo para prod, or to harden / remediate with Antigravity (agy). Trigger phrases include auditar proyecto, control de calidad, harden with agy, and similar production-readiness requests on local, mixed, or AI-generated code. If the leading version is not the latest in VERSION / changelog, update the skill before auditing."
 license: MIT
 compatibility: Requires a filesystem, a shell, git, and Python 3.9+. ripgrep (rg) recommended for Deep security greps.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: pedroknigge
 ---
 
-# Vibe-Proof Auditor (v1.0.0)
+# Vibe-Proof Auditor (v1.0.1)
 
 Numbers, gates, verdict words, and stage notes live only in `references/` — never invent them. Announce this skill version in the report header (`Skill version`) so the reader can tell a stale install from the latest.
 
@@ -41,7 +41,7 @@ A production-readiness or anti-vibe audit of a project path. Catch the public du
 - **Deep** (default): key files, full checklist, concrete evidence.
 - **Quick**: only when the user says "quick" / "rápido". Snapshot + scores + top 5 gaps + gates. ≤15 reads. Skip `security-deep.md`. Declare that skip. File count does **not** switch modes.
 - **Remediation**: after an audit, only if asked. Prompt default; edit repo only when asked.
-- **Hardening (agy):** when the user says `harden` / `hardening` / `agy` / `antigravity` after a report exists, run `python3 -m vibe_proof_auditor.harden_agy <project>/vibe-proof-audit-report.md` (optional `--dry-run`, `--effort high`). That extracts the Remediation Prompt and executes it via Antigravity CLI (`agy -p --add-dir <project>`). If `agy` is missing, print the install hint and fall back to the copy-paste prompt — do not invent a second rubric. Editing the target repo is allowed only on this explicit harden ask.
+- **Hardening (agy):** when the user says `harden` / `hardening` / `agy` / `antigravity` after a report exists, run `python3 -m vibe_proof_auditor.harden --adapter <agy|grok|claude|cursor> <project>/vibe-proof-audit-report.md` (optional `--dry-run`, `--effort high`). That extracts the Remediation Prompt and executes it via Antigravity CLI (`agy -p --add-dir <project>`). If `agy` is missing, print the install hint and fall back to the copy-paste prompt — do not invent a second rubric. Editing the target repo is allowed only on this explicit harden ask.
 - **Baseline**: only when the user says baseline / regresión and a previous JSON exists. Does not skip gates on the current tree; it diffs Fail rows.
 
 ## Parallelism
@@ -142,7 +142,7 @@ When the audit detects severe vibe-coding vulnerabilities, generate these four e
 - `vibe_proof_auditor.validate_report` — census / scores / verdict / stage note; `--json` / `--sarif`
 - `vibe_proof_auditor.compare_eval` — fixture expected.json vs report JSON; `--baseline`
 - `vibe_proof_auditor.render_report` — markdown → HTML (does not score)
-- `vibe_proof_auditor.harden_agy` — Remediation Prompt → `agy -p` (Antigravity harden)
+- `vibe_proof_auditor.harden --adapter <agy|grok|claude|cursor>` — Remediation Prompt → `agy -p` (Antigravity harden)
 - `install.sh` — native Antigravity / `agy` dirs, including the direct `demo-skill` fixture
 - `evals/` — planted fixtures + expected manifests
 - `assets/checklist-template.md` — cover

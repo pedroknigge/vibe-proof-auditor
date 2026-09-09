@@ -151,7 +151,7 @@ done < <(demo_agy_dests)
 echo "copied to $copied skill dir(s)"
 echo "generic: $base/.agents/skills/$NAME"
 if command -v agy >/dev/null 2>&1; then
-  echo "agy harden: python3 -m vibe_proof_auditor.harden_agy path/to/vibe-proof-audit-report.md"
+  echo "agy harden: python3 -m vibe_proof_auditor.harden path/to/vibe-proof-audit-report.md"
   echo "agy fixture: /$DEMO_NAME"
 fi
 echo "or: npx skills add pedroknigge/vibe-proof-auditor -g -y -a antigravity -a antigravity-cli"

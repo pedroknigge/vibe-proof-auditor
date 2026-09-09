@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-v1.0.0. Deterministic agentic QA and DevSecOps auditor. Enforces executable contracts and active probing.
+v1.0.1. Deterministic agentic QA and DevSecOps auditor. Enforces executable contracts and active probing.
 
 ```
  __     _____ ____  _____
@@ -88,9 +88,9 @@ Point it at a project path. Deep mode is the default. Say “quick” / “rápi
 After an audit, harden without pasting the remediation prompt by hand into Antigravity:
 
 ```bash
-python3 -m vibe_proof_auditor.harden_agy ./vibe-proof-audit-report.md
+python3 -m vibe_proof_auditor.harden ./vibe-proof-audit-report.md
 # preview only:
-python3 -m vibe_proof_auditor.harden_agy ./vibe-proof-audit-report.md --dry-run
+python3 -m vibe_proof_auditor.harden ./vibe-proof-audit-report.md --dry-run
 ```
 
 Or tell the agent: “harden with agy”. That runs the report’s Remediation Prompt via `agy -p --add-dir <project>`.
@@ -132,16 +132,16 @@ vibe-proof-auditor/
 │   ├── validate-report.py        # Census / scores / verdict; --json --sarif
 │   ├── compare-eval.py           # expected.json vs report JSON; --baseline
 │   ├── render-report.py          # Markdown → HTML (no scores)
-│   └── harden_agy.py             # Remediation Prompt → agy -p
+│   └── harden.py             # Remediation Prompt → agy -p
 ├── install.sh                    # Agents + Antigravity (agy) skill dirs
 ├── evals/                        # Planted fixtures + expected manifests
-│   └── fixtures/skill-docs/      # demo-skill 1.0.0; native AGY, intentionally testless
+│   └── fixtures/skill-docs/      # demo-skill 1.0.1; native AGY, intentionally testless
 ├── tests/
 │   ├── test_render_report.py
 │   ├── test_scorelib.py
 │   ├── test_validate_report.py
 │   ├── test_export_and_eval.py
-│   ├── test_harden_agy.py
+│   ├── test_harden.py
 │   └── test_packaging.py
 ├── references/
 │   ├── checklist.md              # Scored items (only home)
@@ -182,7 +182,7 @@ python3 -m unittest discover -s tests -v
 | One worked report | `references/example-report.md` (`docs/example-report.html`) |
 | Planted evals | `evals/` |
 | JSON / SARIF / baseline | `vibe_proof_auditor/validate_report.py`, `vibe_proof_auditor/compare_eval.py` |
-| Harden via Antigravity (`agy`) | `vibe_proof_auditor/harden_agy.py`, `./install.sh` |
+| Harden via Antigravity (`agy`) | `vibe_proof_auditor/harden.py`, `./install.sh` |
 | Native AGY `demo-skill` fixture | `evals/fixtures/skill-docs/SKILL.md`, `./install.sh` |
 
 ## Related skills

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Autonomous Remediation (v1.0.0): Run the audit remediation loop through Antigravity (`agy`).
+"""Autonomous Remediation (v1.0.1): Run the audit remediation loop through a chosen harness (`agy`, `grok`, `claude`, `cursor`).
 
 Executes closed-loop remediation where the agent writes tests, patches code, and verifies execution autonomously.
 
 Extracts the fenced Remediation Prompt from a vibe-proof report and either
-prints the `agy -p` command or executes it. Stdlib only.
+prints the command for the chosen adapter or executes it. Stdlib only.
 """
 
 from __future__ import annotations
@@ -20,9 +20,7 @@ from vibe_proof_auditor.scorelib import VERSION
 
 PROMPT_HEADING = "## Remediation Prompt"
 
-
 def extract_remediation_prompt(markdown: str) -> str:
-    """Return the first fenced code block under the Remediation Prompt heading."""
     lines = markdown.splitlines()
     start = None
     for i, line in enumerate(lines):
@@ -51,8 +49,8 @@ def extract_remediation_prompt(markdown: str) -> str:
         body.append(lines[i])
     raise ValueError("Remediation Prompt fence never closed")
 
-
-def build_agy_argv(
+def build_adapter_argv(
+    adapter: str,
     prompt: str,
     *,
     project: Path,
@@ -60,25 +58,48 @@ def build_agy_argv(
     effort: str | None,
     skip_permissions: bool,
 ) -> list[str]:
-    argv = ["agy", "--print", "--add-dir", str(project.resolve())]
-    if model:
-        argv.extend(["--model", model])
-    if effort:
-        argv.extend(["--effort", effort])
-    if skip_permissions:
-        argv.append("--dangerously-skip-permissions")
-    argv.append(prompt)
-    return argv
-
+    if adapter == "agy":
+        argv = ["agy", "--print", "--add-dir", str(project.resolve())]
+        if model:
+            argv.extend(["--model", model])
+        if effort:
+            argv.extend(["--effort", effort])
+        if skip_permissions:
+            argv.append("--dangerously-skip-permissions")
+        argv.append(prompt)
+        return argv
+    elif adapter == "grok":
+        argv = ["grok", "-p", prompt, "--cwd", str(project.resolve()), "--always-approve", "--no-auto-update"]
+        if model:
+            argv.extend(["--model", model])
+        return argv
+    elif adapter == "claude":
+        argv = ["claude", "-p", prompt, "--cwd", str(project.resolve()), "--acceptEdits"]
+        if model:
+            argv.extend(["--model", model])
+        return argv
+    elif adapter == "cursor":
+        argv = ["cursor-agent", "-p", prompt, "--cwd", str(project.resolve()), "--mode", "auto-edit"]
+        if model:
+            argv.extend(["--model", model])
+        return argv
+    else:
+        raise ValueError(f"Unknown adapter: {adapter}")
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Harden a repo with agy using the vibe-proof remediation prompt."
+        description="Harden a repo using the vibe-proof remediation prompt via a chosen AI adapter."
     )
     parser.add_argument(
         "report",
         type=Path,
         help="Path to vibe-proof-audit-report.md",
+    )
+    parser.add_argument(
+        "--adapter",
+        default="agy",
+        choices=("agy", "grok", "claude", "cursor"),
+        help="The harness to execute the agentic CI loop (default: agy)",
     )
     parser.add_argument(
         "--project",
@@ -89,14 +110,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the agy command; do not execute",
+        help="Print the command; do not execute",
     )
     parser.add_argument(
         "--print-prompt",
         action="store_true",
         help="Print only the extracted remediation prompt",
     )
-    parser.add_argument("--model", default=None, help="Pass through to agy --model")
+    parser.add_argument("--model", default=None, help="Pass through model flag")
     parser.add_argument(
         "--effort",
         default=None,
@@ -131,19 +152,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: project dir not found: {project}", file=sys.stderr)
         return 1
 
-    agy = shutil.which("agy")
-    if agy is None:
-        print(
-            "error: `agy` not on PATH. Install Antigravity CLI, then re-run.\n"
-            "  Fallback: copy the Remediation Prompt from the report into any agent.\n"
-            "  Skill install for agy: ./install.sh  # or "
-            "npx skills add pedroknigge/vibe-proof-auditor -g -y "
-            "-a antigravity -a antigravity-cli",
-            file=sys.stderr,
-        )
+    adapter = args.adapter
+    binary = "cursor-agent" if adapter == "cursor" else adapter
+    exe = shutil.which(binary)
+    if exe is None:
+        print(f"error: `{binary}` not on PATH. Install {adapter} CLI, then re-run.\\nFallback: copy the Remediation Prompt from the report into any agent.", file=sys.stderr)
         return 1
 
-    argv_cmd = build_agy_argv(
+    argv_cmd = build_adapter_argv(
+        adapter,
         prompt,
         project=project,
         model=args.model,
@@ -152,7 +169,6 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.dry_run:
-        # Shell-safe preview: show binary + flags, then prompt length.
         preview = " ".join(argv_cmd[:-1]) + f" <<PROMPT ({len(prompt)} chars)"
         print(preview)
         print(prompt)
@@ -160,10 +176,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     env = os.environ.copy()
-    print(f"harden via agy → {project}", file=sys.stderr)
+    print(f"harden via {args.adapter} → {project}", file=sys.stderr)
     proc = subprocess.run(argv_cmd, cwd=str(project), env=env, check=False)
     return int(proc.returncode)
 
-
 if __name__ == "__main__":
     raise SystemExit(main())
+

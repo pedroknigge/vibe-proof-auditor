@@ -1,4 +1,8 @@
 # Changelog
+## 0.9.9
+
+- Add pragmatic integration and balanced generation checks based on X feedback
+
 ## 0.9.8
 
 - **Vibe Coder Playbook Integration**: Deeply embedded the Pre-Launch Playbook for vibe-coded apps.

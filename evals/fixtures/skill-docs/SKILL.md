@@ -1,11 +1,11 @@
 ---
 name: demo-skill
-description: "v0.9.7. Fixture Agent Skill with a runnable script and no tests. Use to validate native Antigravity (agy) skill discovery."
+description: "v0.9.9. Fixture Agent Skill with a runnable script and no tests. Use to validate native Antigravity (agy) skill discovery."
 metadata:
-  version: "0.9.7"
+  version: "0.9.9"
 ---
 
-# Demo skill (v0.9.7)
+# Demo skill (v0.9.9)
 
 Run `python3 scripts/run.py`.
 

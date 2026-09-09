@@ -60,7 +60,7 @@ Do **not** add a mega-item “complies with OWASP Top 10”. Use `references/sec
 - [ ] CSRF protection where cookie sessions apply.
 - [ ] HTTPS only in deployed environments (N/A for local libraries).
 - [ ] Generic authentication responses on login and password reset. The server returns "Invalid email or password" or "If an account exists, we sent instructions" without exposing whether the account exists. **Fail** if the app leaks account existence to unauthenticated callers.
-- [ ] Agent-specific configuration and hooks (e.g., `.serena/project.yml`, MCP config, editor tasks, environment files) are reviewed before executing in an isolated environment, treating unfamiliar repositories as hostile.
+- [ ] Agent-specific configuration and hooks are reviewed. **Active Probing:** Security boundaries are validated via live local server probing (e.g., IDOR attempts with synthesized tokens), not just static reading.
 - [ ] Spend controls and budget alerts configured for paid APIs and downstream providers.
 - [ ] No public admin, debug, or sensitive health endpoints.
 - [ ] Security events logged without PII or tokens.
@@ -77,8 +77,8 @@ Score only what the tree shows. Do not Fail this category because a human was no
 
 - [ ] Architecture README (or equivalent) describes the main flow.
 - [ ] ADRs or recorded “why” for important decisions.
-- [ ] Naming and module layout make data flow traceable from the tree.
-- [ ] No unexplained god files hiding the critical path.
+- [ ] Naming and module layout make data flow traceable from the tree (validated by dependency-cruiser or AST graph, not subjective feeling).
+- [ ] God files eliminated by strict metrics (e.g., no files > 500 lines, max cyclomatic complexity < 15) enforced by linters (ruff, eslint).
 - [ ] Critical features have a documented or easily traced in-tree walkthrough.
 - [ ] Connections between pieces are visible without a human narrator.
 - [ ] Failure modes of the critical path are findable from the tree (logs, errors, or a short debug note) without the author on call.
@@ -101,7 +101,7 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 - [ ] **[C]** Authorization/isolation tests when the product has users (user A cannot access user B). N/A otherwise.
 - [ ] Test suite runs in CI.
 - [ ] Happy path covered for critical features.
-- [ ] Coverage measured on critical modules, or documented why not.
+- [ ] Coverage measured on critical modules, AND test suite passes mutation testing (tests fail if source code boundaries or logic are intentionally corrupted).
 - [ ] Regression suite exists (new changes do not silently break old paths).
 - [ ] “Works on my machine / demo” is not the only check. `ignoreBuildErrors` / `eslint.ignoreDuringBuilds` (or equivalent) is evidence against Pass.
 
@@ -110,7 +110,7 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 ## 4. Architecture
 
 - [ ] Minimal spec or design in-tree before large features (not one-shot “build the whole product”).
-- [ ] Clear separation of concerns (domain vs infrastructure, modules, layers).
+- [ ] Clear separation of concerns enforced by declarative architecture contracts (e.g., vibe-proof.yml) validated by dependency graph analysis.
 - [ ] Features are not stacked at random (no accretion-only design).
 - [ ] Where state lives is explicit: client / server / durable store — not inferred from a finished-looking UI. **Fail** if critical state has no owner and no single home in the tree. Finding id: `state-orphan`.
 - [ ] Data model is consistent (no improvised field drift).
@@ -135,8 +135,8 @@ Mark `not assessed` unless the user was actually asked. Never Fail a gate on the
 
 Shipping is the easy part. Score whether someone who **did not write this** can still change it six months later.
 
-- [ ] Readable, consistent style and patterns.
-- [ ] Clear naming.
+- [ ] Code style and patterns are enforced by automated linters and formatters (no human subjective review required).
+- [ ] Naming conventions enforced by static analysis rules (e.g., strict regex for layer boundaries).
 - [ ] Reasonable function/module size (no god classes / god files).
 - [ ] No critical “TODO: fix later” without a ticket or context.
 - [ ] Refactor is possible without fear of silent breakage. **Pass** needs a safety net on the critical path (tests or equivalent). Demo-only confidence is **Fail**.

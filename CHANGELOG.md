@@ -1,4 +1,12 @@
 # Changelog
+## 1.0.0
+
+- Deterministic and autonomous (v1.0.0): Replaced subjective checklist items with AST/Semgrep metric rules.
+- Active Probing: Added active security probing checks via local server tests.
+- Architecture Contracts: Enforce `vibe-proof.yml` bounds.
+- Mutation Testing: Added to test checklist.
+- Agentic CI: Documented Autonomous Remediation loop in harden.
+
 ## 0.9.9
 
 - Add pragmatic integration and balanced generation checks based on X feedback

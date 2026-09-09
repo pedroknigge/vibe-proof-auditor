@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Run the audit remediation prompt through Antigravity (`agy`).
+"""Autonomous Remediation (v1.0.0): Run the audit remediation loop through Antigravity (`agy`).
+
+Executes closed-loop remediation where the agent writes tests, patches code, and verifies execution autonomously.
 
 Extracts the fenced Remediation Prompt from a vibe-proof report and either
 prints the `agy -p` command or executes it. Stdlib only.

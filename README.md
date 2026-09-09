@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-Pre-1.0 (`0.9.9`). A good adversarial agent skill with a deterministic validator. Not a production certification.
+v1.0.0. Deterministic agentic QA and DevSecOps auditor. Enforces executable contracts and active probing.
 
 ```
  __     _____ ____  _____
@@ -135,7 +135,7 @@ vibe-proof-auditor/
 │   └── harden_agy.py             # Remediation Prompt → agy -p
 ├── install.sh                    # Agents + Antigravity (agy) skill dirs
 ├── evals/                        # Planted fixtures + expected manifests
-│   └── fixtures/skill-docs/      # demo-skill 0.9.9; native AGY, intentionally testless
+│   └── fixtures/skill-docs/      # demo-skill 1.0.0; native AGY, intentionally testless
 ├── tests/
 │   ├── test_render_report.py
 │   ├── test_scorelib.py

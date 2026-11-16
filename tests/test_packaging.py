@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import tempfile
 import unittest
@@ -65,6 +66,24 @@ class VersionSyncTests(unittest.TestCase):
             f"# Demo skill (v{historical_version})",
             (DEMO / "SKILL.md").read_text(encoding="utf-8"),
         )
+
+    def test_readme_item_count_matches_the_inventory(self) -> None:
+        from vibe_proof_auditor import checklist_contract
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        match = re.search(r"(\d+) scored items", readme)
+        if match is None:
+            self.fail("README must state the scored item count")
+        self.assertEqual(int(match.group(1)), len(checklist_contract.scored_items()))
+
+    def test_finding_ids_are_declared_and_owned(self) -> None:
+        text = (ROOT / "references" / "checklist.md").read_text(encoding="utf-8")
+        head, table = text.split("## Common finding IDs", 1)
+        declared = set(re.findall(r"^\| `([^`]+)`", table, re.MULTILINE))
+        owned = set(re.findall(r"Finding id: `([^`]+)`", head))
+        self.assertEqual(owned - declared, set(), "row finding ids must be declared")
+        # `idor-open` is a documented alias of `idor`.
+        self.assertEqual(declared - owned, {"idor-open"})
 
     def test_demo_fixture_remains_runnable_and_testless(self) -> None:
         expected = json.loads(

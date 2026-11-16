@@ -23,10 +23,8 @@ FIXTURES = ROOT / "evals" / "fixtures"
 EXPECTED = ROOT / "evals" / "expected"
 CHECKLIST = ROOT / "references" / "checklist.md"
 
-# Rows exist for these in references/checklist.md, but none of them carries a
-# `Finding id:` yet, so the manifests name ids the checklist never declares.
-# Ratchet: the set may shrink, never grow. Shrinking it needs a checklist edit.
-KNOWN_UNDECLARED = frozenset({"empty-catch", "no-tests"})
+# Every manifest id must resolve to a row or the finding-id table.
+KNOWN_UNDECLARED: frozenset[str] = frozenset()
 
 
 def run(script: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -144,7 +142,7 @@ class EvalFixtureContractTests(unittest.TestCase):
                     ident = spec["id"]
                     if f"`{ident}`" not in checklist:
                         undeclared.add(ident)
-        self.assertLessEqual(undeclared, KNOWN_UNDECLARED)
+        self.assertEqual(undeclared, KNOWN_UNDECLARED)
 
     def test_worker_protocol_plants_a_skipped_step(self) -> None:
         source = (FIXTURES / "worker-protocol" / "src" / "consumer.py").read_text(
@@ -171,6 +169,19 @@ class EvalFixtureContractTests(unittest.TestCase):
             )
             with self.assertRaises(sqlite3.OperationalError):
                 old_app["get_customer"](connection, 1)
+
+    def test_auth_lifecycle_fixture_plants_auth_gaps(self) -> None:
+        fixture = FIXTURES / "auth-lifecycle"
+        auth = (fixture / "src" / "auth.ts").read_text(encoding="utf-8")
+        routes = (fixture / "src" / "routes.ts").read_text(encoding="utf-8")
+        schema = (fixture / "src" / "schema.sql").read_text(encoding="utf-8")
+        self.assertIn('createHash("sha256")', auth)
+        self.assertNotIn("expires", auth)
+        self.assertIn("resetToken.findUnique", auth)
+        self.assertIn("/api/admin/export", routes)
+        self.assertNotIn("requireRole", routes)
+        self.assertNotIn("unique", schema)
+        self.assertIn("phone", schema)
 
     def test_low_signal_fixture_passes_while_checkout_undercharges(self) -> None:
         fixture = FIXTURES / "low-signal-tests"

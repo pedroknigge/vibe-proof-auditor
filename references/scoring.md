@@ -112,6 +112,15 @@ Infer type from the tree. Item-level N/A is the mechanism; a category is N/A onl
 
 Auth-provider preference (Clerk / Auth0 / Supabase Auth) applies **only** when the product has users. Do not invent auth for `cli`, `library`, `static-site`, or `skill/docs`.
 
+**Conditional rows (v1.3.0).** Mark N/A only when the surface does not exist:
+- Password storage, reset, and verification: no password auth.
+- Encryption at rest, PII minimization, audit trail, backups, deletion and export: no durable sensitive data or privileged actions.
+- Connection pool, indexes, and plan limits: no database or hosted provider.
+- Restart policy, health check, preview deployment, zero-downtime, domain/TLS, uptime, and alert routing: not deployed.
+- Staging execution: no deployment.
+- UI states, slow-network, responsive, and a11y: no UI.
+- Pinned runtime: no shipped or deployed build.
+
 Prefer mature AuthZ (RLS / Firebase rules, server ownership checks) when the product has users **and** a client-reachable datastore or user-owned resources — including `saas-single-user` when a client key can read rows. IDOR tests stay N/A only when there is no sharing and no user-owned foreign resources.
 
 Webhook-signature scoring is N/A unless the tree has webhook receivers (Stripe / GitHub / Svix or equivalent). Production CORS is N/A unless there is a browser-cross-origin API. Session invalidation is N/A if there is no cookie/session/JWT auth. Client-bundle secrets are N/A if there is no client/browser bundle. The Process restore/reconciliation row is N/A if there is no durable user data.

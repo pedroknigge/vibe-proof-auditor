@@ -1,6 +1,6 @@
 # Evals
 
-Twelve planted fixtures plus expected-finding manifests. The fixtures plant concrete failure paths (secrets, weak auth, demo-only tests, recovery traps, and neighbors). The agent still classifies evidence. Compare a report with a manifest after an agent audit to measure detection; CI alone checks fixture behavior and manifest structure, not agent recall.
+Thirteen planted fixtures plus expected-finding manifests. The fixtures plant concrete failure paths (secrets, weak auth, demo-only tests, recovery traps, and neighbors). The agent still classifies evidence. Compare a report with a manifest after an agent audit to measure detection; CI alone checks fixture behavior and manifest structure, not agent recall.
 
 ## Fixtures
 
@@ -18,6 +18,7 @@ Twelve planted fixtures plus expected-finding manifests. The fixtures plant conc
 | `fixtures/micro-system-patchwork` | `saas-single-user` | `billing` and `reports` each ship their own transport, auth, logging, config and error shape |
 | `fixtures/rollback-trap` | `saas-single-user` | Migration renames a column; code-only rollback redeploys an old reader that crashes on the new schema |
 | `fixtures/low-signal-tests` | `library` | Passing checkout test derives its expected value from the same helper and misses the shipping charge |
+| `fixtures/auth-lifecycle` | `saas-single-user` | SHA-256 password hash, reusable reset token stored raw, anonymous admin export, no unique email, unused phone field |
 
 `expected/forgeboard.json` is the golden for `references/example-report.md` (CI).
 

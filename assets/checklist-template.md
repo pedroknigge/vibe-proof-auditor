@@ -11,7 +11,7 @@ Cover sheet only. **Items live solely in `references/checklist.md`.** Do not pas
 **Evidence coverage:** _% (from `references/scoring.md`)_
 
 Marks: Pass | Partial | Fail | N/A | insufficient evidence (coverage only, not Partial)  
-Human-interview rows: not assessed | Pass | Fail — **not scored, not a gate**
+Human-interview rows: not assessed (or the observed answer) — **not scored, never a gate**. Do not Fail a gate on an unasked interview.
 
 Scoring: `references/scoring.md`  
 Gates / verdict words / stage notes: `references/gates.md`

@@ -503,3 +503,85 @@ rg -n "codex-security scan|claude-security|npm audit|pip-audit|trufflehog" --glo
 
 **The Threat:** A security scanner cannot compensate for choosing to run a version with a known critical vulnerability (e.g., Next.js August 25 AVIF RCE). 
 **Evidence:** **Fail** if the stack is not patched against known advisories before scanning.
+
+---
+
+## 22. Password Storage and Reset Tokens
+
+**OWASP:** A02 Cryptographic Failures / A07 Identification and Authentication Failures. Map to **Password storage** (`weak-password-hash`) and **Password reset and email verification** (`unproven-reset-flow`).
+
+```bash
+# Password write path: plaintext, reversible encryption, or a fast hash
+rg -n "password.*(md5|sha1|sha256|createHash|digest\()|encrypt\(password|password\s*[:=]\s*['\"]" -i
+# Modern hash usage
+rg -n "bcrypt|argon2|scrypt|pbkdf2" -i
+# Reset / verification token generation, storage, expiry
+rg -n "reset.?token|verification.?token|generateToken|crypto\.random|expires" -i
+```
+
+**The Threat:** A leaked database turns a fast hash into plaintext credentials, and a reusable or non-expiring reset token allows account takeover.
+**Evidence:** **Fail** when a stored password is plaintext, reversibly encrypted, or a single fast hash without a salt; when reset tokens are reusable, predictable, or never expire; or when neither flow was executed. **Pass** requires a modern work factor and one executed reset and verification. N/A without password auth.
+
+---
+
+## 23. Endpoint Authorization Map
+
+**OWASP:** A01 Broken Access Control. Map to **Every server entry point declares its auth requirement** — finding id `endpoint-authz-missing`.
+
+```bash
+# Enumerate server entry points
+rg -n "export async function (GET|POST|PUT|PATCH|DELETE)|app\.(get|post|put|patch|delete)\(|@router\.(get|post)|server action|use server|createServerAction" -i
+# Find privilege checks
+rg -n "requireAuth|requireRole|isAdmin|hasPermission|authorize|can\(|session\.user" -i
+```
+
+**The Threat:** A route that relies on the UI to hide a button, or on “logged in” as the only check, lets any account call a privileged action.
+**Evidence:** List every mutating or sensitive entry point and the check on its server path. **Fail** when a sensitive route has no auth requirement, trusts a client-supplied role or user id, or is reachable by any authenticated user regardless of role. A signed webhook is not an anonymous route; verify its signature instead. N/A when the product has no server entry points.
+
+---
+
+## 24. Plaintext Sensitive Data at Rest
+
+**OWASP:** A02 Cryptographic Failures. Map to **Sensitive data at rest** — finding id `plaintext-sensitive-data`.
+
+```bash
+# Tokens, recovery codes, API keys in schema or seeds
+rg -n "(token|secret|api_key|recovery|otp|password)\s*(text|varchar|string)" -i --glob '*.{sql,ts,js,py,rb}'
+# Encryption or provider-managed storage
+rg -n "encrypt|kms|vault|pgcrypto|managed encryption" -i
+```
+
+**The Threat:** A database dump or backup exposes usable session tokens, provider keys, or recovery codes.
+**Evidence:** **Fail** when a schema, seed, or dump shows a plaintext token, API key, password, or recovery code, or when durable sensitive data sits in an unencrypted store. Provider-managed database encryption satisfies the storage layer; application secrets still must not be plaintext rows. N/A without durable sensitive data.
+
+---
+
+## 25. Audit Trail for Privileged Actions
+
+**OWASP:** A09 Security Logging and Monitoring Failures. Map to **Audit trail** — finding id `missing-audit-trail`.
+
+```bash
+# Privileged or irreversible actions
+rg -n "role|permission|admin|export|delete|refund|credit|impersonat" -i --glob '*.{ts,js,py}'
+# Audit writes
+rg -n "audit|event_log|activity_log|log.*action|who_did" -i
+```
+
+**The Threat:** An incident cannot identify who changed a role, exported data, or adjusted a payment, so it cannot be contained or reversed.
+**Evidence:** Trace one privileged action through its handler. **Fail** when the action leaves no attributable record with actor, target, time, and outcome. Structured application logs without an action record may be Partial. N/A when the product has no privileged or irreversible actions.
+
+---
+
+## 26. PII Minimization
+
+**OWASP:** A04 Insecure Design / privacy. Map to **Stored personal data is limited to fields with a use** — finding id `pii-overcollection`.
+
+```bash
+# Personal-data fields in schema
+rg -n "(ssn|social_security|phone|birth|dob|address|passport|tax_id|free_text|notes)" -i --glob '*.{sql,ts,js,py}'
+# Read paths for those fields
+rg -n "\.phone|\.birth|\.address|\.ssn|tax_id" -i
+```
+
+**The Threat:** Unused PII increases breach impact and retention obligations with no product value.
+**Evidence:** **Fail** when an inactive field holds a sensitive identifier or free-text PII with no read path, retention rule, or deletion path. A field used only for display or support counts as used. N/A without personal data.

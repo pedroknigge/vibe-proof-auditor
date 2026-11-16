@@ -1,4 +1,13 @@
 # Changelog
+## 1.3.0
+
+- Added fifteen scored rows for failures a passing demo hides: endpoint authorization coverage, password storage (`weak-password-hash`), reset and verification tokens (`unproven-reset-flow`), plaintext sensitive data at rest, audit trails, PII overcollection, datastore constraints, staging execution, UI loading/empty/error states, pinned runtimes, development defaults in production, restart policy, health checks, connection pooling, and provider plan limits. The current inventory is 131 scored items.
+- Sharpened existing rows: RLS policies that grant every authenticated user access, HTTPS domain and certificate validity, spend caps that cover cloud infrastructure, incident communication for SLA claims, environment variables that must not fall back to development defaults, and slow-network behavior in the mobile Extras.
+- Added Extras for automated backups, deletion/retention and export, preview deployments, zero-downtime releases, error tracking, uptime checks, alert routing, feedback, and incident communication. Extras stay out of the overall score.
+- Recorded the 100-item production launch list in `references/claim-provenance.md`, including the items that stayed implementation choices rather than scored rules. The supplied percentages and incident references remain leads, not evidence.
+- Corrected the 1.2.0 inventory note from 114 to 117 items, which is what that release shipped.
+- Audited the existing rows: every finding id now resolves to an owning row or the id table, datastore rules joined the critical security gate, vague rows gained observable fail/partial conditions, and the redundant happy-path testing row and duplicate alerting Extras were merged.
+
 ## 1.2.0
 
 - Made the Testing rubric distinguish behavior-level, cross-component proof from tautological unit tests; added repeatable E2E artifacts without mandating E2E as the only test type.
@@ -8,7 +17,7 @@
 
 ## 1.1.0
 
-- Replaced prescriptive, duplicate, and subjective checklist marks with observable failure paths, applicability conditions, and proof requirements; the scored inventory now has 114 distinct items. Added checks for concurrent invariant breaks, duplicate effects, split writes, unsafe retries, retry storms, and stale critical caches.
+- Replaced prescriptive, duplicate, and subjective checklist marks with observable failure paths, applicability conditions, and proof requirements; the scored inventory now has 117 distinct items. Added checks for concurrent invariant breaks, duplicate effects, split writes, unsafe retries, retry storms, and stale critical caches.
 - Strengthened the existing environment-isolation gate: deployed systems must show code/config rollback and, when durable data changes, a compatible or rehearsed data recovery path. Mapped the user-supplied rollback post to these checks without treating the post as a universal design rule.
 - Added a versioned Checklist evidence ledger. Current-version reports must mark every scored row; the validator reconciles item marks, category census, and critical Fail flags. Historical example and demo fixtures remain pinned to their original version.
 

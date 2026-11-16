@@ -1,13 +1,13 @@
 ---
 name: vibe-proof-auditor
-description: "v1.2.0. Audit a project for production readiness with evidence-backed security, behavior, recovery, testing, and maintenance checks. Use for vibe-proof, anti-slop, listo para prod, production checklist, or an explicit hardening request."
+description: "v1.3.0. Audit a project for production readiness with evidence-backed security, auth lifecycle, behavior, recovery, operations, testing, and maintenance checks. Use for vibe-proof, anti-slop, listo para prod, production checklist, or an explicit hardening request."
 license: MIT
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   author: pedroknigge
 ---
 
-# Vibe-Proof Auditor (v1.2.0)
+# Vibe-Proof Auditor (v1.3.0)
 
 Requires a filesystem, shell, git, and Python 3.9+. `rg` is recommended for Deep security searches.
 
@@ -31,7 +31,7 @@ A production-readiness or anti-vibe audit of a project path. Catch the public du
 
 2. **Snapshot (real only).** Tree, stack, tests, secrets, deps, CI, env example, docs. Never simulate. If present, **run** and capture exit codes (do not invent output): the test command from CI or package scripts; `npm`/`pnpm`/`pip`/`cargo audit` when a lockfile exists; `gitleaks detect` when the binary exists. Tool missing or non-zero → `insufficient evidence` on affected items. Unasked interview → `not assessed`.
 
-3. **Audit.** Deep: load `references/checklist.md` first, `references/scoring.md` before numbers. Mark every scored checkbox with a path and short proof (or a reason for N/A / insufficient evidence); use the item order as its versioned identifier. Trace the input or failure sequence and observable outcome for Fail and Partial. A grep hit or absence alone is not proof. Per category: evidence, score, 1–3 strongest proofs, 1 fix. Derive the census from the item marks. Load `references/security-deep.md` with Security, `references/testing-deep.md` with Testing, `references/reliability-deep.md` for applicable concurrency, retry, cache, migration, and recovery paths, and `references/agent-harness-deep.md` only for agent harnesses. Fan-out if the host can spawn agents. Never probe production or run restore/rollback against live data.
+3. **Audit.** Deep: load `references/checklist.md` first, `references/scoring.md` before numbers. Mark every scored checkbox with a path and short proof (or a reason for N/A / insufficient evidence); use the item order as its versioned identifier. Trace the input or failure sequence and observable outcome for Fail and Partial. A grep hit or absence alone is not proof. Per category: evidence, score, 1–3 strongest proofs, 1 fix. Derive the census from the item marks. Load `references/security-deep.md` with Security, `references/testing-deep.md` with Testing, `references/reliability-deep.md` for applicable concurrency, retry, cache, migration, and recovery paths, and `references/agent-harness-deep.md` only for agent harnesses. Fan-out if the host can spawn agents. Never probe production or run restore/rollback against live data. Operational rows (restart, health, plan limits) require platform config or a disposable deployment; a claim in a README is not proof.
 
 4. **Deep gates.** `references/gates.md` only. Verdict first, then the matching stage note. Mode does not change gates.
 

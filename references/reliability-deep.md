@@ -29,3 +29,11 @@ Applicable to deployed systems and durable data. Seed a nonempty disposable data
 ## Resource lifecycle and protocol completeness
 
 For resource acquisition, force an early return and an exception between acquire and release; inspect the open handle or connection count afterward. For a protocol or state machine, derive the required transitions from its actual API contract and exercise timeout, retry, cancellation, and duplicate delivery. A `finally` or `ack()` text match is only a lead; the observed state determines the mark. See `resource-leak`, `cleanup-on-failure-missing`, and `step-skipped` in `checklist.md`.
+
+## Runtime supervision and readiness — `no-restart-policy` / `missing-health-check`
+
+Applicable to a deployed long-running service. Terminate the process or make its critical dependency unavailable, then observe platform behavior. **Pass:** the service restarts under a supervisor with a bounded loop, and the readiness signal stops routing traffic while the dependency is down. **Fail:** the process stays dead until a human restarts it, or readiness keeps reporting ready while requests cannot succeed. A shallow liveness probe is acceptable only when the platform drains the instance. N/A for serverless functions, static sites, and non-deployed packages.
+
+## Connection and plan limits — `connection-pool-unbounded` / `plan-limit-unknown`
+
+Applicable to a hosted database or provider. Count connections at expected concurrency for one and many instances. Compare the result with the provider's documented connection, concurrency, storage, and quota limits. **Pass:** a pool or provider cap bounds connections and the expected launch load fits the plan, with an upgrade or degradation path. **Fail:** each request opens a connection without release, serverless fan-out can exhaust the pool, or launch traffic can exceed a hard limit with no path. Record the measured count and the documented limit.

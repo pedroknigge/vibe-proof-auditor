@@ -1,0 +1,13 @@
+{
+  "fixture": "auth-lifecycle",
+  "product_type": "saas-single-user",
+  "must_fail_gates": ["critical security", "testing"],
+  "must_find": [
+    {"id": "weak-password-hash", "path_substr": "createHash(\"sha256\")", "mark": "Fail"},
+    {"id": "unproven-reset-flow", "path_substr": "resetToken.findUnique", "mark": "Fail"},
+    {"id": "endpoint-authz-missing", "path_substr": "api/admin/export", "mark": "Fail"},
+    {"id": "plaintext-sensitive-data", "path_substr": "reset_tokens", "mark": "Fail"},
+    {"id": "missing-db-constraint", "path_substr": "schema.sql", "mark": "Fail"},
+    {"id": "pii-overcollection", "path_substr": "phone", "mark": "Fail"}
+  ]
+}

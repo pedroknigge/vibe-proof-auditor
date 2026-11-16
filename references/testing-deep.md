@@ -16,3 +16,7 @@ For an isolated system, list its plausible failure modes first (invalid input, b
 
 Record the test command, fixture or seed, relevant environment/config, exit status, and an observable result such as response plus final database row, trace, screenshot, or log. The artifact must let another developer repeat the scenario; a green CI badge or unseeded screenshot cannot do that. Do not demand a screenshot from a CLI or library.
 
+
+## Staging execution — `staging-unproven`
+
+Applicable to a deployed product. Deploy the release candidate to the non-production environment with its own configuration and credentials. Run the critical flow, one authorization or isolation check, and one failure path (provider down, invalid input, or expired session). **Pass:** the evidence names the environment, build, command or request, and observed result. **Fail:** only local, mocked, or preview-with-dev-config runs exist. A green unit suite is not this evidence. N/A without a deployment.

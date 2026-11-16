@@ -22,7 +22,9 @@ When applicable, all of the following must hold:
 
 - No hardcoded secrets in source or git history (as far as the tree allows).
 - AuthN is server-side when the product has auth.
+- Passwords use a modern salted hash, and every server entry point enforces its own auth requirement, when those surfaces exist.
 - Object-level AuthZ / IDOR checks on every sensitive resource when the product has users and resources.
+- Datastore rules (RLS, Firebase rules, or equivalent) protect client-reachable rows when that surface exists.
 - Server-side input validation on entry points.
 - Security category score ≥ 8/10 (`references/scoring.md`).
 
@@ -54,6 +56,7 @@ Mark **N/A** when there is no runtime to handle errors.
 Use repository evidence and a disposable rehearsal when one is available. Never run rollback or restore against production as an audit probe:
 
 - Distinct local / staging / production (or documented equivalent).
+- Production resolves its own configuration and does not fall back to a development database, bucket, mailer, or API URL.
 - A failed release can revert application code and configuration to a known version.
 - When durable data changes, the previous application version can read the migrated data, or a tested restore/reconciliation path returns the system to a valid state. A platform code rollback alone does not prove this.
 - A rollback rehearsal records the command and outcome in a disposable environment or equivalent deployment test. An untested runbook is not Pass for a deployed data-critical system.

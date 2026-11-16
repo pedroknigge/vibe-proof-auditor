@@ -1,4 +1,17 @@
 # Changelog
+## 1.2.0
+
+- Made the Testing rubric distinguish behavior-level, cross-component proof from tautological unit tests; added repeatable E2E artifacts without mandating E2E as the only test type.
+- Sharpened login abuse checks for independent account and source coverage, trusted proxy identity, and deployed enforcement; nginx and fixed request rates remain optional implementations.
+- Added conditional agent-harness cost and context checks, measured across completed tasks and rendered requests, plus source-claim provenance. The general security post maps to existing rows instead of creating duplicates.
+- Added a planted `low-signal-tests` fixture whose suite passes while checkout omits a shipping charge.
+
+## 1.1.0
+
+- Replaced prescriptive, duplicate, and subjective checklist marks with observable failure paths, applicability conditions, and proof requirements; the scored inventory now has 114 distinct items. Added checks for concurrent invariant breaks, duplicate effects, split writes, unsafe retries, retry storms, and stale critical caches.
+- Strengthened the existing environment-isolation gate: deployed systems must show code/config rollback and, when durable data changes, a compatible or rehearsed data recovery path. Mapped the user-supplied rollback post to these checks without treating the post as a universal design rule.
+- Added a versioned Checklist evidence ledger. Current-version reports must mark every scored row; the validator reconciles item marks, category census, and critical Fail flags. Historical example and demo fixtures remain pinned to their original version.
+
 ## 1.0.1
 
 - Multi-harness Agentic CI: Replaced `harden_agy.py` with `harden.py`, adding `--adapter` flag to support autonomous execution via `grok`, `claude`, and `cursor` in addition to `agy`.

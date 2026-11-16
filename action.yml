@@ -1,5 +1,5 @@
 name: vibe-proof-validate
-description: Recompute vibe-proof report math and optionally emit JSON/SARIF
+description: Validate current-version item coverage, report math, and verdict; optionally emit JSON/SARIF
 inputs:
   report:
     description: Path to vibe-proof-audit-report.md

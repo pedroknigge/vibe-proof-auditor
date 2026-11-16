@@ -2,6 +2,8 @@
 
 Single home for **verdict words**, **absolute/recommended gates**, the **verdict rule**, and **stage notes**. Do not copy thresholds or these strings into other files; point here.
 
+Constituent scored rows carry `Gate: ...` tags in `references/checklist.md`; the validator checks that a Pass gate has no Partial, Fail, or insufficient-evidence constituent.
+
 ## Verdict words (exact)
 
 `READY` | `NEEDS HARDENING` | `BLOCKED FOR PRODUCTION`
@@ -49,14 +51,17 @@ Mark **N/A** when there is no runtime to handle errors.
 
 ### 4. Environment isolation
 
-Repo-evidence only (CI, configs, docs):
+Use repository evidence and a disposable rehearsal when one is available. Never run rollback or restore against production as an audit probe:
 
 - Distinct local / staging / production (or documented equivalent).
-- Rollback path for data-critical systems.
+- A failed release can revert application code and configuration to a known version.
+- When durable data changes, the previous application version can read the migrated data, or a tested restore/reconciliation path returns the system to a valid state. A platform code rollback alone does not prove this.
+- A rollback rehearsal records the command and outcome in a disposable environment or equivalent deployment test. An untested runbook is not Pass for a deployed data-critical system.
+- A data-critical system can restore or reconcile durable state on a disposable copy and verify a critical read and invariant. A backup file alone is not a recovery test.
 
 Do **not** require proving “the AI agent cannot write to prod”. That claim is human-interview, `not assessed` if unasked, and never a gate.
 
-Mark **N/A** when the package is not deployed (typical `library` publish-only may still apply a documented release/rollback path; `skill/docs` is N/A).
+Mark **N/A** when the package is not deployed (typical `library` publish-only may still apply a documented release/rollback path; `skill/docs` is N/A). Missing access to a safe rehearsal is `insufficient evidence` on the checklist row and Fail for this applicable gate, not permission to touch production.
 
 ### 5. No ownership-human gate
 
@@ -84,7 +89,7 @@ Apply only **applicable** absolute gates (skipped/N/A gates ignored):
 
 Product / scope still sits in overall (`references/scoring.md`). A score below 6 there does **not** by itself produce `BLOCKED FOR PRODUCTION` and does **not** block `READY`.
 
-Overall, category scores, and Evidence coverage come from `references/scoring.md`. Do not average gates. Do not Fail because a recommended gate failed. `scripts/validate-report.py` recomputes this rule; the renderer does not.
+Overall, category scores, and Evidence coverage come from `references/scoring.md`. Do not average gates. Do not Fail because a recommended gate failed. `python3 -m vibe_proof_auditor.validate_report` recomputes this rule; the renderer does not.
 
 ## Stage (Prototype / MVP / Production)
 

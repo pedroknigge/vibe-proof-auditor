@@ -2,7 +2,7 @@
 
 Load in **Deep** mode when scoring Security. Item marks stay in `references/checklist.md`. Thresholds stay in `references/gates.md`. This file is a **search playbook**: vibe-coding failure modes mapped to OWASP, with commands.
 
-Do not treat a finding here as a new scored mega-item. Map each hit onto the matching checklist row (AuthZ, secrets, injection, …). Absence of a pattern is evidence for Pass on that row, not a separate bonus.
+Do not treat a finding here as a new scored mega-item. Map each hit onto the matching checklist row (AuthZ, secrets, injection, …). Searches only locate candidate paths: read the call chain and use a request or failure test when practical. A missing pattern is not evidence for Pass.
 
 Run from the project root. If a command fails, record `insufficient evidence` on affected checklist items.
 
@@ -26,11 +26,11 @@ Red flags: `if (!cookie) redirect` with no user id; API handlers that trust `x-u
 
 ---
 
-## 2. localStorage JWT as AuthZ
+## 2. Browser-readable tokens and client-only AuthZ
 
 **OWASP:** A01, A07, A02 Cryptographic Failures.
 
-A token in `localStorage` is readable by XSS. Using it only in the browser to hide UI is not authorization.
+A token in `localStorage` is readable by JavaScript and therefore exposed if the origin has XSS. That storage choice alone does not prove the server accepts an unverified token or lacks authorization. Trace storage, XSS exposure, expiry, refresh, and server verification separately. Using a browser-only check to hide UI is not authorization.
 
 ```bash
 rg -n "localStorage\.(get|set)Item" --glob '*.{ts,tsx,js,jsx}'
@@ -38,7 +38,7 @@ rg -n "jwt|access_token|id_token|refresh_token" --glob '*.{ts,tsx,js,jsx}'
 rg -n "Authorization.*localStorage|Bearer.*localStorage"
 ```
 
-Red flags: `localStorage.setItem('token')` plus client-only route guards; JWTs decoded (not verified) in the browser to assign roles; `httpOnly: false` / missing HttpOnly on session cookies (map to checklist **[C]** session cookies — Fail, not Partial). Missing `signOut` / session revoke / token denylist maps to checklist **session invalidation** (not this row).
+Red flags: `localStorage.setItem('token')` plus client-only route guards; JWTs decoded (not verified) to grant server actions; a session cookie missing HttpOnly in an app with an XSS path. Record the observed exposure or authorization failure before marking Fail. Missing `signOut` / session revoke maps to checklist **session invalidation**.
 
 ```bash
 rg -n "httpOnly:\\s*false|httpOnly:\\s*!1" --glob '*.{ts,js}'
@@ -321,7 +321,9 @@ rg -n "captcha|hcaptcha|recaptcha|turnstile|altcha|friendly.?captcha|arcjet|boti
 rg -n "siteverify|verify.*turnstile|challenges\.cloudflare\.com|assessments" --glob '*.{ts,js,py,go}'
 ```
 
-Red flags: a login/register/reset route with no limiter import on any server path; the limiter keyed only on `x-forwarded-for` taken straight from a caller-settable header with no trusted-proxy config; an in-memory counter as the only store on a serverless or multi-instance deploy; a CAPTCHA widget rendered in the form whose token is never sent to `siteverify` (the widget is decoration until the server verifies it); LLM or paid-API routes throttled nowhere. Absence of any server/edge limiter on a live auth path is **Fail** — do not Pass because the login form disables its button.
+Red flags: a login/register/reset route with no limiter on any trusted server, provider, or edge path; `x-forwarded-for` read without a trusted-proxy configuration; an in-memory counter as the only store on a serverless or multi-instance deploy; a CAPTCHA widget whose token is never verified by the server; LLM or paid-API routes throttled nowhere. A single `IP:account` bucket is also weak: rotating either part creates fresh buckets. Check two sequences on a disposable environment: many source addresses against one account, and one source address against many accounts. Verify that enforcement survives multiple app instances/restarts and that the rejected path returns a suitable response without triggering the expensive operation. A per-account lockout or backoff must also avoid letting an attacker trivially deny service to a victim. Absence of any trusted limiter on a live auth path is **Fail** — a disabled login button is no proof.
+
+Nginx `limit_req` is one valid edge implementation; it is not a required architecture. Its default rejection status is 503 unless `limit_req_status` changes it, and an IP bucket alone does not cover distributed attempts against one account. A CDN/WAF, auth provider, or application can supply complementary controls; evaluate the deployed request path rather than mandating a component. See [Nginx `limit_req` documentation](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html), [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html), and [OWASP Bot Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Bot_Management_and_Anti-Automation_Cheat_Sheet.html).
 
 ---
 
@@ -374,7 +376,7 @@ rg -n "createSignedUrl|getSignedUrl|expiresIn|Expires" --glob '*.{ts,js,py}'
 
 Red flags: `multer({ dest })` or a raw `request.files[...]` write with no `fileFilter` and no `limits.fileSize`; an allowlist built from the client-declared `file.type` / `Content-Type` (the caller sets both — check the magic bytes or re-encode); a **denylist** of extensions (`.php`, `.exe`) instead of an allowlist; `path.join(uploadDir, file.originalname)` with no sanitiser, so `../../` escapes the directory and the caller picks the extension; uploads written into `public/` or `static/` where the app server will serve — and possibly execute — them; a public bucket, or signed URLs with year-long expiry; SVG or HTML accepted into a same-origin served path (stored XSS); no cap, so one request fills the disk or the memory of the instance.
 
-Pass needs the whole set: server-side type **and** size limits, a server-generated stored name, and non-executable, non-public storage. Missing any one of those on a live upload path is **Fail**; type and size present but public or caller-named storage is **Partial**.
+Pass needs bounded upload processing, content validation appropriate to how the file is used, a path the caller cannot escape, and access/execution policy appropriate to the content. Intentionally public, inert assets can live in public storage. Demonstrate traversal, unbounded use, executable content, or unauthorized retrieval before marking Fail.
 
 ---
 

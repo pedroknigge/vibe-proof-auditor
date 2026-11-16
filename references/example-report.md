@@ -11,7 +11,7 @@
 **Status:** BLOCKED FOR PRODUCTION  
 **Stage note:** Not expected. Do not ship.
 
-Worked example for the formula in `references/scoring.md` (ForgeBoard). Verdict and stage note from `references/gates.md` only.
+Historical v1.0.1 worked example for the formula in `references/scoring.md` (ForgeBoard). It does not demonstrate the current item ledger or rollback rehearsal; validate with `--legacy`. Verdict and stage note from `references/gates.md` only.
 
 ## Snapshot (real)
 

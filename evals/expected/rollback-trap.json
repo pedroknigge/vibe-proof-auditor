@@ -1,0 +1,11 @@
+{
+  "fixture": "rollback-trap",
+  "product_type": "saas-single-user",
+  "must_fail_gates": ["environment isolation"],
+  "must_find": [
+    {"id": "rollback-trap", "path_substr": "0002_rename.sql", "mark": "Fail"},
+    {"id": "migration-rollback-break", "path_substr": "0002_rename.sql", "mark": "Fail"},
+    {"id": "rollback-unproven", "path_substr": "rollback.md", "mark": "Fail"},
+    {"id": "restore-unproven", "path_substr": "rollback.md", "mark": "Fail"}
+  ]
+}

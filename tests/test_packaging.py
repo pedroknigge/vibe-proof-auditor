@@ -51,21 +51,18 @@ class VersionSyncTests(unittest.TestCase):
         self.assertIn(
             f"## {version}", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         )
+        self.assertIn(f"v{version}", (ROOT / "README.md").read_text(encoding="utf-8"))
+        historical_version = (DEMO / "VERSION").read_text(encoding="utf-8").strip()
         self.assertIn(
-            f"v{version}", (ROOT / "README.md").read_text(encoding="utf-8")
-        )
-        self.assertIn(
-            f"**Skill version:** {version}",
+            f"**Skill version:** {historical_version}",
             (ROOT / "references" / "example-report.md").read_text(encoding="utf-8"),
         )
         self.assertIn(
-            f'version: "{version}"', (DEMO / "SKILL.md").read_text(encoding="utf-8")
-        )
-        self.assertEqual(
-            (DEMO / "VERSION").read_text(encoding="utf-8").strip(), version
+            f'version: "{historical_version}"',
+            (DEMO / "SKILL.md").read_text(encoding="utf-8"),
         )
         self.assertIn(
-            f"# Demo skill (v{version})",
+            f"# Demo skill (v{historical_version})",
             (DEMO / "SKILL.md").read_text(encoding="utf-8"),
         )
 
@@ -102,6 +99,18 @@ class InstallScriptTests(unittest.TestCase):
             ]
             for dest in auditor_dests:
                 self.assertTrue((dest / "SKILL.md").is_file(), dest)
+                self.assertTrue(
+                    (dest / "references" / "reliability-deep.md").is_file(), dest
+                )
+                self.assertTrue(
+                    (dest / "references" / "testing-deep.md").is_file(), dest
+                )
+                self.assertTrue(
+                    (dest / "references" / "agent-harness-deep.md").is_file(), dest
+                )
+                self.assertTrue(
+                    (dest / "references" / "claim-provenance.md").is_file(), dest
+                )
             for dest in demo_dests:
                 self.assertEqual(
                     (dest / "SKILL.md").read_text(encoding="utf-8"),
@@ -110,7 +119,7 @@ class InstallScriptTests(unittest.TestCase):
                 self.assertTrue((dest / "scripts" / "run.py").is_file(), dest)
                 self.assertEqual(
                     (dest / "VERSION").read_text(encoding="utf-8").strip(),
-                    read_version(),
+                    (DEMO / "VERSION").read_text(encoding="utf-8").strip(),
                 )
                 self.assertFalse((dest / "tests").exists(), dest)
             self.assertFalse((home / ".agents" / "skills" / "demo-skill").exists())

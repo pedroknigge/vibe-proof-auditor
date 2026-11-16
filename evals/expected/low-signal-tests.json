@@ -1,0 +1,8 @@
+{
+  "fixture": "low-signal-tests",
+  "product_type": "library",
+  "must_fail_gates": [],
+  "must_find": [
+    {"id": "low-signal-tests", "path_substr": "test_checkout.py", "mark": "Fail"}
+  ]
+}

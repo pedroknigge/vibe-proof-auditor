@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Autonomous Remediation (v1.0.1): Run the audit remediation loop through a chosen harness (`agy`, `grok`, `claude`, `cursor`).
+"""Run the audit remediation loop through a chosen harness (`agy`, `grok`, `claude`, `cursor`).
 
 Executes closed-loop remediation where the agent writes tests, patches code, and verifies execution autonomously.
 
@@ -19,6 +19,7 @@ from pathlib import Path
 from vibe_proof_auditor.scorelib import VERSION
 
 PROMPT_HEADING = "## Remediation Prompt"
+
 
 def extract_remediation_prompt(markdown: str) -> str:
     lines = markdown.splitlines()
@@ -49,6 +50,7 @@ def extract_remediation_prompt(markdown: str) -> str:
         body.append(lines[i])
     raise ValueError("Remediation Prompt fence never closed")
 
+
 def build_adapter_argv(
     adapter: str,
     prompt: str,
@@ -69,22 +71,46 @@ def build_adapter_argv(
         argv.append(prompt)
         return argv
     elif adapter == "grok":
-        argv = ["grok", "-p", prompt, "--cwd", str(project.resolve()), "--always-approve", "--no-auto-update"]
+        argv = [
+            "grok",
+            "-p",
+            prompt,
+            "--cwd",
+            str(project.resolve()),
+            "--always-approve",
+            "--no-auto-update",
+        ]
         if model:
             argv.extend(["--model", model])
         return argv
     elif adapter == "claude":
-        argv = ["claude", "-p", prompt, "--cwd", str(project.resolve()), "--acceptEdits"]
+        argv = [
+            "claude",
+            "-p",
+            prompt,
+            "--cwd",
+            str(project.resolve()),
+            "--acceptEdits",
+        ]
         if model:
             argv.extend(["--model", model])
         return argv
     elif adapter == "cursor":
-        argv = ["cursor-agent", "-p", prompt, "--cwd", str(project.resolve()), "--mode", "auto-edit"]
+        argv = [
+            "cursor-agent",
+            "-p",
+            prompt,
+            "--cwd",
+            str(project.resolve()),
+            "--mode",
+            "auto-edit",
+        ]
         if model:
             argv.extend(["--model", model])
         return argv
     else:
         raise ValueError(f"Unknown adapter: {adapter}")
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -156,7 +182,10 @@ def main(argv: list[str] | None = None) -> int:
     binary = "cursor-agent" if adapter == "cursor" else adapter
     exe = shutil.which(binary)
     if exe is None:
-        print(f"error: `{binary}` not on PATH. Install {adapter} CLI, then re-run.\\nFallback: copy the Remediation Prompt from the report into any agent.", file=sys.stderr)
+        print(
+            f"error: `{binary}` not on PATH. Install {adapter} CLI, then re-run.\\nFallback: copy the Remediation Prompt from the report into any agent.",
+            file=sys.stderr,
+        )
         return 1
 
     argv_cmd = build_adapter_argv(
@@ -180,6 +209,6 @@ def main(argv: list[str] | None = None) -> int:
     proc = subprocess.run(argv_cmd, cwd=str(project), env=env, check=False)
     return int(proc.returncode)
 
+
 if __name__ == "__main__":
     raise SystemExit(main())
-

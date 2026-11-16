@@ -43,7 +43,7 @@ Per applicable checklist item:
 | insufficient evidence | excluded from the ratio (tool failed or file unreadable). Not a Partial. Not a critical Fail. Do not apply a critical floor. Counts only in **Evidence coverage**. |
 | not assessed | excluded — human-interview only, never a Fail |
 
-Publish a **Mark census** table per `SKILL.md` before the ratio. N/A listed separately. `Pass + Partial + Fail + insufficient evidence` **must equal** the applicable count (items that are not N/A). If they do not sum, recount. Do not divide by a number you did not list.
+Publish one **Checklist evidence** row for every scored checkbox in `references/checklist.md`, including N/A and insufficient evidence, then derive the **Mark census** from it. Human-interview rows and Extras are excluded. Item identifiers are category number plus two-digit position (for example `4.03`) and are stable within the skill version. The validator checks that no current row is omitted or duplicated, that category counts and critical Fail flags agree, and that applicable marks carry a path and proof. It cannot independently prove the claim; the auditor still has to inspect the path and run a relevant test. N/A is listed separately. `Pass + Partial + Fail + insufficient evidence` **must equal** the applicable count (items that are not N/A).
 
 `known = Pass + Partial + Fail`
 
@@ -53,7 +53,7 @@ Publish a **Mark census** table per `SKILL.md` before the ratio. N/A listed sepa
 
 **Evidence coverage** (report header; not a category score):
 
-`coverage = known / (known + insufficient evidence)` across the ten scored categories. N/A is not in this fraction. Publish as an integer percent, half up. `scripts/validate-report.py` recomputes it.
+`coverage = known / (known + insufficient evidence)` across the ten scored categories. N/A is not in this fraction. Publish as an integer percent, half up. `python3 -m vibe_proof_auditor.validate_report` recomputes it. Historical reports require `--legacy`; current-version reports cannot use that flag to skip the item ledger.
 
 `category_score = round(category_ratio * 10)` to nearest integer, **half up**.
 
@@ -102,22 +102,23 @@ Infer type from the tree. Item-level N/A is the mechanism; a category is N/A onl
 |--------------|--------------------------|
 | `saas-multi-tenant` | Almost nothing. Datastore rules (RLS / Firebase rules) apply. |
 | `saas-single-user` | Cross-user AuthZ and IDOR tests N/A if there is no sharing and no user-owned foreign resources. AuthN still applies if accounts exist. Datastore rules (RLS / Firebase rules) **apply** when a client key can read rows — not N/A merely because the product is single-user. |
-| `cli` | Browser XSS/CSP/headers/CORS, mobile/responsive, accessibility. AuthN/AuthZ N/A unless the CLI calls user-scoped APIs. Client-bundle secrets N/A unless it ships a browser bundle. Webhooks N/A unless it receives them. |
-| `library` | AuthN/AuthZ, SaaS env isolation, XSS unless it renders HTML, mobile, a11y, service observability, CORS unless it serves HTTP. Tests, deps, errors, maintainability still apply. Publish/rollback docs may apply. Client-bundle secrets N/A unless it ships client JS. Webhooks N/A unless it receives them. |
+| `cli` | Browser XSS/CSP/headers/CORS, mobile/responsive, accessibility. AuthN/AuthZ N/A unless the CLI calls user-scoped APIs. Client-bundle secrets N/A unless it ships a browser bundle. Webhooks N/A unless it receives them. Rollback applies only when the CLI has a deployed service or persistent data migration. |
+| `library` | AuthN/AuthZ, SaaS env isolation, XSS unless it renders HTML, mobile, a11y, service observability, CORS unless it serves HTTP. Tests, deps, errors, maintainability still apply. Publish/rollback applies when downstream data or a deployed service depends on the release. Client-bundle secrets N/A unless it ships client JS. Webhooks N/A unless it receives them. |
 | `static-site` | Server AuthZ/IDOR, data rollback, N+1 unless a backend/BFF exists. AuthN N/A unless there is login. Datastore rules apply if a client-reachable datastore exists (e.g. Firebase/Supabase from the static app); N/A if none. |
 | `skill/docs` | Runtime AuthN/AuthZ, HTTP security headers, CORS, DB performance, mobile, a11y, deploy envs, error-handling runtime, webhooks. Still score: secrets in examples, architecture of the package, maintainability, product/scope. Testing N/A unless a runnable contract exists. Client-bundle secrets N/A unless the package ships client JS. |
 | `mobile` | Web CSP/headers N/A. Platform storage and platform AuthZ apply. Datastore rules apply when a client SDK key can read rows. CORS N/A unless the app exposes a browser-cross-origin HTTP API. |
 | `infra` | Product UX, mobile, a11y N/A. IAM, secrets, state isolation, rollback apply. Datastore rules / CORS / client-bundle N/A unless those surfaces exist. |
+| `agent-harness` | Model-request cost and context rows apply when this product controls those surfaces. Browser, HTTP, AuthN/AuthZ, datastore, rollback, and mobile rows remain item-level N/A unless the harness exposes those surfaces. Tests, deps, errors, maintainability, and tool/agent failure behavior still apply. |
 
 Auth-provider preference (Clerk / Auth0 / Supabase Auth) applies **only** when the product has users. Do not invent auth for `cli`, `library`, `static-site`, or `skill/docs`.
 
 Prefer mature AuthZ (RLS / Firebase rules, server ownership checks) when the product has users **and** a client-reachable datastore or user-owned resources — including `saas-single-user` when a client key can read rows. IDOR tests stay N/A only when there is no sharing and no user-owned foreign resources.
 
-Webhook-signature scoring is N/A unless the tree has webhook receivers (Stripe / GitHub / Svix or equivalent). Production CORS is N/A unless there is a browser-cross-origin API. Session invalidation is N/A if there is no cookie/session/JWT auth. Client-bundle secrets are N/A if there is no client/browser bundle. Restorable backup (extra) is N/A if there is no durable user data.
+Webhook-signature scoring is N/A unless the tree has webhook receivers (Stripe / GitHub / Svix or equivalent). Production CORS is N/A unless there is a browser-cross-origin API. Session invalidation is N/A if there is no cookie/session/JWT auth. Client-bundle secrets are N/A if there is no client/browser bundle. The Process restore/reconciliation row is N/A if there is no durable user data.
 
-## Worked example (ForgeBoard)
+## Historical worked example (ForgeBoard, v1.0.1)
 
-Fictional `saas-multi-tenant` Next.js + Supabase app. Details: `references/example-report.md`.
+Fictional `saas-multi-tenant` Next.js + Supabase app. Details: `references/example-report.md`. Its item count and environment-isolation mark predate the v1.2.0 item ledger and later checks; use `--legacy` to validate that report's arithmetic.
 
 **Security (25 applicable, 3 N/A):** 14 Pass + 4 Partial + 6 Fail + 1 `insufficient evidence`, including critical AuthZ Fail.
 

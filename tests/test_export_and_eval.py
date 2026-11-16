@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 import json
+import runpy
+import sqlite3
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from vibe_proof_auditor import compare_eval
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATE = ROOT / "vibe_proof_auditor" / "validate_report.py"
@@ -22,7 +26,7 @@ CHECKLIST = ROOT / "references" / "checklist.md"
 # Rows exist for these in references/checklist.md, but none of them carries a
 # `Finding id:` yet, so the manifests name ids the checklist never declares.
 # Ratchet: the set may shrink, never grow. Shrinking it needs a checklist edit.
-KNOWN_UNDECLARED = frozenset({"empty-catch", "slopsquat", "no-tests"})
+KNOWN_UNDECLARED = frozenset({"empty-catch", "no-tests"})
 
 
 def run(script: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -41,7 +45,15 @@ class ExportAndEvalTests(unittest.TestCase):
             report = Path(tmp) / "report.json"
             sarif = Path(tmp) / "report.sarif"
             proc = run(
-                VALIDATE, [str(EXAMPLE), "--json", str(report), "--sarif", str(sarif)]
+                VALIDATE,
+                [
+                    str(EXAMPLE),
+                    "--legacy",
+                    "--json",
+                    str(report),
+                    "--sarif",
+                    str(sarif),
+                ],
             )
             self.assertEqual(proc.returncode, 0, proc.stderr)
             payload = json.loads(report.read_text(encoding="utf-8"))
@@ -145,6 +157,50 @@ class EvalFixtureContractTests(unittest.TestCase):
             with self.subTest(step=step):
                 self.assertIn(f"def {step}(", source)
                 self.assertNotIn(f"broker.{step}(", source)
+
+    def test_rollback_fixture_breaks_the_previous_release(self) -> None:
+        fixture = FIXTURES / "rollback-trap"
+        old_app = runpy.run_path(str(fixture / "src" / "old_app.py"))
+        with sqlite3.connect(":memory:") as connection:
+            connection.executescript(
+                (fixture / "migrations" / "0001_init.sql").read_text(encoding="utf-8")
+            )
+            self.assertEqual(old_app["get_customer"](connection, 1), "Ada")
+            connection.executescript(
+                (fixture / "migrations" / "0002_rename.sql").read_text(encoding="utf-8")
+            )
+            with self.assertRaises(sqlite3.OperationalError):
+                old_app["get_customer"](connection, 1)
+
+    def test_low_signal_fixture_passes_while_checkout_undercharges(self) -> None:
+        fixture = FIXTURES / "low-signal-tests"
+        proc = subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"],
+            cwd=fixture,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        checkout = runpy.run_path(str(fixture / "checkout.py"))
+        self.assertEqual(checkout["pay"]([12, 8], 5), 20)
+        self.assertNotEqual(checkout["pay"]([12, 8], 5), 25)
+
+    def test_browser_readable_token_alone_is_not_a_fail(self) -> None:
+        expected = json.loads(
+            (EXPECTED / "saas-multi-tenant.json").read_text(encoding="utf-8")
+        )
+        report = {
+            "product_type": "saas-multi-tenant",
+            "gates": {"critical security": "Fail", "testing": "Fail"},
+            "findings": [
+                {"id": item["id"], "path": item["path_substr"], "mark": item["mark"]}
+                for item in expected["must_find"]
+            ]
+            + [{"id": "localstorage-jwt", "path": "localStorage", "mark": "Fail"}],
+        }
+        errors = compare_eval.eval_against_expected(expected, report)
+        self.assertTrue(any("false Fail" in error for error in errors), errors)
 
     def test_worker_protocol_manifest_drives_compare_eval(self) -> None:
         manifest = EXPECTED / "worker-protocol.json"

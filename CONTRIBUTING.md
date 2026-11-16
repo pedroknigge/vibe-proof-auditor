@@ -1,6 +1,6 @@
 # Contributing to vibe-proof-auditor
 
-The checklist is collected public critiques of vibe-coded apps (secrets, weak auth, demo-only tests, and the rest). Repeated dunks improve an existing row; new dunks add a row in `references/checklist.md`. Do not shrink the list to stay neat.
+The checklist is collected public critiques of vibe-coded apps (secrets, weak auth, demo-only tests, and the rest). Repeated critiques improve an existing row. Add a scored row only when a concrete failure has an applicability condition, an observable result, and a test or trace that distinguishes it from safe behavior. Record the source claim and its limits in `references/claim-provenance.md`. A source's preferred framework or workflow is not a universal requirement. If a row is vague or redundant, sharpen or remove it rather than preserving it for length.
 
 First off, thank you for considering contributing to `vibe-proof-auditor`.
 

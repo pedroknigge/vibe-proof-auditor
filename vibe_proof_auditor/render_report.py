@@ -3,7 +3,7 @@
 
 Stdlib only. Offline (system fonts). Does not invent scores, gates, verdict
 words, or stage notes — it styles whatever the markdown already contains.
-Math lives in ``scripts/validate-report.py`` (ADR 0001 / 0002).
+Math and item coverage live in ``vibe_proof_auditor.validate_report`` (ADR 0001 / 0002).
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from pathlib import Path
 META_LABELS = (
     "Project",
     "Date",
+    "Skill version",
     "Mode",
     "Audit mode",
     "Product type",

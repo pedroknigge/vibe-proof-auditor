@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Verify a vibe-proof audit markdown report against scoring.md / gates.md.
+"""Verify a vibe-proof audit markdown report against the current rubric.
 
-Stdlib only. The agent classifies evidence; this script checks the arithmetic
-and the verdict rule. It does not invent marks or re-read the audited tree.
+Stdlib only. The agent classifies evidence; this script checks item coverage,
+arithmetic, and the verdict rule. It does not re-read the audited tree or prove
+that an evidence claim is true. --legacy checks historical report math only.
 
 Exit 0 if the census, scores, overall, coverage, gates, verdict, and stage note
 are consistent. Exit 1 on mismatch or unreadable input. Exit 2 on usage.
@@ -14,10 +15,93 @@ import re
 import sys
 from pathlib import Path
 
-from vibe_proof_auditor import parser, render_report, scorelib
+from vibe_proof_auditor import checklist_contract, parser, render_report, scorelib
 
 
-def validate(md: str) -> tuple[list[str], dict]:
+def validate_checklist_evidence(
+    table: list[list[str]] | None, census: list[dict]
+) -> tuple[list[str], dict[str, str]]:
+    """Match every current scored row to one evidence-backed mark."""
+    errors: list[str] = []
+    if not table or len(table) < 2:
+        return ["Checklist evidence table required for the current skill version"], {}
+    header = [cell.strip().lower() for cell in table[0]]
+    needed = ("item", "category", "mark", "path", "proof")
+    if any(column not in header for column in needed):
+        return [
+            "Checklist evidence needs Item, Category, Mark, Path, and Proof columns"
+        ], {}
+    col = {name: header.index(name) for name in needed}
+    expected = {item["id"]: item for item in checklist_contract.scored_items()}
+    seen: dict[str, str] = {}
+    marks: dict[str, dict[str, int | bool]] = {
+        category: {
+            "pass": 0,
+            "partial": 0,
+            "fail": 0,
+            "insufficient": 0,
+            "na": 0,
+            "critical_fail": False,
+        }
+        for category in scorelib.WEIGHTS
+    }
+    aliases = {
+        "pass": "pass",
+        "partial": "partial",
+        "fail": "fail",
+        "n/a": "na",
+        "insufficient evidence": "insufficient",
+    }
+    for row in table[1:]:
+
+        def cell(name: str, row_ref: list[str] = row) -> str:
+            position = col[name]
+            return row_ref[position].strip() if position < len(row_ref) else ""
+
+        item_id = cell("item").strip("`")
+        if item_id in seen:
+            errors.append(f"Checklist evidence duplicate item {item_id}")
+            continue
+        item = expected.get(item_id)
+        if item is None:
+            errors.append(f"Checklist evidence unknown item {item_id}")
+            continue
+        seen[item_id] = cell("mark")
+        category = scorelib.norm_cat(cell("category"))
+        if category != item["category"]:
+            errors.append(f"Checklist evidence {item_id}: wrong category")
+        mark = aliases.get(cell("mark").lower())
+        if mark is None:
+            errors.append(
+                f"Checklist evidence {item_id}: invalid mark {cell('mark')!r}"
+            )
+            continue
+        if not cell("proof") or cell("proof") in {"—", "-"}:
+            errors.append(f"Checklist evidence {item_id}: proof required")
+        if mark in {"pass", "partial", "fail"} and (
+            not cell("path") or cell("path") in {"—", "-"}
+        ):
+            errors.append(f"Checklist evidence {item_id}: path required")
+        counts = marks[item["category"]]
+        counts[mark] += 1
+        if mark == "fail" and item["critical"]:
+            counts["critical_fail"] = True
+    for item_id in sorted(expected.keys() - seen.keys()):
+        errors.append(f"Checklist evidence missing item {item_id}")
+    for census_row in census:
+        category = census_row["category"]
+        census_counts = marks.get(category)
+        if census_counts is None:
+            continue
+        for name in ("pass", "partial", "fail", "insufficient", "na", "critical_fail"):
+            if census_row[name] != census_counts[name]:
+                errors.append(
+                    f"{category}: census {name} {census_row[name]} != Checklist evidence {census_counts[name]}"
+                )
+    return errors, seen
+
+
+def validate(md: str, *, legacy: bool = False) -> tuple[list[str], dict]:
     """validate function."""
     meta = render_report.parse_meta(md)
     tables = render_report.parse_tables(md)
@@ -31,6 +115,23 @@ def validate(md: str) -> tuple[list[str], dict]:
         )
         if not census:
             return errors, {}
+
+    skill_version = meta.get("Skill version", "")
+    if not skill_version:
+        errors.append("Skill version header required")
+    elif legacy and skill_version == scorelib.VERSION:
+        errors.append("--legacy cannot bypass current-version Checklist evidence")
+    elif skill_version != scorelib.VERSION and not legacy:
+        errors.append(
+            f"Skill version {skill_version} differs from current {scorelib.VERSION}; "
+            "use --legacy only for historical reports"
+        )
+    evidence_marks: dict[str, str] = {}
+    if not legacy and skill_version == scorelib.VERSION:
+        evidence_errors, evidence_marks = validate_checklist_evidence(
+            tables.get("checklist evidence"), census
+        )
+        errors.extend(evidence_errors)
 
     computed: dict[str, int | None] = {}
     for row in census:
@@ -123,6 +224,22 @@ def validate(md: str) -> tuple[list[str], dict]:
         if key not in gates:
             errors.append(f"absolute gate missing: {key}")
 
+    gate_items: dict[str, list[str]] = {gate: [] for gate in scorelib.ABSOLUTE_GATES}
+    for item in checklist_contract.scored_items():
+        gate = item["gate"]
+        if gate in gate_items:
+            gate_items[gate].append(item["id"])
+    if evidence_marks:
+        for gate, item_ids in gate_items.items():
+            if gates.get(gate, "").lower() != "pass":
+                continue
+            for item_id in item_ids:
+                mark = evidence_marks.get(item_id, "").lower()
+                if mark not in {"pass", "n/a"}:
+                    errors.append(
+                        f"{gate} cannot be Pass with Checklist evidence {item_id} {mark or 'missing'}"
+                    )
+
     sec = computed.get("security")
     if (
         gates.get("critical security", "").lower() == "pass"
@@ -181,7 +298,9 @@ def validate(md: str) -> tuple[list[str], dict]:
 
     payload = {
         "schema": "vibe-proof-report/0.6",
-        "version": scorelib.VERSION,
+        "version": skill_version,
+        "validator_version": scorelib.VERSION,
+        "legacy_validation": legacy,
         "project": meta.get("Project", ""),
         "date": meta.get("Date", ""),
         "mode": mode,
@@ -266,13 +385,14 @@ def main(argv: list[str]) -> int:
 
     if len(argv) < 2 or argv[1] in {"-h", "--help"}:
         print(
-            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif]",
+            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
             file=sys.stderr,
         )
         return 2
     src: Path | None = None
     json_out: Path | None = None
     sarif_out: Path | None = None
+    legacy = False
     args = argv[1:]
     i = 0
     while i < len(args):
@@ -282,9 +402,12 @@ def main(argv: list[str]) -> int:
         elif args[i] == "--sarif" and i + 1 < len(args):
             sarif_out = Path(args[i + 1])
             i += 2
+        elif args[i] == "--legacy":
+            legacy = True
+            i += 1
         elif args[i].startswith("-"):
             print(
-                "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif]",
+                "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
                 file=sys.stderr,
             )
             return 2
@@ -293,7 +416,7 @@ def main(argv: list[str]) -> int:
             i += 1
     if src is None:
         print(
-            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif]",
+            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
             file=sys.stderr,
         )
         return 2
@@ -305,7 +428,7 @@ def main(argv: list[str]) -> int:
     except (OSError, UnicodeDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
-    errors, payload = validate(md)
+    errors, payload = validate(md, legacy=legacy)
     if json_out:
         json_out.write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"

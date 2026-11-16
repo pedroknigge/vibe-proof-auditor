@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-v1.0.1. Deterministic agentic QA and DevSecOps auditor. Enforces executable contracts and active probing.
+v1.2.0. Evidence-backed project audit with explicit checks for failure recovery, concurrency, retries, data safety, test signal, and agent-harness cost. The validator checks report math and item coverage; it does not independently verify the audited code.
 
 ```
  __     _____ ____  _____
@@ -83,7 +83,7 @@ In any supported agent:
 - “listo para prod”
 - “production checklist”
 
-Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for a short pass (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up always includes a senior evidence block **and** a plain-language **Why this dunks** section so a vibe coder can act on the finding without knowing the checklist by heart — and without losing the path-level proof.
+Point it at a project path. Deep mode is the default. Say “quick” / “rápido” for an evidence-backed triage without a production verdict (file count does not switch modes). If the host can spawn parallel agents, Deep fans out independent categories and merges once — same gates, one verdict. Prototype and MVP still run the production gates; the **stage note** says whether `BLOCKED` was expected. The write-up includes per-item evidence, a senior summary, and a plain-language **Why this dunks** section.
 
 After an audit, harden without pasting the remediation prompt by hand into Antigravity:
 
@@ -95,13 +95,15 @@ python3 -m vibe_proof_auditor.harden ./vibe-proof-audit-report.md --dry-run
 
 Or tell the agent: “harden with agy”. That runs the report’s Remediation Prompt via `agy -p --add-dir <project>`.
 
-Every pass writes markdown + JSON at the project root (HTML opens only on an interactive TTY):
+Every Deep audit writes markdown + JSON at the project root (HTML opens only on an interactive TTY). Current-version reports include a Checklist evidence row for every scored item, reconciled with the census by the validator:
 
 - `vibe-proof-audit-report.md` — evidence report
 - `vibe-proof-audit-report.json` — computed scores / gates / findings
 - `vibe-proof-audit-report.html` — styled twin
 
 `vibe_proof_auditor/validate_report.py` recomputes the math. `--sarif` is optional. `vibe_proof_auditor/compare_eval.py --baseline` diffs new Fail rows. Say `professional` for a sober **Why this matters** section.
+
+The ForgeBoard worked report and `demo-skill` fixture are historical v1.0.1 examples. They do not demonstrate the v1.2.0 item ledger, rollback gate, or added checks.
 
 Planted fixtures: `evals/`. Worked HTML: `docs/example-report.html`.
 
@@ -129,13 +131,14 @@ vibe-proof-auditor/
 ├── LICENSE
 ├── vibe_proof_auditor/
 │   ├── scorelib.py               # Weights, floors, verdict math
-│   ├── validate-report.py        # Census / scores / verdict; --json --sarif
-│   ├── compare-eval.py           # expected.json vs report JSON; --baseline
-│   ├── render-report.py          # Markdown → HTML (no scores)
-│   └── harden.py             # Remediation Prompt → agy -p
+│   ├── checklist_contract.py     # Versioned scored-item inventory
+│   ├── validate_report.py        # Ledger / census / scores / verdict
+│   ├── compare_eval.py           # expected.json vs report JSON; --baseline
+│   ├── render_report.py          # Markdown → HTML (no scores)
+│   └── harden.py                 # Remediation Prompt → chosen CLI
 ├── install.sh                    # Agents + Antigravity (agy) skill dirs
 ├── evals/                        # Planted fixtures + expected manifests
-│   └── fixtures/skill-docs/      # demo-skill 1.0.1; native AGY, intentionally testless
+│   └── fixtures/skill-docs/      # historical demo-skill 1.0.1; native AGY, intentionally testless
 ├── tests/
 │   ├── test_render_report.py
 │   ├── test_scorelib.py
@@ -148,6 +151,9 @@ vibe-proof-auditor/
 │   ├── gates.md                  # Verdicts and production gates
 │   ├── scoring.md                # Formula, weights, N/A matrix
 │   ├── security-deep.md          # Security grep playbook
+│   ├── testing-deep.md           # Test signal and reproducible E2E probes
+│   ├── reliability-deep.md       # Failure probes and rollback rehearsal
+│   ├── agent-harness-deep.md     # Task-level model cost and context probes
 │   ├── prompt-maestro.md         # Short export for other agents
 │   └── example-report.md         # Worked report
 ├── docs/adr/
@@ -173,7 +179,10 @@ python3 -m unittest discover -s tests -v
 | Verdict words, absolute/recommended gates, verdict rule, stage notes | `references/gates.md` |
 | Weights, formula, floors, scale, product-type N/A matrix | `references/scoring.md` |
 | Scored items and human-interview (unscored) items | `references/checklist.md` (only home; the template is a cover) |
+| Source claim to observable check | `references/claim-provenance.md` |
 | Security grep playbook | `references/security-deep.md` |
+| Test signal and repeatable cross-component proof | `references/testing-deep.md` |
+| Agent-harness cost and context probes | `references/agent-harness-deep.md` |
 | Report format | `SKILL.md` |
 | HTML render | `vibe_proof_auditor/render_report.py` |
 | HTML render does not score | `docs/adr/0001-html-render-does-not-score.md` |

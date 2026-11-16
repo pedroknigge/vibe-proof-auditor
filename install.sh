@@ -64,11 +64,24 @@ copy_one() {
       --exclude .orderfield \
       --exclude '__pycache__' \
       --exclude 'vibe-proof-audit-report.*' \
+      --exclude .venv \
+      --exclude .mypy_cache \
+      --exclude .pytest_cache \
+      --exclude .ruff_cache \
+      --exclude .coverage \
+      --exclude .gstack \
+      --exclude node_modules \
+      --exclude '*.egg-info' \
+      --exclude .DS_Store \
       "$source/" "$dest/"
   else
-    cp -R "$source"/. "$dest/"
-    rm -rf "$dest/.git" "$dest/.orderfield"
+    cp -R "$source"/. "$dest"/
+    rm -rf "$dest/.git" "$dest/.orderfield" "$dest/.venv" \
+      "$dest/.mypy_cache" "$dest/.pytest_cache" "$dest/.ruff_cache" \
+      "$dest/.coverage" "$dest/.gstack" "$dest/node_modules"
     find "$dest" -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
+    find "$dest" -name '*.egg-info' -type d -exec rm -rf {} + 2>/dev/null || true
+    find "$dest" -name '.DS_Store' -delete 2>/dev/null || true
   fi
   echo "installed $dest"
 }

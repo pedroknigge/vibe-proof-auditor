@@ -130,6 +130,8 @@ class InstallScriptTests(unittest.TestCase):
                 self.assertTrue(
                     (dest / "references" / "claim-provenance.md").is_file(), dest
                 )
+                for cache in (".venv", ".pytest_cache", ".mypy_cache", ".ruff_cache"):
+                    self.assertFalse((dest / cache).exists(), f"{cache} in {dest}")
             for dest in demo_dests:
                 self.assertEqual(
                     (dest / "SKILL.md").read_text(encoding="utf-8"),

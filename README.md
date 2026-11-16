@@ -11,7 +11,7 @@ npx skills add pedroknigge/vibe-proof-auditor -g -y
 [![skills.sh](https://skills.sh/b/pedroknigge/vibe-proof-auditor)](https://skills.sh/pedroknigge/vibe-proof-auditor)
 ![vibe-proof BLOCKED](assets/badge-blocked.svg)
 
-v1.3.0. Evidence-backed project audit with 131 scored items across ten categories, including auth lifecycle, secrets, authorization, failure recovery, concurrency, retries, data safety, test signal, deployment operations, and agent-harness cost. The validator checks report math and item coverage; it does not independently verify the audited code.
+v1.3.1. Evidence-backed project audit with 131 scored items across ten categories, including auth lifecycle, secrets, authorization, failure recovery, concurrency, retries, data safety, test signal, deployment operations, and agent-harness cost. The validator checks report math and item coverage; it does not independently verify the audited code.
 
 ```
  __     _____ ____  _____
@@ -103,7 +103,7 @@ Every Deep audit writes markdown + JSON at the project root (HTML opens only on 
 
 `vibe_proof_auditor/validate_report.py` recomputes the math. `--sarif` is optional. `vibe_proof_auditor/compare_eval.py --baseline` diffs new Fail rows. Say `professional` for a sober **Why this matters** section.
 
-The ForgeBoard worked report and `demo-skill` fixture are historical v1.0.1 examples. They do not demonstrate the v1.3.0 item ledger, rollback gate, auth-lifecycle rows, or operations checks.
+The ForgeBoard worked report and `demo-skill` fixture are historical v1.0.1 examples. They do not demonstrate the v1.3.1 item ledger, rollback gate, auth-lifecycle rows, or operations checks.
 
 Planted fixtures: `evals/`. Worked HTML: `docs/example-report.html`.
 

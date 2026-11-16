@@ -1,13 +1,13 @@
 ---
 name: vibe-proof-auditor
-description: "v1.3.0. Audit a project for production readiness with evidence-backed security, auth lifecycle, behavior, recovery, operations, testing, and maintenance checks. Use for vibe-proof, anti-slop, listo para prod, production checklist, or an explicit hardening request."
+description: "v1.3.1. Audit a project for production readiness with evidence-backed security, auth lifecycle, behavior, recovery, operations, testing, and maintenance checks. Use for vibe-proof, anti-slop, listo para prod, production checklist, or an explicit hardening request."
 license: MIT
 metadata:
-  version: "1.3.0"
+  version: "1.3.1"
   author: pedroknigge
 ---
 
-# Vibe-Proof Auditor (v1.3.0)
+# Vibe-Proof Auditor (v1.3.1)
 
 Requires a filesystem, shell, git, and Python 3.9+. `rg` is recommended for Deep security searches.
 

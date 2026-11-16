@@ -1,4 +1,11 @@
 # Changelog
+## 1.3.1
+
+- Kept development artifacts out of installed copies. `install.sh` no longer copies `.venv`, `.mypy_cache`, `.pytest_cache`, `.ruff_cache`, `.coverage`, `.gstack`, `node_modules`, or `*.egg-info`; each AGY copy drops from about 110 MB to 716 KB.
+- Added an install test that fails when a cache directory reaches an installed copy.
+- Pinned the CI test job to `ubuntu-22.04`, because `ubuntu-latest` moved to 26.04 without a setup-python build for Python 3.9.
+- No rubric, scoring, gate, or report-format change.
+
 ## 1.3.0
 
 - Added fifteen scored rows for failures a passing demo hides: endpoint authorization coverage, password storage (`weak-password-hash`), reset and verification tokens (`unproven-reset-flow`), plaintext sensitive data at rest, audit trails, PII overcollection, datastore constraints, staging execution, UI loading/empty/error states, pinned runtimes, development defaults in production, restart policy, health checks, connection pooling, and provider plan limits. The current inventory is 131 scored items.

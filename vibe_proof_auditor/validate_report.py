@@ -17,6 +17,11 @@ from pathlib import Path
 
 from vibe_proof_auditor import checklist_contract, parser, render_report, scorelib
 
+USAGE = (
+    "usage: validate-report.py INPUT.md [--json OUT.json] "
+    "[--sarif OUT.sarif] [--legacy]"
+)
+
 
 def validate_checklist_evidence(
     table: list[list[str]] | None, census: list[dict]
@@ -102,7 +107,6 @@ def validate_checklist_evidence(
 
 
 def validate(md: str, *, legacy: bool = False) -> tuple[list[str], dict]:
-    """validate function."""
     meta = render_report.parse_meta(md)
     tables = render_report.parse_tables(md)
     errors: list[str] = []
@@ -333,18 +337,15 @@ def validate(md: str, *, legacy: bool = False) -> tuple[list[str], dict]:
 
 
 def to_sarif(payload: dict) -> dict:
-    """to_sarif function."""
-    results: list[dict] = []
-    for gate, status in (payload.get("gates") or {}).items():
-        if (status or "").lower() != "fail":
-            continue
-        results.append(
-            {
-                "ruleId": f"gate/{gate.replace(' ', '-')}",
-                "level": "error",
-                "message": {"text": f"Absolute or recommended gate Fail: {gate}"},
-            }
-        )
+    results: list[dict] = [
+        {
+            "ruleId": f"gate/{gate.replace(' ', '-')}",
+            "level": "error",
+            "message": {"text": f"Absolute or recommended gate Fail: {gate}"},
+        }
+        for gate, status in (payload.get("gates") or {}).items()
+        if (status or "").lower() == "fail"
+    ]
     for finding in payload.get("findings") or []:
         if (finding.get("mark") or "").lower() != "fail":
             continue
@@ -380,14 +381,10 @@ def to_sarif(payload: dict) -> dict:
 
 
 def main(argv: list[str]) -> int:
-    """main function."""
     import json
 
     if len(argv) < 2 or argv[1] in {"-h", "--help"}:
-        print(
-            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
-            file=sys.stderr,
-        )
+        print(USAGE, file=sys.stderr)
         return 2
     src: Path | None = None
     json_out: Path | None = None
@@ -406,19 +403,13 @@ def main(argv: list[str]) -> int:
             legacy = True
             i += 1
         elif args[i].startswith("-"):
-            print(
-                "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
-                file=sys.stderr,
-            )
+            print(USAGE, file=sys.stderr)
             return 2
         else:
             src = Path(args[i])
             i += 1
     if src is None:
-        print(
-            "usage: validate-report.py INPUT.md [--json OUT.json] [--sarif OUT.sarif] [--legacy]",
-            file=sys.stderr,
-        )
+        print(USAGE, file=sys.stderr)
         return 2
     if not src.is_file():
         print(f"error: markdown not found: {src}", file=sys.stderr)

@@ -1,4 +1,13 @@
 # Changelog
+## 1.3.2
+
+- Removed the dead one-off `fix_report.py` and `fix_report2.py` scripts. Both hardcoded a Quill report path and had no references.
+- Removed `compare_eval` recall bookkeeping that no consumer read.
+- Simplified `harden`: a regex replaces the manual fence walk, adapter arguments come from one data table, the project path resolves once, the no-op environment copy is gone, and the missing-CLI error prints a real newline.
+- Removed placeholder docstrings and duplicated usage strings. The renderer reuses its table and heading helpers, and `scorelib` uses a regex for numbered category names.
+- Added regression tests for unclosed and empty remediation fences and for the Claude and Cursor adapter arguments.
+- No rubric, scoring, gate, report-format, or CLI contract change. Product Python drops from 2039 to 1933 lines; tests grow from 944 to 978 lines.
+
 ## 1.3.1
 
 - Kept development artifacts out of installed copies. `install.sh` no longer copies `.venv`, `.mypy_cache`, `.pytest_cache`, `.ruff_cache`, `.coverage`, `.gstack`, `node_modules`, or `*.egg-info`; each AGY copy drops from about 110 MB to 716 KB.

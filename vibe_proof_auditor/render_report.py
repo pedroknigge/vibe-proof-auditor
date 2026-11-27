@@ -61,6 +61,21 @@ def strip_inline_md(text: str) -> str:
     return text.strip()
 
 
+def norm_heading(text: str) -> str:
+    text = re.sub(r"\s+", " ", text).strip().lower()
+    return re.sub(r"\s*\(.*\)$", "", text)
+
+
+def split_cells(line: str) -> list[str]:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def is_sep_row(cells: list[str]) -> bool:
+    return bool(cells) and all(
+        re.fullmatch(r":?-{3,}:?", c.replace(" ", "")) for c in cells
+    )
+
+
 def parse_meta(md: str) -> dict[str, str]:
     meta: dict[str, str] = {}
     for label in META_LABELS:
@@ -83,27 +98,21 @@ def parse_tables(md: str) -> dict[str, list[list[str]]]:
     while i < len(lines):
         h = re.match(r"^#{2,6}\s+(.+)$", lines[i])
         if h:
-            heading = re.sub(r"\s+", " ", h.group(1)).strip().lower()
-            heading = re.sub(r"\s*\(.*\)$", "", heading)
+            heading = norm_heading(h.group(1))
             i += 1
             continue
         if lines[i].lstrip().startswith("|") and heading:
             rows: list[list[str]] = []
             while i < len(lines) and lines[i].lstrip().startswith("|"):
-                raw = [c.strip() for c in lines[i].strip().strip("|").split("|")]
-                if not all(re.fullmatch(r":?-{3,}:?", c.replace(" ", "")) for c in raw):
-                    rows.append(raw)
+                cells = split_cells(lines[i])
+                if not is_sep_row(cells):
+                    rows.append(cells)
                 i += 1
             if rows:
                 tables[heading] = rows
             continue
         i += 1
     return tables
-
-
-def extract_score(raw: str) -> str:
-    m = re.search(r"(\d+(?:\.\d+)?)", raw or "")
-    return m.group(1) if m else "—"
 
 
 def score_number(raw: str) -> float | None:
@@ -156,6 +165,7 @@ def render_scorecard(table: list[list[str]] | None) -> str:
             else ""
         )
         n = score_number(score_raw)
+        display = score_raw if n is None or n != int(n) else str(int(n))
         cls = mark_class(status)
         notes_html = f'<p class="notes">{inline(notes)}</p>' if notes else ""
         cards.append(
@@ -165,7 +175,7 @@ def render_scorecard(table: list[list[str]] | None) -> str:
     <span class="pill {cls}">{esc(status)}</span>
   </header>
   <div class="cat-score">
-    <b>{esc(score_raw if n is None else str(int(n) if n == int(n) else score_raw))}</b>
+    <b>{esc(display)}</b>
     {ticks(n)}
   </div>
   {notes_html}
@@ -217,16 +227,6 @@ def render_gates(table: list[list[str]] | None) -> str:
     )
 
 
-def split_cells(line: str) -> list[str]:
-    return [c.strip() for c in line.strip().strip("|").split("|")]
-
-
-def is_sep_row(cells: list[str]) -> bool:
-    return bool(cells) and all(
-        re.fullmatch(r":?-{3,}:?", c.replace(" ", "")) for c in cells
-    )
-
-
 def md_body_html(md: str) -> str:
     """Convert report markdown to HTML, skipping dashboard-duplicated sections."""
     lines = md.splitlines()
@@ -266,8 +266,7 @@ def md_body_html(md: str) -> str:
             flush_para()
             level = len(heading.group(1))
             title = heading.group(2).strip()
-            key = re.sub(r"\s+", " ", title).strip().lower()
-            key = re.sub(r"\s*\(.*\)$", "", key)
+            key = norm_heading(title)
             skip = key in SKIP_BODY_HEADINGS
             in_dunks = key.startswith("why this dunks")
             if not skip:
@@ -328,8 +327,6 @@ def md_body_html(md: str) -> str:
                     items.append(f"<li>{inline(om.group(1))}</li>")
                 elif not ordered and um:
                     items.append(f"<li>{inline(um.group(1))}</li>")
-                elif not lines[i].strip():
-                    break
                 else:
                     break
                 i += 1
@@ -691,7 +688,8 @@ def render_html(md: str) -> str:
     tables = parse_tables(md)
     status = meta.get("Status", "")
     sclass = mark_class(status) if status in STATUS_CLASS else "na"
-    score = extract_score(meta.get("Overall Score", ""))
+    overall = score_number(meta.get("Overall Score", ""))
+    score = "—" if overall is None else f"{overall:g}"
     name = project_name(meta.get("Project", ""))
     kicker = ""
     m = re.search(r"(?im)^[-*]\s*verdict:\s*(.+)$", md)

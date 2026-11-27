@@ -6,9 +6,10 @@ The skill version lives in ``VERSION``. Contract numbers live in
 
 from __future__ import annotations
 
+import re
 from decimal import ROUND_HALF_UP, Decimal
 
-VERSION = "1.3.1"
+VERSION = "1.3.2"
 
 # Must match references/scoring.md weight table (sum 12.1).
 WEIGHTS: dict[str, float] = {
@@ -77,18 +78,13 @@ STAGE_NOTES: dict[tuple[str, str], str] = {
 
 
 def round_half_up(value: float, ndigits: int = 0) -> float:
-    quant = Decimal(1) if ndigits == 0 else Decimal("0." + "0" * (ndigits - 1) + "1")
+    quant = Decimal(1).scaleb(-ndigits)
     return float(Decimal(str(value)).quantize(quant, rounding=ROUND_HALF_UP))
 
 
 def norm_cat(name: str) -> str:
-    text = (name or "").strip().lower()
-    text = text.split("(")[0].strip()
-    for prefix in ("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10."):
-        if text.startswith(prefix):
-            text = text[len(prefix) :].strip()
-            break
-    return text
+    text = (name or "").strip().lower().split("(")[0].strip()
+    return re.sub(r"^\d+\.\s*", "", text)
 
 
 def norm_gate(name: str) -> str:

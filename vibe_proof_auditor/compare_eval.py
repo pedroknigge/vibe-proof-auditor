@@ -16,6 +16,11 @@ import json
 import sys
 from pathlib import Path
 
+USAGE = (
+    "usage: compare-eval.py EXPECTED.json REPORT.json\n"
+    "       compare-eval.py --baseline OLD.json NEW.json"
+)
+
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -67,11 +72,8 @@ def eval_against_expected(expected: dict, report: dict) -> list[str]:
 
     findings = report.get("findings") or []
     must = expected.get("must_find") or []
-    hits = 0
     for spec in must:
-        if finding_match(findings, spec):
-            hits += 1
-        else:
+        if not finding_match(findings, spec):
             ident = spec.get("id") or spec.get("path_substr")
             errors.append(f"missing finding {ident}")
     for spec in expected.get("must_not_find_as_fail") or []:
@@ -80,8 +82,6 @@ def eval_against_expected(expected: dict, report: dict) -> list[str]:
         if finding_match(findings, probe):
             errors.append(f"false Fail on {spec.get('id') or spec.get('path_substr')}")
 
-    if must:
-        report["_recall"] = hits / len(must)
     return errors
 
 
@@ -116,20 +116,12 @@ def baseline_regressions(old: dict, new: dict) -> list[str]:
 
 def main(argv: list[str]) -> int:
     if len(argv) >= 2 and argv[1] in {"-h", "--help"}:
-        print(
-            "usage: compare-eval.py EXPECTED.json REPORT.json\n"
-            "       compare-eval.py --baseline OLD.json NEW.json",
-            file=sys.stderr,
-        )
+        print(USAGE, file=sys.stderr)
         return 2
     baseline = len(argv) >= 2 and argv[1] == "--baseline"
     paths = argv[2:] if baseline else argv[1:]
     if len(paths) != 2:
-        print(
-            "usage: compare-eval.py EXPECTED.json REPORT.json\n"
-            "       compare-eval.py --baseline OLD.json NEW.json",
-            file=sys.stderr,
-        )
+        print(USAGE, file=sys.stderr)
         return 2
     left = Path(paths[0])
     right = Path(paths[1])

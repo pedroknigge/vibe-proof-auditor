@@ -6,7 +6,6 @@ from vibe_proof_auditor import scorelib
 
 
 def parse_int(raw: str, *, default: int = 0) -> int:
-    """parse_int function."""
     text = (raw or "").strip()
     if not text or text == "—":
         return default
@@ -14,7 +13,6 @@ def parse_int(raw: str, *, default: int = 0) -> int:
 
 
 def table_map(table: list[list[str]] | None) -> tuple[list[str], list[list[str]]]:
-    """table_map function."""
     if not table or len(table) < 2:
         return [], []
     header = [h.strip().lower() for h in table[0]]
@@ -22,7 +20,6 @@ def table_map(table: list[list[str]] | None) -> tuple[list[str], list[list[str]]
 
 
 def col(header: list[str], *names: str) -> int | None:
-    """col function."""
     for name in names:
         if name in header:
             return header.index(name)
@@ -30,7 +27,6 @@ def col(header: list[str], *names: str) -> int | None:
 
 
 def census_rows(table: list[list[str]] | None) -> list[dict]:
-    """census_rows function."""
     header, rows = table_map(table)
     if not header:
         return []
@@ -74,7 +70,6 @@ def census_rows(table: list[list[str]] | None) -> list[dict]:
 
 
 def category_score_map(table: list[list[str]] | None) -> dict[str, tuple[str, str]]:
-    """category_score_map function."""
     header, rows = table_map(table)
     i_cat = col(header, "category")
     i_score = col(header, "score")
@@ -96,7 +91,6 @@ def category_score_map(table: list[list[str]] | None) -> dict[str, tuple[str, st
 
 
 def gate_status_map(table: list[list[str]] | None) -> dict[str, str]:
-    """gate_status_map function."""
     header, rows = table_map(table)
     i_gate = col(header, "gate")
     i_status = col(header, "status")
@@ -111,7 +105,6 @@ def gate_status_map(table: list[list[str]] | None) -> dict[str, str]:
 
 
 def parse_overall(raw: str) -> float | None:
-    """parse_overall function."""
     text = (raw or "").strip()
     if not text:
         return None
@@ -122,7 +115,6 @@ def parse_overall(raw: str) -> float | None:
 
 
 def parse_coverage(raw: str) -> int | None:
-    """parse_coverage function."""
     text = (raw or "").strip().rstrip("%")
     if not text:
         return None
@@ -133,7 +125,6 @@ def parse_coverage(raw: str) -> int | None:
 
 
 def expected_cat_status(score: int | None, critical_fail: bool) -> str:
-    """expected_cat_status function."""
     if score is None:
         return "N/A"
     if critical_fail or score <= 4:
@@ -144,7 +135,6 @@ def expected_cat_status(score: int | None, critical_fail: bool) -> str:
 
 
 def parse_findings(table: list[list[str]] | None) -> list[dict[str, str]]:
-    """parse_findings function."""
     header, rows = table_map(table)
     if not header:
         return []

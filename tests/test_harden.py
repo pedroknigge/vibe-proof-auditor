@@ -25,8 +25,42 @@ class HardenTests(unittest.TestCase):
 
     def test_missing_section_raises(self) -> None:
         with self.assertRaises(ValueError) as ctx:
-            harden.extract_remediation_prompt("# No remediation here\\n")
+            harden.extract_remediation_prompt("# No remediation here\n")
         self.assertIn("Remediation Prompt", str(ctx.exception))
+
+    def test_unclosed_fence_raises(self) -> None:
+        text = "## Remediation Prompt\n```bash\nfix\n"
+        with self.assertRaises(ValueError) as ctx:
+            harden.extract_remediation_prompt(text)
+        self.assertIn("never closed", str(ctx.exception))
+
+    def test_empty_fence_raises(self) -> None:
+        text = "## Remediation Prompt\n```bash\n\n```\n"
+        with self.assertRaises(ValueError) as ctx:
+            harden.extract_remediation_prompt(text)
+        self.assertIn("empty", str(ctx.exception))
+
+    def test_build_adapter_argv_prompt_first_adapters(self) -> None:
+        cases = (
+            ("claude", "claude", "--acceptEdits"),
+            ("cursor", "cursor-agent", "auto-edit"),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            for adapter, binary, flag in cases:
+                with self.subTest(adapter=adapter):
+                    argv = harden.build_adapter_argv(
+                        adapter,
+                        "fix",
+                        project=project,
+                        model="m",
+                        effort=None,
+                        skip_permissions=False,
+                    )
+                    self.assertEqual(argv[0], binary)
+                    self.assertEqual(argv[2], "fix")
+                    self.assertIn(flag, argv)
+                    self.assertEqual(argv[-2:], ["--model", "m"])
 
     def test_build_adapter_argv(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
